@@ -1,0 +1,286 @@
+diff --git a/.claude/settings.json b/.claude/settings.json
+index 9e68d1a..bb52195 100644
+--- a/.claude/settings.json
++++ b/.claude/settings.json
+@@ -1,8 +1,8 @@
+ {
+   "hooks": {
+-    "UserPromptSubmit": [{"hooks": [{"type": "command", "command": "python scripts/evidence/claude_hook.py user-prompt-submit"}]}],
+-    "PreToolUse": [{"hooks": [{"type": "command", "command": "python scripts/evidence/claude_hook.py pre-tool-use"}]}],
+-    "PostToolUse": [{"hooks": [{"type": "command", "command": "python scripts/evidence/claude_hook.py post-tool-use"}]}],
+-    "Stop": [{"hooks": [{"type": "command", "command": "python scripts/evidence/claude_hook.py stop"}]}]
++    "UserPromptSubmit": [{"hooks": [{"type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/scripts/evidence/claude_hook.py\" user-prompt-submit"}]}],
++    "PreToolUse": [{"hooks": [{"type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/scripts/evidence/claude_hook.py\" pre-tool-use"}]}],
++    "PostToolUse": [{"hooks": [{"type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/scripts/evidence/claude_hook.py\" post-tool-use"}]}],
++    "Stop": [{"hooks": [{"type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/scripts/evidence/claude_hook.py\" stop"}]}]
+   }
+ }
+diff --git a/scripts/evidence/claude_hook.py b/scripts/evidence/claude_hook.py
+index db2ea50..2810804 100644
+--- a/scripts/evidence/claude_hook.py
++++ b/scripts/evidence/claude_hook.py
+@@ -3,6 +3,7 @@ from __future__ import annotations
+ import json
+ import os
+ from pathlib import Path
++import re
+ import sys
+ from typing import Any
+ 
+@@ -14,7 +15,9 @@ except ImportError:
+     from redact import redact
+ 
+ WRITE_TOOLS = {"Edit", "Write", "NotebookEdit"}
+-DESTRUCTIVE = ("git commit", "git push", "git reset", "git clean", "git stash", "rm -", "remove-item")
++DESTRUCTIVE_RE = re.compile(
++    r"(?i)(?:\bgit\b(?:(?![;&|\r\n]).){0,500}\b(?:commit|push|reset|clean|stash)\b|\brm\s+-|\bremove-item\b)"
++)
+ 
+ 
+ def context() -> tuple[Path | None, str, str]:
+@@ -22,10 +25,20 @@ def context() -> tuple[Path | None, str, str]:
+     role = os.environ.get("EVIDENCE_ROLE", "unknown")
+     prompt_id = os.environ.get("PROMPT_ID", "unknown")
+     if not evidence:
+-        pointer = Path.cwd() / ".evidence-active.json"
+-        if pointer.is_file():
+-            data = json.loads(pointer.read_text(encoding="utf-8"))
+-            evidence, role, prompt_id = data.get("evidence_dir"), data.get("role", role), data.get("prompt_id", prompt_id)
++        roots = []
++        project_root = os.environ.get("CLAUDE_PROJECT_DIR")
++        if project_root:
++            roots.append(Path(project_root))
++        roots.extend([Path.cwd(), *Path.cwd().parents])
++        for root in roots:
++            pointer = root / ".evidence-active.json"
++            if pointer.is_file():
++                try:
++                    data = json.loads(pointer.read_text(encoding="utf-8"))
++                except (OSError, json.JSONDecodeError, UnicodeError):
++                    continue
++                evidence, role, prompt_id = data.get("evidence_dir"), data.get("role", role), data.get("prompt_id", prompt_id)
++                break
+     return (Path(evidence).resolve() if evidence else None, role, prompt_id)
+ 
+ 
+@@ -45,6 +58,10 @@ def allowed_evidence_write(tool_input: dict[str, Any], evidence: Path) -> bool:
+ 
+ 
+ def main() -> int:
++    if hasattr(sys.stdin, "reconfigure"):
++        sys.stdin.reconfigure(encoding="utf-8", errors="replace")
++    if hasattr(sys.stdout, "reconfigure"):
++        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+     event = sys.argv[1] if len(sys.argv) > 1 else "unknown"
+     if event == "self-test":
+         print(json.dumps({"ok": True, "events": ["user-prompt-submit", "pre-tool-use", "post-tool-use", "stop"]}))
+@@ -69,14 +86,22 @@ def main() -> int:
+             decision = deny(f"Claude {role} may only write evidence artifacts", "PreToolUse")
+         if tool_name == "Bash":
+             command = str(tool_input.get("command", "")).lower()
+-            if any(pattern in command for pattern in DESTRUCTIVE):
++            if DESTRUCTIVE_RE.search(command):
+                 decision = deny(f"destructive command blocked for Claude {role}", "PreToolUse")
+-    append_jsonl(log, {"at": now(), "event": event, "role": role, "prompt_id": prompt_id, "tool_name": tool_name, "payload": redact(payload), "denied": decision is not None})
++    log_error = None
++    try:
++        append_jsonl(log, {"at": now(), "event": event, "role": role, "prompt_id": prompt_id, "tool_name": tool_name, "payload": redact(payload), "denied": decision is not None})
++    except (OSError, TimeoutError, UnicodeError) as exc:
++        log_error = str(exc)
+     if event == "stop":
+         (evidence / "claude" / session).mkdir(parents=True, exist_ok=True)
+         (evidence / "claude" / session / "stop-event.json").write_text(json.dumps(redact(payload), ensure_ascii=False, indent=2), encoding="utf-8")
+     if decision:
+         print(json.dumps(decision, ensure_ascii=False))
++        return 0
++    if log_error and os.environ.get("EVIDENCE_REQUIRED") == "1":
++        print(json.dumps(deny(f"evidence audit logging failed: {log_error}", event), ensure_ascii=False))
++        return 2
+     return 0
+ 
+ 
+diff --git a/scripts/evidence/evidence.py b/scripts/evidence/evidence.py
+index aebecb7..2d4fe0a 100644
+--- a/scripts/evidence/evidence.py
++++ b/scripts/evidence/evidence.py
+@@ -88,11 +88,6 @@ def safe_slug(value: str) -> str:
+     return (slug or "prompt")[:40]
+ 
+ 
+-def empty_tree(repo: Path) -> str:
+-    result = git(repo, "hash-object", "-t", "tree", "--stdin", check=True)
+-    return result.stdout.strip()
+-
+-
+ def has_head(repo: Path) -> bool:
+     return git(repo, "rev-parse", "--verify", "HEAD", check=False).returncode == 0
+ 
+@@ -334,6 +329,13 @@ def validate(directory: Path, final: bool = False) -> list[str]:
+         ]
+         if not verifier_results:
+             failures.append("independent verifier commands")
++        config_path = Path(manifest["repo_root"]) / "evidence.config.json"
++        if config_path.is_file():
++            config = json.loads(config_path.read_text(encoding="utf-8"))
++            for required in config.get("required", []):
++                result = manifest.get("verification", {}).get(required)
++                if not result or result.get("executed_by") != "verifier" or result.get("status") != "passed":
++                    failures.append(f"required verifier command: {required}")
+         for name, result in manifest.get("verification", {}).items():
+             if result.get("executed_by") == "verifier" and result.get("status") != "passed":
+                 failures.append(f"verification failed: {name}")
+@@ -355,6 +357,18 @@ def finalize(args: argparse.Namespace) -> int:
+     return 0
+ 
+ 
++def validate_command(args: argparse.Namespace) -> int:
++    failures = validate(Path(args.dir), args.final)
++    print(json.dumps({"failures": failures}, ensure_ascii=False))
++    return 2 if failures else 0
++
++
++def verify_checksums_command(args: argparse.Namespace) -> int:
++    failures = verify_checksums(Path(args.dir))
++    print(json.dumps({"failures": failures}, ensure_ascii=False))
++    return 2 if failures else 0
++
++
+ def build_parser() -> argparse.ArgumentParser:
+     parser = argparse.ArgumentParser()
+     sub = parser.add_subparsers(dest="action", required=True)
+@@ -363,9 +377,9 @@ def build_parser() -> argparse.ArgumentParser:
+     p = sub.add_parser("snapshot"); p.add_argument("--dir", required=True); p.add_argument("--stage", required=True); p.set_defaults(func=snapshot)
+     p = sub.add_parser("gate"); p.add_argument("--dir", required=True); p.add_argument("--name", required=True); p.set_defaults(func=gate)
+     p = sub.add_parser("capture-command"); p.add_argument("--dir", required=True); p.add_argument("--role", choices=["implementer", "verifier"], required=True); p.add_argument("--name", required=True); p.add_argument("--timeout", type=int, default=600); p.add_argument("command", nargs=argparse.REMAINDER); p.set_defaults(func=capture_command)
+-    p = sub.add_parser("validate"); p.add_argument("--dir", required=True); p.add_argument("--final", action="store_true"); p.set_defaults(func=lambda a: (print(json.dumps({"failures": validate(Path(a.dir), a.final)}, ensure_ascii=False)), 2 if validate(Path(a.dir), a.final) else 0)[1])
++    p = sub.add_parser("validate"); p.add_argument("--dir", required=True); p.add_argument("--final", action="store_true"); p.set_defaults(func=validate_command)
+     p = sub.add_parser("finalize"); p.add_argument("--dir", required=True); p.add_argument("--outcome", choices=["succeeded", "failed", "blocked"], required=True); p.set_defaults(func=finalize)
+-    p = sub.add_parser("verify-checksums"); p.add_argument("--dir", required=True); p.set_defaults(func=lambda a: (print(json.dumps({"failures": verify_checksums(Path(a.dir))}, ensure_ascii=False)), 2 if verify_checksums(Path(a.dir)) else 0)[1])
++    p = sub.add_parser("verify-checksums"); p.add_argument("--dir", required=True); p.set_defaults(func=verify_checksums_command)
+     return parser
+ 
+ 
+diff --git a/tests/evidence/test_claude_hook.py b/tests/evidence/test_claude_hook.py
+index e96baad..7f4aa24 100644
+--- a/tests/evidence/test_claude_hook.py
++++ b/tests/evidence/test_claude_hook.py
+@@ -6,6 +6,9 @@ import subprocess
+ import sys
+ import tempfile
+ import unittest
++from unittest import mock
++
++from scripts.evidence import claude_hook
+ 
+ 
+ SCRIPT = Path(__file__).parents[2] / "scripts/evidence/claude_hook.py"
+@@ -46,5 +49,71 @@ class ClaudeHookTests(unittest.TestCase):
+         self.assertEqual(result.returncode, 0)
+         self.assertTrue(json.loads(result.stdout)["ok"])
+ 
++    def test_project_pointer_is_found_from_nested_cwd(self):
++        project = Path(self.temp.name) / "project"
++        nested = project / "logs" / "date" / "prompt"
++        nested.mkdir(parents=True)
++        pointer = {"evidence_dir": str(self.evidence), "role": "verifier", "prompt_id": "prompt-test"}
++        (project / ".evidence-active.json").write_text(json.dumps(pointer), encoding="utf-8")
++        env = os.environ.copy()
++        env.update({"CLAUDE_PROJECT_DIR": str(project), "EVIDENCE_REQUIRED": "1"})
++        result = subprocess.run(
++            [sys.executable, str(SCRIPT), "pre-tool-use"],
++            input=json.dumps({"tool_name": "Write", "tool_input": {"file_path": str(project / "game.py")}}),
++            text=True, encoding="utf-8", capture_output=True, env=env, cwd=nested,
++        )
++        self.assertEqual(result.returncode, 0)
++        self.assertEqual(json.loads(result.stdout)["hookSpecificOutput"]["permissionDecision"], "deny")
++
++    def test_utf8_korean_payload_overrides_cp949_stdio(self):
++        env = self.env.copy()
++        env["PYTHONIOENCODING"] = "cp949"
++        payload = json.dumps(
++            {"tool_name": "Write", "tool_input": {"file_path": r"D:\개인 pjt\게임\source.py"}},
++            ensure_ascii=False,
++        ).encode("utf-8")
++        result = subprocess.run(
++            [sys.executable, str(SCRIPT), "pre-tool-use"], input=payload, capture_output=True, env=env
++        )
++        self.assertEqual(result.returncode, 0)
++        self.assertEqual(json.loads(result.stdout.decode("utf-8"))["hookSpecificOutput"]["permissionDecision"], "deny")
++        logged = (self.evidence / "claude/verify-session-r1/tool-events.jsonl").read_text(encoding="utf-8")
++        self.assertIn("개인", logged)
++
++    def test_git_dash_c_commit_is_denied(self):
++        commands = [
++            "git -C . commit -m nope",
++            'git -C "D:/개인 pjt/codex 게임 해커톤" commit -m nope',
++            "git -C D:/x -c a=b commit -m nope",
++        ]
++        for command in commands:
++            with self.subTest(command=command):
++                result = self.invoke("pre-tool-use", {"tool_name": "Bash", "tool_input": {"command": command}})
++                self.assertEqual(json.loads(result.stdout)["hookSpecificOutput"]["permissionDecision"], "deny")
++
++    def test_corrupt_pointer_fails_closed_when_evidence_is_required(self):
++        project = Path(self.temp.name) / "project"
++        nested = project / "nested"
++        nested.mkdir(parents=True)
++        (project / ".evidence-active.json").write_text("{corrupt", encoding="utf-8")
++        env = os.environ.copy()
++        env.pop("EVIDENCE_DIR", None)
++        env.pop("EVIDENCE_ROLE", None)
++        env.pop("PROMPT_ID", None)
++        env.update({"CLAUDE_PROJECT_DIR": str(project), "EVIDENCE_REQUIRED": "1"})
++        result = subprocess.run(
++            [sys.executable, str(SCRIPT), "pre-tool-use"],
++            input=json.dumps({"tool_name": "Write", "tool_input": {"file_path": str(project / "game.py")}}),
++            text=True, encoding="utf-8", capture_output=True, env=env, cwd=nested,
++        )
++        self.assertEqual(result.returncode, 2)
++        self.assertEqual(json.loads(result.stdout)["hookSpecificOutput"]["permissionDecision"], "deny")
++
++    def test_deny_survives_audit_log_failure(self):
++        payload = {"tool_name": "Write", "tool_input": {"file_path": str(self.evidence.parent / "game.py")}}
++        with mock.patch.dict(os.environ, self.env, clear=True), mock.patch.object(sys, "stdin", io.StringIO(json.dumps(payload))), mock.patch.object(sys, "stdout", new_callable=io.StringIO) as output, mock.patch.object(claude_hook, "append_jsonl", side_effect=OSError("disk full")), mock.patch.object(sys, "argv", [str(SCRIPT), "pre-tool-use"]):
++            self.assertEqual(claude_hook.main(), 0)
++            self.assertEqual(json.loads(output.getvalue())["hookSpecificOutput"]["permissionDecision"], "deny")
++
+ 
+ if __name__ == "__main__": unittest.main()
+diff --git a/tests/evidence/test_evidence_cli.py b/tests/evidence/test_evidence_cli.py
+index 963eb62..9fc1cb7 100644
+--- a/tests/evidence/test_evidence_cli.py
++++ b/tests/evidence/test_evidence_cli.py
+@@ -67,6 +67,9 @@ class EvidenceCliTests(RepoCase):
+ 
+     def test_final_validation_requires_independent_verifier_command(self):
+         directory = self.start()
++        (self.repo / "evidence.config.json").write_text(
++            json.dumps({"required": ["full_tests"]}), encoding="utf-8"
++        )
+         decisions = directory / "01-human-design-decisions.md"
+         decisions.write_text("# decisions\n\n| HDD-1 | 결정됨 | Core | 점프 | Human | 구현 |\n", encoding="utf-8")
+         for filename in evidence.PLAN_FILES:
+@@ -78,7 +81,9 @@ class EvidenceCliTests(RepoCase):
+         manifest["verifier_tree_unchanged"] = True
+         manifest["verification"] = {"self-test": {"executed_by": "implementer", "status": "passed"}}
+         evidence.save_manifest(directory, manifest)
+-        self.assertIn("independent verifier commands", evidence.validate(directory, final=True))
++        failures = evidence.validate(directory, final=True)
++        self.assertIn("independent verifier commands", failures)
++        self.assertIn("required verifier command: full_tests", failures)
+ 
+ 
+ if __name__ == "__main__": unittest.main()
+diff --git a/tests/evidence/test_project_rules.py b/tests/evidence/test_project_rules.py
+index b150f25..15cbef6 100644
+--- a/tests/evidence/test_project_rules.py
++++ b/tests/evidence/test_project_rules.py
+@@ -12,6 +12,8 @@ class ProjectRuleTests(unittest.TestCase):
+         text = (Path(__file__).parents[2] / ".claude/settings.json").read_text(encoding="utf-8")
+         for event in ("UserPromptSubmit", "PreToolUse", "PostToolUse", "Stop"):
+             self.assertIn(event, text)
++        self.assertIn("$CLAUDE_PROJECT_DIR/scripts/evidence/claude_hook.py", text)
++        self.assertNotIn('"command": "python scripts/', text)
+ 
+ 
+ if __name__ == "__main__": unittest.main()

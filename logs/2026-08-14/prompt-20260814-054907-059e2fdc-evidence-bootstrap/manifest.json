@@ -1,0 +1,68 @@
+{
+  "schema_version": "2.0",
+  "prompt_id": "prompt-20260814-054907-059e2fdc-evidence-bootstrap",
+  "created_at": "2026-08-14T05:49:08+09:00",
+  "completed_at": "2026-08-14T06:18:34+09:00",
+  "status": "FINALIZED",
+  "user_request_sha256": "043b18066d1ad6155ff49169dfe3c763c9b8e2c58f576191f7c73ad0cdeb1091",
+  "repo_root": "D:\\개인 pjt\\codex 게임 해커톤",
+  "git_branch": "main",
+  "git_unborn_head": true,
+  "git_head_before": null,
+  "baseline_tree": "94ccc094625f373c1a992904ad9d49fd69830906",
+  "snapshots": {
+    "baseline": "94ccc094625f373c1a992904ad9d49fd69830906",
+    "implementation": "94ccc094625f373c1a992904ad9d49fd69830906",
+    "after-fix": "4a1aeca8641979247af6341e9088f77d5d876a9b",
+    "verify-before": "4a1aeca8641979247af6341e9088f77d5d876a9b",
+    "verify-after": "4a1aeca8641979247af6341e9088f77d5d876a9b"
+  },
+  "human_decision_status": "captured",
+  "plan_hashes": {
+    "02-claude-requirements-analysis.md": "f57eca93e16e7e1b7b53bb146d21112689b835d8cf7194ac8e9825506712f50b",
+    "03-claude-implementation-plan.md": "b922ee00253fdc62f8e29be3c77a0e3e9c0854d6751be4ddd7e353dd890fb516",
+    "04-claude-acceptance-criteria.md": "fdda8c592e76af3afdeaaa11c96d76f5624d085506b01715137fd2aad7cf5706",
+    "05-codex-implementation-brief.md": "073164b42fcb65b8a3ca871e59d0eaaf77c31390d35d94ae81bf9d207c11eb23"
+  },
+  "orca_tasks": {
+    "prompt": null,
+    "plan": "task_c243569b6474",
+    "implement": null,
+    "verify": [
+      "task_8d3957f04659",
+      "task_ce81edf573b6",
+      "task_5912d2164f16",
+      "task_229f7c5783ee"
+    ]
+  },
+  "orca_dispatches": {
+    "plan": "ctx_505f739311fc",
+    "verify": [
+      "ctx_6732e75b54c1",
+      "ctx_825cb6801ec0",
+      "ctx_c44e3ed08c90",
+      "ctx_d8f680138f99"
+    ]
+  },
+  "verification": {
+    "unittest": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "exit_code": 0,
+      "log": "codex\\self-check\\unittest.log"
+    },
+    "full_tests": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "agent": "claude-code",
+      "task_id": "task_229f7c5783ee",
+      "dispatch_id": "ctx_d8f680138f99",
+      "exit_code": 0,
+      "tests": "22/22",
+      "log": "verification/full_tests.log"
+    }
+  },
+  "verifier_tree_unchanged": true,
+  "open_defects": [],
+  "final_outcome": "succeeded"
+}

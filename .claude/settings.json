@@ -1,0 +1,8 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [{"hooks": [{"type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/scripts/evidence/claude_hook.py\" user-prompt-submit"}]}],
+    "PreToolUse": [{"hooks": [{"type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/scripts/evidence/claude_hook.py\" pre-tool-use"}]}],
+    "PostToolUse": [{"hooks": [{"type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/scripts/evidence/claude_hook.py\" post-tool-use"}]}],
+    "Stop": [{"hooks": [{"type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/scripts/evidence/claude_hook.py\" stop"}]}]
+  }
+}

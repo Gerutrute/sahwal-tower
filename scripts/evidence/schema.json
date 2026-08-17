@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Codex implementation evidence manifest",
+  "type": "object",
+  "required": ["schema_version", "prompt_id", "created_at", "status", "repo_root", "git_unborn_head", "baseline_tree", "verification"],
+  "properties": {
+    "schema_version": {"const": "2.0"},
+    "prompt_id": {"type": "string", "pattern": "^prompt-"},
+    "status": {"enum": ["STARTED", "PLAN_FROZEN", "IMPLEMENTATION_CAPTURED", "VERIFIED", "DEFECTS_FOUND", "FINALIZED", "FAILED", "BLOCKED"]},
+    "git_unborn_head": {"type": "boolean"},
+    "verification": {"type": "object"}
+  }
+}

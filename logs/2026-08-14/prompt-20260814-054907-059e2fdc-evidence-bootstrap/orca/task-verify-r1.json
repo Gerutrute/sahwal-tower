@@ -1,0 +1,7 @@
+{
+  "task_id": "task_8d3957f04659",
+  "dispatch_id": "ctx_6732e75b54c1",
+  "role": "claude-verifier",
+  "outcome": "failed",
+  "finding": "CV-1"
+}

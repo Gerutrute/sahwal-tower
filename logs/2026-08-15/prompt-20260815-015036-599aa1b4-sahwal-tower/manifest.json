@@ -1,0 +1,101 @@
+{
+  "schema_version": "2.0",
+  "prompt_id": "prompt-20260815-015036-599aa1b4-sahwal-tower",
+  "created_at": "2026-08-15T01:50:36+09:00",
+  "completed_at": "2026-08-15T10:08:49+09:00",
+  "status": "FINALIZED",
+  "user_request_sha256": "0e6630349a8a668bdb79f29028d201f2512c5d830feefc8039a131b9c9dfad88",
+  "repo_root": "D:\\개인 pjt\\codex 게임 해커톤",
+  "git_branch": "main",
+  "git_unborn_head": true,
+  "git_head_before": null,
+  "baseline_tree": "74cb2a6b9c7650934c3b9a5485d70c249759c813",
+  "snapshots": {
+    "baseline": "74cb2a6b9c7650934c3b9a5485d70c249759c813",
+    "implementation": "cfa7d5750c073ef8e9dee933a13000a41d2e240c",
+    "verify-before": "cfa7d5750c073ef8e9dee933a13000a41d2e240c",
+    "verify-after": "cfa7d5750c073ef8e9dee933a13000a41d2e240c"
+  },
+  "human_decision_status": "captured",
+  "plan_hashes": {
+    "02-claude-requirements-analysis.md": "d2e52017666d6db9b3dea9f34c60ef6f63cc5f054c72d8542776063305cfccbb",
+    "03-claude-implementation-plan.md": "98b5a9ba18ca7c0c7a0ad0fec9541718aac6d9f00c5b2cea6c9655d2dfa2b467",
+    "04-claude-acceptance-criteria.md": "29b4b149c17e0085fae3866f79a4c51b813ee70eb28c1fef02cf3d18a4aa398a",
+    "05-codex-implementation-brief.md": "d0e8f187a13670629ad8ab7ef7729cd054cefde591d8c63fd37c87c3e8ff72ac"
+  },
+  "orca_tasks": {
+    "prompt": null,
+    "plan": "task_0ee0d2f5eb71",
+    "implement": "hermes-codex-local",
+    "verify": [
+      "task_7e48d30a8391",
+      "task_0a823409843f"
+    ]
+  },
+  "orca_dispatches": {
+    "plan": "ctx_bbf93b8c6aee",
+    "verify": [
+      "ctx_5ef403506fb6",
+      "ctx_27b2231ff358"
+    ]
+  },
+  "verification": {
+    "red_engine_rules": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "exit_code": 1,
+      "log": "codex\\self-check\\red_engine_rules.log"
+    },
+    "typecheck": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "exit_code": 0,
+      "log": "verification\\typecheck.log"
+    },
+    "full_tests": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "exit_code": 0,
+      "log": "verification\\full_tests.log"
+    },
+    "build": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "exit_code": 0,
+      "log": "verification\\build.log"
+    },
+    "balance": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "exit_code": 0,
+      "log": "verification\\balance.log"
+    },
+    "simulation": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "exit_code": 0,
+      "log": "verification\\simulation.log"
+    },
+    "runtime_audit": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "exit_code": 0,
+      "log": "verification\\runtime_audit.log"
+    },
+    "ac_mapping": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "exit_code": 0,
+      "log": "verification\\ac_mapping.log"
+    },
+    "dev_server": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "exit_code": 0,
+      "log": "verification\\dev_server.log"
+    }
+  },
+  "verifier_tree_unchanged": true,
+  "open_defects": [],
+  "final_outcome": "succeeded"
+}

@@ -1,0 +1,12 @@
+$ node C:/Users/WIN/AppData/Local/Temp/claude/D-----pjt-codex-------/a62b0739-bcf6-44e0-a8a8-136125a858ec/scratchpad/dev-check.mjs
+
+STDOUT
+vite banner: [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m168[22m[2m[0m ms[22m |   [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5207[22m/[39m
+GET http://127.0.0.1:5207/ -> HTTP/1.1 200 OK
+contains <div id="root">: true
+GET http://[::1]:5207/ -> 
+DEV_SERVER_CHECK: PASS
+
+STDERR
+
+EXIT 0

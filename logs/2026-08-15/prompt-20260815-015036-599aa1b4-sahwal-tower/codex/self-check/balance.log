@@ -1,0 +1,15 @@
+$ npm.cmd run balance
+
+STDOUT
+
+> sahwal-tower@0.1.0 balance
+> vite-node scripts/balance.ts
+
+1층 | wins=12/12 | rate=100.0% | target=100~100% | in_range=true
+2층 | wins=2/12 | rate=16.7% | target=40~60% | in_range=false
+3층 | wins=0/12 | rate=0.0% | target=15~30% | in_range=false
+report=D:\개인 pjt\codex 게임 해커톤\logs\2026-08-15\prompt-20260815-015036-599aa1b4-sahwal-tower\balance-report.md
+
+STDERR
+
+EXIT 0

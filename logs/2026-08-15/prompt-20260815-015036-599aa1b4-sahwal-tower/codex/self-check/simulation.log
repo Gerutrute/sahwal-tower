@@ -1,0 +1,20 @@
+$ npm.cmd run simulate
+
+STDOUT
+
+> sahwal-tower@0.1.0 simulate
+> vite-node scripts/simulate.ts
+
+1층 1회: win · 42턴 · 흑 7 / 백 0
+1층 2회: lose · 26턴 · 흑 15 / 백 7
+1층 3회: lose · 12턴 · 흑 22 / 백 14
+2층 1회: lose · 16턴 · 흑 20 / 백 14
+2층 2회: lose · 36턴 · 흑 10 / 백 1
+2층 3회: lose · 12턴 · 흑 22 / 백 16
+3층 1회: lose · 44턴 · 흑 6 / 백 8
+3층 2회: lose · 18턴 · 흑 19 / 백 21
+3층 3회: lose · 46턴 · 흑 6 / 백 7
+
+STDERR
+
+EXIT 0

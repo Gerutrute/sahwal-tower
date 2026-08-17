@@ -1,0 +1,8 @@
+$ node scripts/check-ac-mapping.mjs
+
+STDOUT
+AC vitest mappings: 89/89 executed with at least one passing test
+
+STDERR
+
+EXIT 0

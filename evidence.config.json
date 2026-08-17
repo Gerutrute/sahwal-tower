@@ -1,0 +1,11 @@
+{
+  "commands": {
+    "focused_tests": ["npm.cmd", "test", "--", "--run"],
+    "lint": [],
+    "typecheck": ["npm.cmd", "run", "typecheck"],
+    "full_tests": ["npm.cmd", "test"],
+    "build": ["npm.cmd", "run", "build"]
+  },
+  "required": ["full_tests", "typecheck", "build"],
+  "note": "Vite + React 18 + TypeScript 게임의 정식 검증 명령. 밸런스·시뮬레이션·380px headless Chrome 검사는 별도 증적으로 캡처한다."
+}

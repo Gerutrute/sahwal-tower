@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "id": 1,
+      "url": "https://openaigame2026.com",
+      "title": "OpenAI Game Builders Seoul 공식 안내",
+      "accessed": "2026-08-14"
+    },
+    {
+      "id": 2,
+      "url": "https://openaigame2026.com/ko/terms",
+      "title": "OpenAI Game Builders Seoul 참가 약관",
+      "accessed": "2026-08-14"
+    },
+    {
+      "id": 3,
+      "url": "https://openaigame2026.com/ko/privacy",
+      "title": "OpenAI Game Builders Seoul 개인정보 처리방침",
+      "accessed": "2026-08-14"
+    }
+  ]
+}
