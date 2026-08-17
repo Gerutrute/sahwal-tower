@@ -10,6 +10,7 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "balance": "vite-node scripts/balance.ts",
+    "benchmark:ai": "node scripts/benchmark-ai.mjs",
     "simulate": "vite-node scripts/simulate.ts",
     "check:mobile": "node scripts/playwright-mobile-check.mjs"
   },

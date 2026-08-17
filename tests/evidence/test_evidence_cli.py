@@ -85,5 +85,46 @@ class EvidenceCliTests(RepoCase):
         self.assertIn("independent verifier commands", failures)
         self.assertIn("required verifier command: full_tests", failures)
 
+    def test_final_validation_rejects_required_command_alias(self):
+        directory = self.start()
+        expected = ["npm.cmd", "run", "benchmark:ai"]
+        (self.repo / "evidence.config.json").write_text(
+            json.dumps({
+                "commands": {"benchmark_ai": expected},
+                "required": ["benchmark_ai"],
+            }),
+            encoding="utf-8",
+        )
+        decisions = directory / "01-human-design-decisions.md"
+        decisions.write_text("# decisions\n\n| HDD-1 | 결정됨 | Core | 점프 | Human | 구현 |\n", encoding="utf-8")
+        for filename in evidence.PLAN_FILES:
+            (directory / filename).write_text("# artifact\n", encoding="utf-8")
+        self.assertEqual(evidence.gate(argparse.Namespace(dir=str(directory), name="plan-frozen")), 0)
+        for filename in (
+            evidence.ROLE_FILES["codex-log"],
+            evidence.ROLE_FILES["codex-result"],
+            evidence.ROLE_FILES["claude-verification"],
+            evidence.ROLE_FILES["final-summary"],
+        ):
+            (directory / filename).write_text("# artifact\n", encoding="utf-8")
+        manifest = evidence.load_manifest(directory)
+        manifest["verifier_tree_unchanged"] = True
+        manifest["verification"] = {
+            "benchmark_ai": {
+                "executed_by": "verifier",
+                "status": "passed",
+                "argv": ["python", "-c", "print('not the benchmark')"],
+            }
+        }
+        evidence.save_manifest(directory, manifest)
+
+        failures = evidence.validate(directory, final=True)
+
+        self.assertIn("required verifier argv: benchmark_ai", failures)
+
+        manifest["verification"]["benchmark_ai"]["argv"] = expected
+        evidence.save_manifest(directory, manifest)
+        self.assertNotIn("required verifier argv: benchmark_ai", evidence.validate(directory, final=True))
+
 
 if __name__ == "__main__": unittest.main()

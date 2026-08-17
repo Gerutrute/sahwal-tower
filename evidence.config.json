@@ -4,8 +4,11 @@
     "lint": [],
     "typecheck": ["npm.cmd", "run", "typecheck"],
     "full_tests": ["npm.cmd", "test"],
-    "build": ["npm.cmd", "run", "build"]
+    "build": ["npm.cmd", "run", "build"],
+    "benchmark_ai": ["npm.cmd", "run", "benchmark:ai"],
+    "runtime_audit": ["npm.cmd", "audit", "--omit=dev", "--audit-level=high"],
+    "mobile_check": ["npm.cmd", "run", "check:mobile"]
   },
-  "required": ["full_tests", "typecheck", "build"],
-  "note": "Vite + React 18 + TypeScript 게임의 정식 검증 명령. 밸런스·시뮬레이션·380px headless Chrome 검사는 별도 증적으로 캡처한다."
+  "required": ["full_tests", "typecheck", "build", "benchmark_ai", "runtime_audit", "mobile_check"],
+  "note": "RoGolike MVP의 정식 검증 명령. required receipt는 이름뿐 아니라 설정된 exact argv와 일치해야 한다."
 }

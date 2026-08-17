@@ -1,0 +1,37 @@
+$ npx.cmd vitest run tests/go.rules.test.ts -t 병종이 달라도 즉시 되따냄은 단순패다
+
+STDOUT
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [31m❯[39m tests/go.rules.test.ts [2m([22m[2m1 test[22m[2m | [22m[31m1 failed[39m[2m)[22m[90m 4[2mms[22m[39m
+[31m   [31m×[31m 단순패 규칙[2m > [22m병종이 달라도 즉시 되따냄은 단순패다[90m 4[2mms[22m[31m[39m
+[31m     → expected 'undefined' to be 'function' // Object.is equality[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m   Start at [22m 19:34:24
+[2m   Duration [22m 223ms[2m (transform 26ms, setup 9ms, collect 19ms, tests 4ms, environment 0ms, prepare 73ms)[22m
+
+
+STDERR
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 1 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/go.rules.test.ts[2m > [22m단순패 규칙[2m > [22m병종이 달라도 즉시 되따냄은 단순패다
+[31m[1mAssertionError[22m: expected 'undefined' to be 'function' // Object.is equality[39m
+
+Expected: [32m"[7mf[27mun[7mction[27m"[39m
+Received: [31m"un[7mdefined[27m"[39m
+
+[36m [2m❯[22m tests/go.rules.test.ts:[2m24:35[22m[39m
+    [90m 22| [39m  [34mit[39m([32m'병종이 달라도 즉시 되따냄은 단순패다'[39m[33m,[39m () [33m=>[39m {
+    [90m 23| [39m    [35mconst[39m { canonicalKoKey } [33m=[39m go [35mas[39m [33mKoApi[39m[33m;[39m
+    [90m 24| [39m    [34mexpect[39m([35mtypeof[39m canonicalKoKey)[33m.[39m[34mtoBe[39m([32m'function'[39m)[33m;[39m
+    [90m   | [39m                                  [31m^[39m
+    [90m 25| [39m
+    [90m 26| [39m    [35mconst[39m normal [33m=[39m [34mboardWith[39m([
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+EXIT 1

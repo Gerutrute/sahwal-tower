@@ -1,7 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 
-const criteria = readFileSync('logs/2026-08-15/prompt-20260815-015036-599aa1b4-sahwal-tower/04-claude-acceptance-criteria.md', 'utf8');
+const criteriaPath = process.argv[2] ?? process.env.AC_PATH;
+if (!criteriaPath) {
+  throw new Error('usage: node scripts/check-ac-mapping.mjs <acceptance-criteria.md>');
+}
+const criteria = readFileSync(criteriaPath, 'utf8');
 const commands = [...new Set([...criteria.matchAll(/`(npx vitest run tests\/[^`]+)`/g)].map((match) => match[1]))];
 const failures = [];
 for (const command of commands) {

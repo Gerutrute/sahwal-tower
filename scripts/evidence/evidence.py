@@ -278,7 +278,13 @@ def capture_command(args: argparse.Namespace) -> int:
     log_path.write_text(redact_text(f"$ {' '.join(command)}\n\nSTDOUT\n{stdout}\nSTDERR\n{stderr}\nEXIT {code}\n"), encoding="utf-8", newline="\n")
     receipt = {"name": args.name, "role": args.role, "argv": redact(command), "started_at": started, "completed_at": now(), "duration_ns": time.time_ns() - started_ns, "exit_code": code, "log": str(log_path.relative_to(directory))}
     append_jsonl(directory / ("verification/commands.jsonl" if args.role == "verifier" else "codex/exec-receipts.jsonl"), receipt)
-    manifest.setdefault("verification", {})[args.name] = {"status": "passed" if code == 0 else "failed", "executed_by": args.role, "exit_code": code, "log": receipt["log"]}
+    manifest.setdefault("verification", {})[args.name] = {
+        "status": "passed" if code == 0 else "failed",
+        "executed_by": args.role,
+        "argv": receipt["argv"],
+        "exit_code": code,
+        "log": receipt["log"],
+    }
     save_manifest(directory, manifest)
     return code
 
@@ -336,6 +342,10 @@ def validate(directory: Path, final: bool = False) -> list[str]:
                 result = manifest.get("verification", {}).get(required)
                 if not result or result.get("executed_by") != "verifier" or result.get("status") != "passed":
                     failures.append(f"required verifier command: {required}")
+                    continue
+                expected_argv = config.get("commands", {}).get(required)
+                if expected_argv and result.get("argv") != expected_argv:
+                    failures.append(f"required verifier argv: {required}")
         for name, result in manifest.get("verification", {}).items():
             if result.get("executed_by") == "verifier" and result.get("status") != "passed":
                 failures.append(f"verification failed: {name}")

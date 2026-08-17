@@ -5,6 +5,7 @@ import legacy from '@vitejs/plugin-legacy';
 export default defineConfig({
   // Orca IDE 포털처럼 하위 경로로 프록시될 때도 정적 자산을 같은 경로에서 불러온다.
   base: './',
+  publicDir: 'public',
   plugins: [
     react(),
     legacy({

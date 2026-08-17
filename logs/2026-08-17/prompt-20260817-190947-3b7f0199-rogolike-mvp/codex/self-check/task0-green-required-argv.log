@@ -1,0 +1,20 @@
+$ python -m unittest discover -s tests/evidence -p test_evidence_cli.py -v
+
+STDOUT
+
+STDERR
+test_checksum_round_trip_and_tamper_detection (test_evidence_cli.EvidenceCliTests.test_checksum_round_trip_and_tamper_detection) ... ok
+test_final_validation_rejects_required_command_alias (test_evidence_cli.EvidenceCliTests.test_final_validation_rejects_required_command_alias) ... ok
+test_final_validation_requires_independent_verifier_command (test_evidence_cli.EvidenceCliTests.test_final_validation_requires_independent_verifier_command) ... ok
+test_plan_gate_is_fail_closed_then_freezes_hashes (test_evidence_cli.EvidenceCliTests.test_plan_gate_is_fail_closed_then_freezes_hashes) ... {"missing": ["02-claude-requirements-analysis.md", "03-claude-implementation-plan.md", "04-claude-acceptance-criteria.md", "05-codex-implementation-brief.md"], "pending_human_decision": true}
+plan hash changed: 02-claude-requirements-analysis.md
+ok
+test_snapshot_does_not_touch_user_index (test_evidence_cli.EvidenceCliTests.test_snapshot_does_not_touch_user_index) ... ok
+test_start_supports_unborn_head_and_korean_path_content (test_evidence_cli.EvidenceCliTests.test_start_supports_unborn_head_and_korean_path_content) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.944s
+
+OK
+
+EXIT 0

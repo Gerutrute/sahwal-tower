@@ -1,0 +1,12 @@
+## dev...origin/dev
+?? .hermes/plans/2026-08-17_172618-gwiseokrok-mvp-music-integration.md
+?? .hermes/plans/2026-08-17_172618-gwiseokrok-mvp-music-integration.review.md
+?? docs/00_overview/
+?? docs/01_battle/
+?? docs/02_progression/
+?? docs/03_content/
+?? docs/04_prototype/
+?? docs/CHANGELOG.md
+?? docs/README.md
+?? logs/2026-08-17/
+?? music/

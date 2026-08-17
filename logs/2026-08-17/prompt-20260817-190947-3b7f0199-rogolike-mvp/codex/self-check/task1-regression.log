@@ -1,0 +1,36 @@
+$ npm.cmd test
+
+STDOUT
+
+> sahwal-tower@0.1.0 test
+> vitest run
+
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [32m✓[39m tests/meta.deps.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/rng.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 3[2mms[22m[39m
+ [32m✓[39m tests/engine.economy.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/engine.purity.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/engine.floors.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/go.board.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/engine.ai.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/engine.revival.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/engine.relics.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/engine.rules.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/run.flow.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 66[2mms[22m[39m
+ [32m✓[39m tests/sim.random.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 239[2mms[22m[39m
+ [32m✓[39m tests/ui.responsive.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/balance.harness.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 377[2mms[22m[39m
+ [32m✓[39m tests/ui.timer.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[90m 70[2mms[22m[39m
+ [32m✓[39m tests/ui.render.test.tsx [2m([22m[2m14 tests[22m[2m)[22m[90m 80[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m16 passed[39m[22m[90m (16)[39m
+[2m      Tests [22m [1m[32m116 passed[39m[22m[90m (116)[39m
+[2m   Start at [22m 19:31:57
+[2m   Duration [22m 847ms[2m (transform 326ms, setup 99ms, collect 981ms, tests 895ms, environment 1.31s, prepare 1.54s)[22m
+
+
+STDERR
+
+EXIT 0

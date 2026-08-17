@@ -1,40 +1,85 @@
-import { CELLS, SIZE, colOf, idx, libsOf, rowOf, type BattleState, type Pos } from '../engine';
+import type { KeyboardEvent } from 'react';
+import type { BoardSize, StoneColor, StoneKind } from '../game/types';
 
-const STEP = 50;
-const PAD = 20;
-const point = (p: Pos) => ({ x: PAD + colOf(p) * STEP, y: PAD + rowOf(p) * STEP });
+export interface BoardStone {
+  readonly color: StoneColor;
+  readonly kind: StoneKind;
+}
 
-export function BoardSvg({ state, disabled, onMove }: { state: BattleState; disabled: boolean; onMove: (p: Pos) => void }) {
-  const kingBAtari = state.kingB !== null && state.board[state.kingB] === 'B' && libsOf(state.board, state.kingB) === 1;
-  const kingWAtari = state.kingW !== null && state.board[state.kingW] === 'W' && libsOf(state.board, state.kingW) === 1;
-  return <div className="board-wrap">
-    <svg className="board" viewBox="0 0 340 340" role="grid" aria-label="칠 줄 바둑판">
-      <rect className="board-bg" x="0" y="0" width="340" height="340" rx="10" />
-      {Array.from({ length: SIZE }, (_, n) => <g key={n}>
-        <line className="grid-line" x1={PAD} y1={PAD+n*STEP} x2={PAD+6*STEP} y2={PAD+n*STEP} />
-        <line className="grid-line" x1={PAD+n*STEP} y1={PAD} x2={PAD+n*STEP} y2={PAD+6*STEP} />
+interface BoardSvgProps {
+  readonly size: BoardSize;
+  readonly points: readonly (BoardStone | null)[];
+  readonly disabled?: boolean;
+  readonly previewPoint?: number | null;
+  readonly invalidPoint?: number | null;
+  readonly onMove: (point: number) => void;
+}
+
+const VIEW_SIZE = 380;
+const EDGE = 22;
+const stepFor = (size: BoardSize): number => size === 9 ? 42 : 56;
+const hitRadiusFor = (size: BoardSize): number => size === 9 ? 21 : 22;
+const coordinate = (size: BoardSize, index: number): number => EDGE + index * stepFor(size);
+
+export function BoardSvg({
+  size,
+  points,
+  disabled = false,
+  previewPoint = null,
+  invalidPoint = null,
+  onMove,
+}: BoardSvgProps) {
+  const total = size * size;
+  const end = coordinate(size, size - 1);
+  const play = (point: number) => {
+    if (!disabled) onMove(point);
+  };
+  const onKeyDown = (event: KeyboardEvent<SVGCircleElement>, point: number) => {
+    if (disabled || (event.key !== 'Enter' && event.key !== ' ')) return;
+    event.preventDefault();
+    onMove(point);
+  };
+
+  return <div className="board-wrap" data-board-size={size}>
+    <svg className="board" viewBox={`0 0 ${VIEW_SIZE} ${VIEW_SIZE}`} role="grid" aria-label={`${size}×${size} 바둑판`}>
+      <rect className="board-bg" width={VIEW_SIZE} height={VIEW_SIZE} rx="18" />
+      {Array.from({ length: size }, (_, index) => <g key={`line-${index}`}>
+        <line className="grid-line" x1={EDGE} y1={coordinate(size, index)} x2={end} y2={coordinate(size, index)} />
+        <line className="grid-line" x1={coordinate(size, index)} y1={EDGE} x2={coordinate(size, index)} y2={end} />
       </g>)}
-      <circle className="star" cx={PAD+3*STEP} cy={PAD+3*STEP} r="4" />
-      {Array.from({ length: CELLS }, (_, p) => {
-        const cell = state.board[p]; const { x, y } = point(p);
-        if (cell === 'R') return <circle key={p} className="rock" cx={x} cy={y} r="18" />;
-        if (cell === null) return <circle key={p} data-hit={`${rowOf(p)}-${colOf(p)}`} className="hit" cx={x} cy={y} r={STEP/2} fill="transparent"
-          role="button" tabIndex={disabled ? -1 : 0} aria-label={`${rowOf(p)+1}행 ${colOf(p)+1}열에 착수`}
-          onClick={() => !disabled && onMove(p)} onKeyDown={(event) => {
-            if (!disabled && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); onMove(p); }
-          }} />;
-        const king = p === state.kingB || p === state.kingW;
-        const atari = (p === state.kingB && kingBAtari) || (p === state.kingW && kingWAtari);
-        return <g key={p} className="stone-pop">
-          <circle className={`stone stone-${cell.toLowerCase()}`} cx={x} cy={y} r="20" />
-          {state.lastMove === p && <circle className="last-ring" cx={x} cy={y} r="12" />}
-          {king && <circle className="king-ring" cx={x} cy={y} r="23" />}
-          {atari && <circle className="atari-ring" cx={x} cy={y} r="27" />}
-          {king && <text className={`king-text king-text-${cell.toLowerCase()}`} x={x} y={y+6}>王</text>}
-          {state.bomb.pos === p && <text className="bomb-mark" x={x} y={y+7}>✸</text>}
+      {size === 9 && [2, 4, 6].flatMap((row) => [2, 4, 6].map((column) =>
+        <circle key={`star-${row}-${column}`} className="star" cx={coordinate(size, column)} cy={coordinate(size, row)} r="3" />))}
+      {size === 7 && <circle className="star" cx={coordinate(size, 3)} cy={coordinate(size, 3)} r="3" />}
+      {Array.from({ length: total }, (_, point) => {
+        const row = Math.floor(point / size);
+        const column = point % size;
+        const x = coordinate(size, column);
+        const y = coordinate(size, row);
+        const stone = points[point] ?? null;
+        return <g key={`point-${point}`} role="row">
+          {previewPoint === point && !stone && <circle className="preview-stone" cx={x} cy={y} r="17" />}
+          {stone && <g className="stone-pop">
+            <circle className={`stone stone-${stone.color.toLowerCase()}`} cx={x} cy={y} r="17" />
+            <text className={`stone-kind stone-kind-${stone.color.toLowerCase()}`} x={x} y={y + 5}>{stone.kind.slice(-1)}</text>
+          </g>}
+          {invalidPoint === point && <circle className="invalid-ring" cx={x} cy={y} r="18" />}
+          <circle
+            className="hit"
+            data-hit={`${row}-${column}`}
+            data-point={point}
+            cx={x}
+            cy={y}
+            r={hitRadiusFor(size)}
+            fill="transparent"
+            role="button"
+            tabIndex={disabled ? -1 : 0}
+            aria-disabled={disabled}
+            aria-label={`${size}×${size} 바둑판 ${row + 1}행 ${column + 1}열${stone ? ', 놓을 수 없음' : ', 착수'}`}
+            onClick={() => play(point)}
+            onKeyDown={(event) => onKeyDown(event, point)}
+          />
         </g>;
       })}
     </svg>
-    {(kingBAtari || kingWAtari) && <p className="danger-line">{kingBAtari ? '위험 — 내 왕돌이 단수에 몰렸다!' : '기회 — 적 왕돌이 단수다. 한 수면 잡는다.'}</p>}
   </div>;
 }

@@ -1,0 +1,39 @@
+$ npx.cmd vitest run tests/ui.game.test.tsx -t 타이틀에 RoGolike를 표시한다
+
+STDOUT
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [31m❯[39m tests/ui.game.test.tsx [2m([22m[2m1 test[22m[2m | [22m[31m1 failed[39m[2m)[22m[90m 12[2mms[22m[39m
+[31m   [31m×[31m RoGolike 게임 UI[2m > [22m타이틀에 RoGolike를 표시한다[90m 12[2mms[22m[31m[39m
+[31m     → expected '' to be 'RoGolike' // Object.is equality[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m   Start at [22m 20:24:17
+[2m   Duration [22m 613ms[2m (transform 89ms, setup 7ms, collect 125ms, tests 12ms, environment 268ms, prepare 72ms)[22m
+
+
+STDERR
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 1 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/ui.game.test.tsx[2m > [22mRoGolike 게임 UI[2m > [22m타이틀에 RoGolike를 표시한다
+[31m[1mAssertionError[22m: expected '' to be 'RoGolike' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- RoGolike[39m
+
+[36m [2m❯[22m tests/ui.game.test.tsx:[2m28:28[22m[39m
+    [90m 26| [39m  [34mit[39m([32m'타이틀에 RoGolike를 표시한다'[39m[33m,[39m () [33m=>[39m {
+    [90m 27| [39m    [35mconst[39m view [33m=[39m [34mrenderApp[39m()[33m;[39m
+    [90m 28| [39m    [34mexpect[39m(document[33m.[39mtitle)[33m.[39m[34mtoBe[39m([32m'RoGolike'[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m 29| [39m    [34mexpect[39m(view[33m.[39m[34mquerySelector[39m([32m'h1'[39m)[33m?.[39mtextContent)[33m.[39m[34mtoBe[39m([32m'RoGolike'[39m)[33m;[39m
+    [90m 30| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+EXIT 1

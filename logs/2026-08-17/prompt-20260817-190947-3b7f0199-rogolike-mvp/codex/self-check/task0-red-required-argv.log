@@ -1,0 +1,23 @@
+$ python -m unittest tests.evidence.test_evidence_cli.EvidenceCliTests.test_final_validation_rejects_required_command_alias -v
+
+STDOUT
+
+STDERR
+evidence (unittest.loader._FailedTest.evidence) ... ERROR
+
+======================================================================
+ERROR: evidence (unittest.loader._FailedTest.evidence)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: evidence
+Traceback (most recent call last):
+  File "C:\Python314\Lib\unittest\loader.py", line 137, in loadTestsFromName
+    module = __import__(module_name)
+ModuleNotFoundError: No module named 'tests.evidence'
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+FAILED (errors=1)
+
+EXIT 1

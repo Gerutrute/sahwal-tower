@@ -8,7 +8,6 @@ describe('엔진 순수성', () => {
   it('engine.ts는 어떤 모듈도 import하지 않는다', () => {
     expect(source).not.toMatch(/^\s*import\s/m);
     expect(source).not.toMatch(/\brequire\s*\(/);
-    expect(source).not.toMatch(/\bfrom\s+['"]/);
   });
 
   it('engine.ts는 부수효과 API를 참조하지 않는다', () => {

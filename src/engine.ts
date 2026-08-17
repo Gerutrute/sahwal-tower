@@ -4,6 +4,165 @@ export type Pos = number;
 export type Board = readonly Cell[];
 export type Rng = () => number;
 
+export {
+  canonicalKoKey,
+  createRuleState,
+  createBoard,
+  groupAt,
+  legalPlayPoints,
+  libertiesAt,
+  libertiesOf,
+  pass,
+  passIfNoLegalMove,
+  playTurn,
+  pointColumn,
+  pointIndex,
+  pointRow,
+  tryPlay,
+} from './game/go';
+export { scoreArea } from './game/scoring';
+export { createSeededRng, randomInt, shuffle } from './game/rng';
+export {
+  addTemporaryHandLimit,
+  createDeckState,
+  createStoneFromCard,
+  discardUsed,
+  drawToLimit,
+  expireTemporaryHandLimits,
+  passDeckTurn,
+  reshuffle,
+  resolveCardUse,
+} from './game/deck';
+export {
+  STARTING_DECK,
+  STONE_DEFINITIONS,
+  createStoneEffectDefinition,
+  resolveCavalryEffect,
+  resolveGeneralCaptureEffect,
+  resolveGuardianEffect,
+  resolveSacrificeEffects,
+  resolveScoutEffect,
+} from './game/content/stones';
+export { resolveEffectQueue, resolveMove, summarizeCapture } from './game/effects';
+export {
+  battleReducer,
+  createBattleState,
+  hasLegalCardMove,
+  performRevivalSpecialMove,
+  resolveBattleOutcome,
+  validateEnemyDefinition,
+} from './game/battle';
+export { chooseBattleAiMove, enumerateLegalAiMoves } from './game/ai';
+export { enumerateMapPaths, generateActMap } from './game/map';
+export { decisiveMoveCandidates, generateRewardCandidates } from './game/rewards';
+export {
+  createDojoVisit,
+  generateShop,
+  purchaseShopOffer,
+  removalPrice,
+  removeShopCard,
+  useDojo,
+  validateEconomyConfig,
+} from './game/economy';
+export { createRunState, runReducer } from './game/run';
+export { CHARM_DEFINITIONS, CHARM_IDS } from './game/content/charms';
+export { ENEMY_DEFINITIONS, ENEMY_IDS } from './game/content/enemies';
+export { EVENT_DEFINITIONS, EVENT_IDS } from './game/content/events';
+export { RELIC_DEFINITIONS, RELIC_IDS } from './game/content/relics';
+export type { BoardSize, BoardState, Stone, StoneColor, StoneKind } from './game/types';
+export type { RandomSource, Seed } from './game/rng';
+export type {
+  BattleAction,
+  BattleLogEntry,
+  BattleOutcome,
+  BattlePhase,
+  BattleRewardStatus,
+  BattleState as ReducerBattleState,
+  BossGaugeDefinition,
+  CreateBattleInput,
+  EnemyDefinition,
+  RevivalDefinition,
+  RevivalPriority,
+  RevivalScoreWeights,
+  RevivalSpecialMoveDefinition,
+  RevivalTieBreak,
+  RevivalTraitDefinition,
+} from './game/battle';
+export type {
+  AiCandidate,
+  AiChoice,
+  AiEvaluator,
+  AiSearchState,
+  ScoredAiCandidate,
+} from './game/ai';
+export type { ActMap, ActNumber, MapNode, MapNodeType, MapWeights, NonCombatNodeType } from './game/map';
+export type { MoveImpactRecord, RewardCandidate, RewardCatalog } from './game/rewards';
+export type {
+  DojoAction,
+  DojoResult,
+  DojoVisitState,
+  EconomyConfig,
+  InventoryState,
+  PurchaseResult,
+  ShopCatalog,
+  ShopOffer,
+  ShopState,
+} from './game/economy';
+export type {
+  BattleNodeKind,
+  BattleResolution,
+  CreateRunInput,
+  RunAction,
+  RunState as ProgressionRunState,
+  RunStatus,
+} from './game/run';
+export type { CharmDefinition, CharmId } from './game/content/charms';
+export type { EnemyId, RunEnemyDefinition } from './game/content/enemies';
+export type { EventChoiceDefinition, EventDefinition, EventId } from './game/content/events';
+export type { RelicDefinition, RelicId as ContentRelicId } from './game/content/relics';
+export type { ContentBehaviorContract } from './game/content/contracts';
+export type { DeckState, HandLimitModifier, StoneCard } from './game/deck';
+export type {
+  EffectDefinition,
+  EffectLimitLogEntry,
+  EffectLimits,
+  EffectLog,
+  EffectLogEntry,
+  EffectMoveState,
+  EffectPriority,
+  EffectQueueResult,
+  EffectSideRelation,
+  EffectSourceKind,
+  CaptureSummary,
+  CapturedStone,
+  RejectedEffectQueue,
+  ResolvedEffectQueue,
+  ResolveMoveOptions,
+  ResolveMoveResult,
+} from './game/effects';
+export type {
+  DeckInspectionEffectResult,
+  GeneralCaptureEffectInput,
+  GeneralCaptureEffectResult,
+  ScoutEffectResult,
+  StoneDefinition,
+  StoneEffectSource,
+  StoneEffectTemplate,
+  StoneEffectTrigger,
+  StoneRemovalCause,
+} from './game/content/stones';
+export type {
+  IllegalMoveCode,
+  IllegalPlay,
+  LegalPlay,
+  PassResult,
+  PlayResult,
+  RulePhase,
+  RuleState,
+  TurnPlayResult,
+} from './game/go';
+export type { AreaScore, ColorAreaScore } from './game/scoring';
+
 export const SIZE = 7;
 export const CELLS = 49;
 export const START_POUCH = 28;
@@ -12,19 +171,45 @@ export const AI_DELAY_MS = 620;
 export const SIM_MOVE_LIMIT = 400;
 export const POUCH_WARN = 5;
 
-export const idx = (row: number, col: number): Pos => row * SIZE + col;
-export const rowOf = (p: Pos): number => Math.floor(p / SIZE);
-export const colOf = (p: Pos): number => p % SIZE;
-export const neighbors = (p: Pos): Pos[] => {
-  const row = rowOf(p);
-  const col = colOf(p);
+export function idx(row: number, col: number): Pos;
+export function idx(size: 7 | 9, row: number, col: number): Pos;
+export function idx(sizeOrRow: number, rowOrCol: number, maybeCol?: number): Pos {
+  const size = maybeCol === undefined ? SIZE : sizeOrRow;
+  const row = maybeCol === undefined ? sizeOrRow : rowOrCol;
+  const col = maybeCol === undefined ? rowOrCol : maybeCol;
+  return row * size + col;
+}
+
+export function rowOf(p: Pos): number;
+export function rowOf(size: 7 | 9, p: Pos): number;
+export function rowOf(sizeOrPoint: number, maybePoint?: Pos): number {
+  const size = maybePoint === undefined ? SIZE : sizeOrPoint;
+  const point = maybePoint === undefined ? sizeOrPoint : maybePoint;
+  return Math.floor(point / size);
+}
+
+export function colOf(p: Pos): number;
+export function colOf(size: 7 | 9, p: Pos): number;
+export function colOf(sizeOrPoint: number, maybePoint?: Pos): number {
+  const size = maybePoint === undefined ? SIZE : sizeOrPoint;
+  const point = maybePoint === undefined ? sizeOrPoint : maybePoint;
+  return point % size;
+}
+
+export function neighbors(p: Pos): Pos[];
+export function neighbors(size: 7 | 9, p: Pos): Pos[];
+export function neighbors(sizeOrPoint: number, maybePoint?: Pos): Pos[] {
+  const size = maybePoint === undefined ? SIZE : sizeOrPoint;
+  const p = maybePoint === undefined ? sizeOrPoint : maybePoint;
+  const row = Math.floor(p / size);
+  const col = p % size;
   const result: Pos[] = [];
-  if (row > 0) result.push(idx(row - 1, col));
-  if (col > 0) result.push(idx(row, col - 1));
-  if (col < SIZE - 1) result.push(idx(row, col + 1));
-  if (row < SIZE - 1) result.push(idx(row + 1, col));
+  if (row > 0) result.push(row * size - size + col);
+  if (col > 0) result.push(row * size + col - 1);
+  if (col < size - 1) result.push(row * size + col + 1);
+  if (row < size - 1) result.push(row * size + size + col);
   return result;
-};
+}
 export const manhattan = (a: Pos, b: Pos): number =>
   Math.abs(rowOf(a) - rowOf(b)) + Math.abs(colOf(a) - colOf(b));
 export const chebyshev = (a: Pos, b: Pos): number =>

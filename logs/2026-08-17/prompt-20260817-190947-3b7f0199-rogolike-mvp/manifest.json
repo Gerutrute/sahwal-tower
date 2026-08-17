@@ -1,0 +1,561 @@
+{
+  "schema_version": "2.0",
+  "prompt_id": "prompt-20260817-190947-3b7f0199-rogolike-mvp",
+  "created_at": "2026-08-17T19:09:47+09:00",
+  "completed_at": null,
+  "status": "IMPLEMENTATION_CAPTURED",
+  "user_request_sha256": "8ab7368087df61e7d8cacbae82892cf341572cef6c853b2ae971339545031b0f",
+  "repo_root": "D:\\개인 pjt\\codex 게임 해커톤",
+  "git_branch": "dev",
+  "git_unborn_head": false,
+  "git_head_before": "2c00919d094310950633ae40237bf1764fc078b3",
+  "baseline_tree": "94705b8f3df11aaaaf42d1616e685023b6f08d42",
+  "snapshots": {
+    "baseline": "94705b8f3df11aaaaf42d1616e685023b6f08d42",
+    "implementation": "a83c3e97ca96dd39431b1f4ed68733a213ad520a"
+  },
+  "human_decision_status": "captured",
+  "plan_hashes": {
+    "02-claude-requirements-analysis.md": "06219bda7faed0ce1091c73b1814daad21bbef3c52037c23787010980965cf96",
+    "03-claude-implementation-plan.md": "17354d31b46b7eae476d5b762678cc2fa6f1e8395ea768d52d9d63c28143ed60",
+    "04-claude-acceptance-criteria.md": "b6877a8ab403e4b4904c7affcc4752e53b11545518f409d86f4846b16d713733",
+    "05-codex-implementation-brief.md": "ae91e7b3cc6aeb22ade370f6cdc0c3039699658b5265e90ce75c3f2c97d77de7",
+    "../../../.hermes/plans/2026-08-17_172618-gwiseokrok-mvp-music-integration.md": "94efc5bd04b8ee9cf0344486eacd127193de1909b31077aff35f8380ef64d7ea"
+  },
+  "orca_tasks": {
+    "prompt": null,
+    "plan": "task_9fde52777d0a",
+    "implement": null,
+    "verify": []
+  },
+  "orca_dispatches": {
+    "plan": "ctx_98fa5d528924",
+    "verify": []
+  },
+  "verification": {
+    "task0-red-required-argv": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "exit_code": 1,
+      "log": "codex\\self-check\\task0-red-required-argv.log"
+    },
+    "task0-red-required-argv-valid": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "exit_code": 1,
+      "log": "codex\\self-check\\task0-red-required-argv-valid.log"
+    },
+    "task0-green-required-argv": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/evidence",
+        "-p",
+        "test_evidence_cli.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task0-green-required-argv.log"
+    },
+    "task0-green-exact-ac": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "python",
+        "-m",
+        "unittest",
+        "tests.evidence.test_evidence_cli",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task0-green-exact-ac.log"
+    },
+    "task0-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task0-regression.log"
+    },
+    "task0-regression-final": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task0-regression-final.log"
+    },
+    "task1-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/go.board.test.ts",
+        "-t",
+        "7×7과 9×9 판을 만든다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\task1-red.log"
+    },
+    "task1-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/go.board.test.ts",
+        "tests/rng.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task1-green.log"
+    },
+    "task1-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task1-regression.log"
+    },
+    "task1-typecheck": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task1-typecheck.log"
+    },
+    "task2-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/go.rules.test.ts",
+        "-t",
+        "병종이 달라도 즉시 되따냄은 단순패다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\task2-red.log"
+    },
+    "task2-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/go.rules.test.ts",
+        "tests/go.scoring.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task2-green.log"
+    },
+    "task2-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task2-regression.log"
+    },
+    "task2-typecheck": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task2-typecheck.log"
+    },
+    "task3-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/deck.test.ts",
+        "-t",
+        "10장에서 4장을 뽑는다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\task3-red.log"
+    },
+    "task3-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/deck.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task3-green.log"
+    },
+    "task3-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task3-regression.log"
+    },
+    "task3-typecheck": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task3-typecheck.log"
+    },
+    "task4-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/effects.queue.test.ts",
+        "-t",
+        "동일 입력은 동일 로그를 낸다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\task4-red.log"
+    },
+    "task4-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/effects.queue.test.ts",
+        "tests/stones.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task4-green.log"
+    },
+    "task4-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task4-regression.log"
+    },
+    "task4-typecheck": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task4-typecheck.log"
+    },
+    "task5-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/battle.flow.test.ts",
+        "-t",
+        "두 번째 패스 뒤 계가한다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\task5-red.log"
+    },
+    "task5-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/battle.flow.test.ts",
+        "tests/battle.revival.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task5-green.log"
+    },
+    "task5-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task5-regression.log"
+    },
+    "task5-typecheck": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task5-typecheck.log"
+    },
+    "task5-benchmark": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "benchmark:ai"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task5-benchmark.log"
+    },
+    "task5-final-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/battle.flow.test.ts",
+        "tests/battle.revival.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task5-final-green.log"
+    },
+    "task5-regression-final": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task5-regression-final.log"
+    },
+    "task5-typecheck-final": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task5-typecheck-final.log"
+    },
+    "task5-benchmark-final": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "benchmark:ai"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task5-benchmark-final.log"
+    },
+    "task5-post-review-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/battle.flow.test.ts",
+        "tests/battle.revival.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task5-post-review-green.log"
+    },
+    "task5-post-review-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task5-post-review-regression.log"
+    },
+    "task5-post-review-typecheck": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task5-post-review-typecheck.log"
+    },
+    "task6-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/map.property.test.ts",
+        "-t",
+        "1막은 5노드 뒤 보스다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\task6-red.log"
+    },
+    "task6-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/map.property.test.ts",
+        "tests/run.progression.test.ts",
+        "tests/economy.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task6-green.log"
+    },
+    "task6-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task6-regression.log"
+    },
+    "task6-typecheck": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task6-typecheck.log"
+    },
+    "task7-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/ui.game.test.tsx",
+        "-t",
+        "타이틀에 RoGolike를 표시한다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\task7-red.log"
+    },
+    "task7-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/ui.game.test.tsx",
+        "-t",
+        "타이틀에 RoGolike를 표시한다"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task7-green.log"
+    },
+    "task7-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task7-regression.log"
+    },
+    "task7-typecheck": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task7-typecheck.log"
+    },
+    "task7-build": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task7-build.log"
+    },
+    "task7-mobile": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "check:mobile"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task7-mobile.log"
+    }
+  },
+  "verifier_tree_unchanged": null,
+  "open_defects": [],
+  "final_outcome": null
+}
