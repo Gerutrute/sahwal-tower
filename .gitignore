@@ -9,3 +9,4 @@ dist-debug-old/
 playwright-results/
 .vercel/
 runtime-config.js
+.env*.local
