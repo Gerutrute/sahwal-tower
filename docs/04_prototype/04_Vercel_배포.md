@@ -26,10 +26,11 @@ npx vite-node scripts/vercel-export-draft-config.ts
 
 ## 3. 브랜치와 자동 배포
 
-1. Settings → Git에서 **Production Branch**가 `main`인지 확인한다.
-2. `dev` push는 Preview 배포를 만든다. 고정 브랜치 URL은 `sahwal-tower-git-dev-<scope>.vercel.app` 형식이며, 각 배포 URL은 Deployments 탭에서 확인한다.
-3. `vercel.json`의 `git.deploymentEnabled`는 `"**": false`, `main: true`, `dev: true` 화이트리스트다. Vercel은 미명시 브랜치를 기본 활성화하므로 `"**": false`가 반드시 필요하다.
-4. 이 규칙은 push된 커밋에 `vercel.json`이 있을 때 적용된다. 아직 이 파일이 없는 `main` 또는 그 지점에서 갈라진 브랜치에는 병합 전까지 적용되지 않는다.
+1. GitHub 저장소 기본 브랜치가 `main`이면 Vercel도 이를 Production branch로 자동 사용한다. 현재 Dashboard에서 별도 **Production Branch** 메뉴가 보이지 않을 수 있다.
+2. 새 프로젝트의 첫 배포는 브랜치와 관계없이 항상 Production으로 분류된다. 첫 배포 이후부터 `main`은 Production, 다른 브랜치는 Preview 규칙을 따른다.
+3. `dev` push는 Preview 배포를 만든다. 고정 브랜치 URL은 `sahwal-tower-git-dev-<scope>.vercel.app` 형식이며, 각 배포 URL은 Deployments 탭에서 확인한다.
+4. `vercel.json`의 `git.deploymentEnabled`는 `"**": false`, `main: true`, `dev: true` 화이트리스트다. Vercel은 미명시 브랜치를 기본 활성화하므로 `"**": false`가 반드시 필요하다.
+5. 이 규칙은 push된 커밋에 `vercel.json`이 있을 때 적용된다. 아직 이 파일이 없는 `main` 또는 그 지점에서 갈라진 브랜치에는 병합 전까지 적용되지 않는다.
 
 ## 4. H-3: 현재 Production 상태 선택
 
