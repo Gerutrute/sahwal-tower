@@ -1,0 +1,133 @@
+## dev...origin/dev
+ M docs/03_content/01_특수돌.md
+ M docs/CHANGELOG.md
+ M logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/exec-receipts.jsonl
+ M logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/diff/10-codex-implementation.patch
+ M logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/manifest.json
+ M package.json
+ M scripts/balance.ts
+ M scripts/check-ac-mapping.mjs
+ M scripts/playwright-mobile-check.mjs
+ M scripts/simulate.ts
+ M src/App.tsx
+ M src/audio.ts
+ M src/components/BoardSvg.tsx
+ D src/engine.ts
+ M src/game/battle.ts
+ M src/game/content/charms.ts
+ M src/game/content/relics.ts
+ M src/game/content/stones.ts
+ M src/game/deck.ts
+ M src/game/economy.ts
+ M src/game/map.ts
+ M src/game/rewards.ts
+ M src/game/run.ts
+ M src/hooks/useGameMusic.ts
+ M src/main.tsx
+ M src/styles.css
+ D tests/audio.test.ts
+ M tests/battle.flow.test.ts
+ M tests/battle.revival.test.ts
+ M tests/deck.test.ts
+ M tests/effects.queue.test.ts
+ D tests/engine.ai.test.ts
+ D tests/engine.purity.test.ts
+ M tests/go.board.test.ts
+ M tests/rng.test.ts
+ M tests/sim.random.test.ts
+ M tests/stones.test.ts
+ M tests/ui.game.test.tsx
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/06-claude-verification-report.md
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/06-codex-implementation-log.md
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/07-codex-result.md
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/08-claude-verification-report.md
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/09-claude-defect-report.md
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/10-codex-fix-log.md
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/11-final-summary.md
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/checksums.sha256
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/corrective-ac-mapping.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/corrective-benchmark-ai.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/corrective-build.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/corrective-def1-def3-green.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/corrective-def1-def3-red.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/corrective-def2-ai-sacrifice-red.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/corrective-full-tests.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/corrective-hook-self-test.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/corrective-mobile-green.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/corrective-mobile.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/corrective-python-compile-expanded.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/corrective-python-compile.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/corrective-python-tests.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/corrective-runtime-audit.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/corrective-typecheck.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/final-ac-mapping.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/final-benchmark-ai.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/final-build.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/final-full-tests-latest.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/final-full-tests.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/final-hook-self-test.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/final-mobile.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/final-python-compile.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/final-python-tests.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/final-runtime-audit.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/final-typecheck-latest.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/final-typecheck.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/mobile-430-green.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/task10-1-green.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/task10-1-red.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/task10-balance-7.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/task10-balance-9.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/task10-green.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/task10-red.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/task10-regression.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/task8-build.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/task8-green.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/task8-mobile.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/task8-red.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/task8-regression.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/task8-typecheck.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/task9-green.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/task9-nonfatal-regression.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/task9-red.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/self-check/task9-regression.log
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/diff/30-after-fix.patch
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/diff/40-fix-only.patch
+?? logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/verification/
+?? logs/2026-08-17/prompt-20260817-225957-b5cb1da1-rogolike-playtest-ux/
+?? logs/2026-08-18/
+?? src/audio/
+?? src/components/AudioControls.tsx
+?? src/components/MapGraph.tsx
+?? src/components/audio-control-types.ts
+?? src/game/GameProvider.tsx
+?? src/game/mapLayout.ts
+?? src/game/telemetry.ts
+?? src/game/unlocks.ts
+?? tests/ai.effects.test.ts
+?? tests/audio.manager.test.ts
+?? tests/audio.routing.test.tsx
+?? tests/balance.harness.test.ts
+?? tests/battle.effects.test.ts
+?? tests/battle.majority.test.ts
+?? tests/battle.premove.test.ts
+?? tests/battle.product-effects.test.ts
+?? tests/battle.protection.test.ts
+?? tests/fixtures/draft-game-config.ts
+?? tests/map.graph.test.ts
+?? tests/map.progression.test.ts
+?? tests/result.analysis.test.ts
+?? tests/rewards.detail.test.ts
+?? tests/stones.presentation.test.ts
+?? tests/telemetry.test.ts
+?? tests/ui.audio-status.test.tsx
+?? tests/ui.battle.test.tsx
+?? tests/ui.board.test.tsx
+?? tests/ui.card-clarity.test.tsx
+?? tests/ui.dojo.test.tsx
+?? tests/ui.map.graph.test.tsx
+?? tests/ui.map.progression.test.tsx
+?? tests/ui.onetap.test.tsx
+?? tests/ui.progression.test.tsx
+?? tests/ui.reward.detail.test.tsx
+?? tests/ui.shell.test.tsx
+?? tests/unlocks.test.ts

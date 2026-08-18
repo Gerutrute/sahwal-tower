@@ -1,0 +1,40 @@
+$ npx.cmd vitest run tests/ui.board.test.tsx -t 9×9가 81개 좌표를 비중첩 렌더한다
+
+STDOUT
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [31m❯[39m tests/ui.board.test.tsx [2m([22m[2m2 tests[22m[2m | [22m[31m1 failed[39m[2m | [22m[33m1 skipped[39m[2m)[22m[90m 30[2mms[22m[39m
+[31m   [31m×[31m 9×9가 81개 좌표를 비중첩 렌더한다[90m 30[2mms[22m[31m[39m
+[31m     → expected null to be truthy[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[33m1 skipped[39m[90m (2)[39m
+[2m   Start at [22m 20:57:41
+[2m   Duration [22m 613ms[2m (transform 70ms, setup 8ms, collect 93ms, tests 30ms, environment 279ms, prepare 80ms)[22m
+
+
+STDERR
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 1 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/ui.board.test.tsx[2m > [22m9×9가 81개 좌표를 비중첩 렌더한다
+[31m[1mAssertionError[22m: expected null to be truthy[39m
+
+[32m- Expected:[39m 
+true
+
+[31m+ Received:[39m 
+null
+
+[36m [2m❯[22m tests/ui.board.test.tsx:[2m32:65[22m[39m
+    [90m 30| [39m  [34mclick[39m([32m'등반 시작'[39m)[33m;[39m
+    [90m 31| [39m  [34mclick[39m([32m'보스'[39m)[33m;[39m
+    [90m 32| [39m  [34mexpect[39m(host[33m.[39m[34mquerySelector[39m([32m'[data-game-engine="integrated"]'[39m))[33m.[39m[34mtoBeTr[39m…
+    [90m   | [39m                                                                [31m^[39m
+    [90m 33| [39m  [35mconst[39m hits [33m=[39m [[33m...[39mhost[33m.[39mquerySelectorAll[33m<[39m[33mSVGCircleElement[39m[33m>[39m([32m'.hit'[39m)][33m;[39m
+    [90m 34| [39m  [34mexpect[39m(hits)[33m.[39m[34mtoHaveLength[39m([34m81[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+EXIT 1

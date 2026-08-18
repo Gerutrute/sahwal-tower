@@ -7,8 +7,9 @@
     "build": ["npm.cmd", "run", "build"],
     "benchmark_ai": ["npm.cmd", "run", "benchmark:ai"],
     "runtime_audit": ["npm.cmd", "audit", "--omit=dev", "--audit-level=high"],
-    "mobile_check": ["npm.cmd", "run", "check:mobile"]
+    "mobile_check": ["npm.cmd", "run", "check:mobile"],
+    "vercel_preview_check": ["npm.cmd", "run", "check:vercel-preview"]
   },
-  "required": ["full_tests", "typecheck", "build", "benchmark_ai", "runtime_audit", "mobile_check"],
+  "required": ["full_tests", "typecheck", "build", "benchmark_ai", "runtime_audit", "mobile_check", "vercel_preview_check"],
   "note": "RoGolike MVP의 정식 검증 명령. required receipt는 이름뿐 아니라 설정된 exact argv와 일치해야 한다."
 }

@@ -1,0 +1,12 @@
+$ npm.cmd run benchmark:ai
+
+STDOUT
+
+> sahwal-tower@0.1.0 benchmark:ai
+> node scripts/benchmark-ai.mjs
+
+{"cpuThrottleRate":4,"warmupPerFixture":10,"measurementsPerFixture":100,"results":[{"size":7,"sampleCount":500,"p50Ms":0.800000011920929,"p95Ms":1.300000011920929,"maxMs":1.7999999821186066,"expectedCandidateCount":82000,"actualCandidateCount":82000,"seeds":["draft-ai-7-0","draft-ai-7-1","draft-ai-7-2","draft-ai-7-3","draft-ai-7-4"]},{"size":9,"sampleCount":500,"p50Ms":1.5999999940395355,"p95Ms":2.0999999940395355,"maxMs":2.800000011920929,"expectedCandidateCount":138000,"actualCandidateCount":138000,"seeds":["draft-ai-9-0","draft-ai-9-1","draft-ai-9-2","draft-ai-9-3","draft-ai-9-4"]}]}
+
+STDERR
+
+EXIT 0

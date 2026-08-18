@@ -1,0 +1,52 @@
+$ npx.cmd vitest run tests/deck.test.ts -t 시작 덱은 일반석 5장과 특수돌 5종 각 1장이다
+
+STDOUT
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [31m❯[39m tests/deck.test.ts [2m([22m[2m9 tests[22m[2m | [22m[31m1 failed[39m[2m | [22m[33m8 skipped[39m[2m)[22m[90m 5[2mms[22m[39m
+[31m   [31m×[31m 순환형 돌 덱[2m > [22m시작 덱은 일반석 5장과 특수돌 5종 각 1장이다[90m 4[2mms[22m[31m[39m
+[31m     → expected [ 'STONE-001', 'STONE-001', …(8) ] to deeply equal [ 'STONE-001', 'STONE-001', …(8) ][39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[33m8 skipped[39m[90m (9)[39m
+[2m   Start at [22m 00:43:05
+[2m   Duration [22m 316ms[2m (transform 38ms, setup 9ms, collect 34ms, tests 5ms, environment 0ms, prepare 70ms)[22m
+
+
+STDERR
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 1 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/deck.test.ts[2m > [22m순환형 돌 덱[2m > [22m시작 덱은 일반석 5장과 특수돌 5종 각 1장이다
+[31m[1mAssertionError[22m: expected [ 'STONE-001', 'STONE-001', …(8) ] to deeply equal [ 'STONE-001', 'STONE-001', …(8) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  Array [[22m
+[2m    "STONE-001",[22m
+[2m    "STONE-001",[22m
+[2m    "STONE-001",[22m
+[2m    "STONE-001",[22m
+[2m    "STONE-001",[22m
+[31m+   "STONE-001",[39m
+[2m    "STONE-002",[22m
+[32m-   "STONE-003",[39m
+[32m-   "STONE-004",[39m
+[2m    "STONE-005",[22m
+[2m    "STONE-006",[22m
+[31m+   "STONE-003",[39m
+[2m  ][22m
+
+[36m [2m❯[22m tests/deck.test.ts:[2m26:27[22m[39m
+    [90m 24| [39m[34mdescribe[39m([32m'순환형 돌 덱'[39m[33m,[39m () [33m=>[39m {
+    [90m 25| [39m  [34mit[39m([32m'시작 덱은 일반석 5장과 특수돌 5종 각 1장이다'[39m[33m,[39m () [33m=>[39m {
+    [90m 26| [39m    [34mexpect[39m([33mSTARTING_DECK[39m)[33m.[39m[34mtoEqual[39m([
+    [90m   | [39m                          [31m^[39m
+    [90m 27| [39m      [32m'STONE-001'[39m[33m,[39m [32m'STONE-001'[39m[33m,[39m [32m'STONE-001'[39m[33m,[39m [32m'STONE-001'[39m[33m,[39m [32m'STONE-001'[39m[33m,[39m
+    [90m 28| [39m      [32m'STONE-002'[39m[33m,[39m [32m'STONE-003'[39m[33m,[39m [32m'STONE-004'[39m[33m,[39m [32m'STONE-005'[39m[33m,[39m [32m'STONE-006'[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+EXIT 1

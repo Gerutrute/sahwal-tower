@@ -10,8 +10,8 @@ interface BoardSvgProps {
   readonly size: BoardSize;
   readonly points: readonly (BoardStone | null)[];
   readonly disabled?: boolean;
-  readonly previewPoint?: number | null;
   readonly invalidPoint?: number | null;
+  readonly protectedPoints?: readonly number[];
   readonly onMove: (point: number) => void;
 }
 
@@ -25,8 +25,8 @@ export function BoardSvg({
   size,
   points,
   disabled = false,
-  previewPoint = null,
   invalidPoint = null,
+  protectedPoints = [],
   onMove,
 }: BoardSvgProps) {
   const total = size * size;
@@ -57,11 +57,11 @@ export function BoardSvg({
         const y = coordinate(size, row);
         const stone = points[point] ?? null;
         return <g key={`point-${point}`} role="row">
-          {previewPoint === point && !stone && <circle className="preview-stone" cx={x} cy={y} r="17" />}
           {stone && <g className="stone-pop">
             <circle className={`stone stone-${stone.color.toLowerCase()}`} cx={x} cy={y} r="17" />
             <text className={`stone-kind stone-kind-${stone.color.toLowerCase()}`} x={x} y={y + 5}>{stone.kind.slice(-1)}</text>
           </g>}
+          {protectedPoints.includes(point) && <circle className="protection-ring" data-protected={point} cx={x} cy={y} r="20" />}
           {invalidPoint === point && <circle className="invalid-ring" cx={x} cy={y} r="18" />}
           <circle
             className="hit"

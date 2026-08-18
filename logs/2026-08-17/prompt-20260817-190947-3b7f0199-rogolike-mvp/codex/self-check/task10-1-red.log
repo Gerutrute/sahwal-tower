@@ -1,0 +1,25 @@
+$ npx.cmd vitest run tests/unlocks.test.ts -t 잠긴 ID는 후보에서 제외된다
+
+STDOUT
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [31m❯[39m tests/unlocks.test.ts [2m([22m[2m0 test[22m[2m)[22m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [2mno tests[22m
+[2m   Start at [22m 21:20:05
+[2m   Duration [22m 293ms[2m (transform 31ms, setup 14ms, collect 0ms, tests 0ms, environment 0ms, prepare 116ms)[22m
+
+
+STDERR
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Failed Suites 1 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unlocks.test.ts[2m [ tests/unlocks.test.ts ][22m
+[31m[1mError[22m: Failed to load url ../src/game/unlocks (resolved id: ../src/game/unlocks) in D:/개인 pjt/codex 게임 해커톤/tests/unlocks.test.ts. Does the file exist?[39m
+[90m [2m❯[22m loadAndTransform ../../%EA%B0%9C%EC%9D%B8%20pjt/codex%20%EA%B2%8C%EC%9E%84%20%ED%95%B4%EC%BB%A4%ED%86%A4/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:[2m51969:17[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+EXIT 1

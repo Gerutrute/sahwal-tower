@@ -1,0 +1,40 @@
+$ npx.cmd vitest run tests/ui.reward.detail.test.tsx -t 모바일 첫 탭은 상세만 펼친다
+
+STDOUT
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [31m❯[39m tests/ui.reward.detail.test.tsx [2m([22m[2m2 tests[22m[2m | [22m[31m1 failed[39m[2m | [22m[33m1 skipped[39m[2m)[22m[90m 17[2mms[22m[39m
+[31m   [31m×[31m 보상 상세 UI[2m > [22m모바일 첫 탭은 상세만 펼친다[90m 16[2mms[22m[31m[39m
+[31m     → expected undefined to be 'true' // Object.is equality[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[33m1 skipped[39m[90m (2)[39m
+[2m   Start at [22m 00:46:28
+[2m   Duration [22m 789ms[2m (transform 144ms, setup 9ms, collect 201ms, tests 17ms, environment 322ms, prepare 101ms)[22m
+
+
+STDERR
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 1 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/ui.reward.detail.test.tsx[2m > [22m보상 상세 UI[2m > [22m모바일 첫 탭은 상세만 펼친다
+[31m[1mAssertionError[22m: expected undefined to be 'true' // Object.is equality[39m
+
+[32m- Expected:[39m 
+"true"
+
+[31m+ Received:[39m 
+undefined
+
+[36m [2m❯[22m tests/ui.reward.detail.test.tsx:[2m40:49[22m[39m
+    [90m 38| [39m    [35mconst[39m face [33m=[39m host[33m?.[39mquerySelector[33m<[39m[33mHTMLButtonElement[39m[33m>[39m([32m'.reward-face'[39m…
+    [90m 39| [39m    [34mact[39m(() [33m=>[39m face[33m?.[39m[34mclick[39m())[33m;[39m
+    [90m 40| [39m    [34mexpect[39m(face[33m?.[39m[34mgetAttribute[39m([32m'aria-expanded'[39m))[33m.[39m[34mtoBe[39m([32m'true'[39m)[33m;[39m
+    [90m   | [39m                                                [31m^[39m
+    [90m 41| [39m    [34mexpect[39m(host[33m?.[39m[34mquerySelector[39m([32m'[aria-label$="상세"]'[39m))[33m.[39m[34mtoBeTruthy[39m()[33m;[39m
+    [90m 42| [39m    [34mexpect[39m(host[33m?.[39m[34mquerySelector[39m([32m'[data-screen="reward"]'[39m))[33m.[39m[34mtoBeTruthy[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+EXIT 1

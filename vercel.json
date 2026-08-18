@@ -1,0 +1,12 @@
+{
+  "buildCommand": "npm run build:vercel",
+  "outputDirectory": "dist",
+  "installCommand": "npm ci",
+  "git": {
+    "deploymentEnabled": {
+      "**": false,
+      "main": true,
+      "dev": true
+    }
+  }
+}

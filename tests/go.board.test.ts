@@ -1,15 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import {
-  createBoard,
-  groupAt,
-  libertiesAt,
-  neighbors,
-  pointIndex,
-  type BoardSize,
-  type BoardState,
-  type Stone,
-  type StoneColor,
-} from '../src/engine';
+import { createBoard, groupAt, libertiesAt, neighbors, pointIndex } from '../src/game/go';
+import type { BoardSize, BoardState, Stone, StoneColor } from '../src/game/types';
 
 const stone = (color: StoneColor, instanceId: string): Stone => ({
   color,

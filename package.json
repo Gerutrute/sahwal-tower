@@ -6,13 +6,15 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "node scripts/clean-dist.mjs && tsc --noEmit && vite build",
-    "preview": "vite preview",
+    "build:vercel": "node scripts/vercel-build.mjs",
+    "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "balance": "vite-node scripts/balance.ts",
     "benchmark:ai": "node scripts/benchmark-ai.mjs",
     "simulate": "vite-node scripts/simulate.ts",
-    "check:mobile": "node scripts/playwright-mobile-check.mjs"
+    "check:mobile": "node scripts/playwright-mobile-check.mjs",
+    "check:vercel-preview": "node scripts/vercel-preview-check.mjs"
   },
   "dependencies": {
     "react": "18.3.1",

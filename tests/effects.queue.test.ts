@@ -1,16 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  createBoard,
-  libertiesAt,
-  resolveEffectQueue,
-  resolveMove,
-  summarizeCapture,
-  tryPlay,
-  type BoardState,
-  type EffectDefinition,
-  type Stone,
-} from '../src/engine';
+import { createBoard, libertiesAt, tryPlay } from '../src/game/go';
+import { resolveEffectQueue, resolveMove, summarizeCapture, type EffectDefinition } from '../src/game/effects';
+import type { BoardState, Stone } from '../src/game/types';
 import {
   DRAFT_EFFECT_LIMITS_FIXTURE,
   DRAFT_GENERATED_LIMIT_FIXTURE,

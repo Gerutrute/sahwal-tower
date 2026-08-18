@@ -1,0 +1,12 @@
+$ npm.cmd run build:vercel
+
+STDOUT
+
+> sahwal-tower@0.1.0 build:vercel
+> node scripts/vercel-build.mjs
+
+
+STDERR
+RUNTIME_CONFIG_SCHEMA_INVALID komiBySize,economy,mapWeights,effectLimits,generalCaptureMoneyCap,enemyDeck,bossByAct,rewards,shop,eventCurrencyReward,aiCaptureWeight,aiEffectWeights,aiPassScoreThreshold,analysisCaptureWeight,analysisEffectWeight,audioTuning
+
+EXIT 1

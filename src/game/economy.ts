@@ -91,16 +91,20 @@ export function generateShop(
   catalog: ShopCatalog,
   config: EconomyConfig,
   rng: RandomSource,
+  isProductUnlocked: (productId: StoneKind | CharmId | RelicId) => boolean = () => true,
 ): ShopState {
   validateEconomyConfig(config);
-  if (new Set(catalog.stones.map(({ id }) => id)).size < 3
-    || new Set(catalog.charms).size < 2
-    || new Set(catalog.relics).size < 1) {
+  const availableStones = catalog.stones.filter(({ id }) => isProductUnlocked(id));
+  const availableCharms = catalog.charms.filter(isProductUnlocked);
+  const availableRelics = catalog.relics.filter(isProductUnlocked);
+  if (new Set(availableStones.map(({ id }) => id)).size < 3
+    || new Set(availableCharms).size < 2
+    || new Set(availableRelics).size < 1) {
     throw new RangeError('shop catalog does not contain enough unique products');
   }
-  const stones = shuffle([...new Map(catalog.stones.map((stone) => [stone.id, stone])).values()], rng).slice(0, 3);
-  const charms = shuffle([...new Set(catalog.charms)], rng).slice(0, 2);
-  const relics = shuffle([...new Set(catalog.relics)], rng).slice(0, 1);
+  const stones = shuffle([...new Map(availableStones.map((stone) => [stone.id, stone])).values()], rng).slice(0, 3);
+  const charms = shuffle([...new Set(availableCharms)], rng).slice(0, 2);
+  const relics = shuffle([...new Set(availableRelics)], rng).slice(0, 1);
   return {
     offers: [
       ...stones.map<ShopOffer>((stone, index) => ({

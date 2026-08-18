@@ -145,3 +145,18 @@ export function enumerateMapPaths(map: ActMap): readonly (readonly MapNode[])[] 
   map.starts.forEach((start) => visit(start, []));
   return paths;
 }
+
+export function selectableNodeIds(
+  map: ActMap,
+  completedNodeIds: readonly string[],
+): readonly string[] {
+  if (completedNodeIds.length === 0) return [...map.starts];
+  const byId = new Map<string, MapNode>([
+    ...map.columns.flat().map((candidate) => [candidate.id, candidate] as const),
+    [map.boss.id, map.boss] as const,
+  ]);
+  const lastCompletedId = completedNodeIds.at(-1)!;
+  const lastCompleted = byId.get(lastCompletedId);
+  if (lastCompleted === undefined) throw new Error(`map references missing node: ${lastCompletedId}`);
+  return [...lastCompleted.next];
+}

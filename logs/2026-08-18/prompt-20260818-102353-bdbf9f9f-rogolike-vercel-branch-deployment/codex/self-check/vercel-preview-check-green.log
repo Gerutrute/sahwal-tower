@@ -1,0 +1,14 @@
+$ npm.cmd run check:vercel-preview
+
+STDOUT
+
+> sahwal-tower@0.1.0 check:vercel-preview
+> node scripts/vercel-preview-check.mjs
+
+VERCEL_PREVIEW_CHECK_OK
+
+STDERR
+(node:32296) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+EXIT 0

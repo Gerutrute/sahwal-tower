@@ -1,0 +1,8 @@
+$ node scripts/check-ac-mapping.mjs logs/2026-08-18/prompt-20260818-102353-bdbf9f9f-rogolike-vercel-branch-deployment/04-claude-acceptance-criteria.md
+
+STDOUT
+AC vitest mappings: 6/6 executed with at least one passing test
+
+STDERR
+
+EXIT 0

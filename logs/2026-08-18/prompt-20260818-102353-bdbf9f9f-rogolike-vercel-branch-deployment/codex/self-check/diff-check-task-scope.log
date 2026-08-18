@@ -1,0 +1,15 @@
+$ git diff --check -- .gitignore evidence.config.json package.json scripts/playwright-mobile-check.mjs src/App.tsx src/main.tsx src/styles.css docs/CHANGELOG.md
+
+STDOUT
+
+STDERR
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'evidence.config.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/playwright-mobile-check.mjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/App.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/styles.css', LF will be replaced by CRLF the next time Git touches it
+
+EXIT 0

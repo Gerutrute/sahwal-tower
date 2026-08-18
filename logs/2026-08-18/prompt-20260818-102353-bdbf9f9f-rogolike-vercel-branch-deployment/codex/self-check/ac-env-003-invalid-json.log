@@ -1,0 +1,12 @@
+$ npm.cmd run build:vercel
+
+STDOUT
+
+> sahwal-tower@0.1.0 build:vercel
+> node scripts/vercel-build.mjs
+
+
+STDERR
+RUNTIME_CONFIG_INVALID_JSON
+
+EXIT 1

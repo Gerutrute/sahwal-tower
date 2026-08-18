@@ -1,0 +1,22 @@
+$ npm.cmd test -- --run tests/map.graph.test.ts tests/ui.map.graph.test.tsx
+
+STDOUT
+
+> sahwal-tower@0.1.0 test
+> vitest run --run tests/map.graph.test.ts tests/ui.map.graph.test.tsx
+
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [32m✓[39m tests/map.graph.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/ui.map.graph.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[90m 26[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[32m6 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 01:39:23
+[2m   Duration [22m 7.66s[2m (transform 185ms, setup 20ms, collect 333ms, tests 35ms, environment 7.09s, prepare 170ms)[22m
+
+
+STDERR
+
+EXIT 0

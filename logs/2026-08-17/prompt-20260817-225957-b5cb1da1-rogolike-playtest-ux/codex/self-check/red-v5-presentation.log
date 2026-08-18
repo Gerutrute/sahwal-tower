@@ -1,0 +1,66 @@
+$ npm.cmd test -- --run tests/stones.presentation.test.ts
+
+STDOUT
+
+> sahwal-tower@0.1.0 test
+> vitest run --run tests/stones.presentation.test.ts
+
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [31m❯[39m tests/stones.presentation.test.ts [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[90m 3[2mms[22m[39m
+[31m   [31m×[31m 병종 카드 표시 계약[2m > [22m6개 병종 모두 한국어 요약·조건·전략을 제공한다[90m 2[2mms[22m[31m[39m
+[31m     → Cannot read properties of undefined (reading 'summary')[39m
+[31m   [31m×[31m 병종 카드 표시 계약[2m > [22m병종별 클래스와 문양이 모두 서로 다르다[90m 0[2mms[22m[31m[39m
+[31m     → Cannot destructure property 'classKey' of 'undefined' as it is undefined.[39m
+[31m   [31m×[31m 병종 카드 표시 계약[2m > [22m승인된 효과 수치를 요약에 명시한다[90m 0[2mms[22m[31m[39m
+[31m     → Cannot read properties of undefined (reading 'summary')[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[90m (3)[39m
+[2m   Start at [22m 23:34:37
+[2m   Duration [22m 238ms[2m (transform 32ms, setup 9ms, collect 27ms, tests 3ms, environment 0ms, prepare 68ms)[22m
+
+
+STDERR
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 3 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/stones.presentation.test.ts[2m > [22m병종 카드 표시 계약[2m > [22m6개 병종 모두 한국어 요약·조건·전략을 제공한다
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading 'summary')[39m
+[36m [2m❯[22m tests/stones.presentation.test.ts:[2m10:42[22m[39m
+    [90m  8| [39m    [34mexpect[39m(definitions)[33m.[39m[34mtoHaveLength[39m([34m6[39m)[33m;[39m
+    [90m  9| [39m    [35mfor[39m ([35mconst[39m definition [35mof[39m definitions) {
+    [90m 10| [39m      [35mfor[39m ([35mconst[39m value [35mof[39m [definition[33m.[39mui[33m.[39msummary[33m,[39m definition[33m.[39mui[33m.[39mcondit…
+    [90m   | [39m                                         [31m^[39m
+    [90m 11| [39m        [34mexpect[39m(value)[33m.[39m[34mtoMatch[39m([36m/[가-힣]/[39m)[33m;[39m
+    [90m 12| [39m        [34mexpect[39m(value)[33m.[39mnot[33m.[39m[34mtoMatch[39m([36m/STONE-|after-placement|capture-succ[39m…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/stones.presentation.test.ts[2m > [22m병종 카드 표시 계약[2m > [22m병종별 클래스와 문양이 모두 서로 다르다
+[31m[1mTypeError[22m: Cannot destructure property 'classKey' of 'undefined' as it is undefined.[39m
+[36m [2m❯[22m tests/stones.presentation.test.ts:[2m19:30[22m[39m
+    [90m 17| [39m  [34mit[39m([32m'병종별 클래스와 문양이 모두 서로 다르다'[39m[33m,[39m () [33m=>[39m {
+    [90m 18| [39m    [35mconst[39m ui [33m=[39m [33mObject[39m[33m.[39m[34mvalues[39m([33mSTONE_DEFINITIONS[39m)[33m.[39m[34mmap[39m(({ ui[33m:[39m value }) [33m=>[39m…
+    [90m 19| [39m    [34mexpect[39m([35mnew[39m [33mSet[39m(ui[33m.[39m[34mmap[39m(({ classKey }) [33m=>[39m classKey))[33m.[39msize)[33m.[39m[34mtoBe[39m([34m6[39m)[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m 20| [39m    [34mexpect[39m([35mnew[39m [33mSet[39m(ui[33m.[39m[34mmap[39m(({ icon }) [33m=>[39m icon))[33m.[39msize)[33m.[39m[34mtoBe[39m([34m6[39m)[33m;[39m
+    [90m 21| [39m  })[33m;[39m
+[90m [2m❯[22m tests/stones.presentation.test.ts:[2m19:23[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/stones.presentation.test.ts[2m > [22m병종 카드 표시 계약[2m > [22m승인된 효과 수치를 요약에 명시한다
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading 'summary')[39m
+[36m [2m❯[22m tests/stones.presentation.test.ts:[2m24:46[22m[39m
+    [90m 22| [39m
+    [90m 23| [39m  [34mit[39m([32m'승인된 효과 수치를 요약에 명시한다'[39m[33m,[39m () [33m=>[39m {
+    [90m 24| [39m    [34mexpect[39m([33mSTONE_DEFINITIONS[39m[[32m'STONE-002'[39m][33m.[39mui[33m.[39msummary)[33m.[39m[34mtoContain[39m([32m'2장'[39m)[33m;[39m
+    [90m   | [39m                                             [31m^[39m
+    [90m 25| [39m    [34mexpect[39m([33mSTONE_DEFINITIONS[39m[[32m'STONE-003'[39m][33m.[39mui[33m.[39msummary)[33m.[39m[34mtoContain[39m([32m'5냥'[39m)[33m;[39m
+    [90m 26| [39m    [34mexpect[39m([33mSTONE_DEFINITIONS[39m[[32m'STONE-004'[39m][33m.[39mui[33m.[39msummary)[33m.[39m[34mtoContain[39m([32m'1장'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+EXIT 1

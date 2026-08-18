@@ -1,0 +1,40 @@
+$ npx.cmd vitest run tests/battle.product-effects.test.ts -t AI가 플레이어 희생석을 포획해도
+
+STDOUT
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [31m❯[39m tests/battle.product-effects.test.ts [2m([22m[2m7 tests[22m[2m | [22m[31m1 failed[39m[2m | [22m[33m6 skipped[39m[2m)[22m[90m 8[2mms[22m[39m
+[31m   [31m×[31m 제품 전투 특수 돌 배선[2m > [22mAI가 플레이어 희생석을 포획해도 플레이어의 다음 턴 패 한도가 늘어난다[90m 8[2mms[22m[31m[39m
+[31m     → expected 4 to be 5 // Object.is equality[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[33m6 skipped[39m[90m (7)[39m
+[2m   Start at [22m 22:10:28
+[2m   Duration [22m 389ms[2m (transform 93ms, setup 11ms, collect 116ms, tests 8ms, environment 0ms, prepare 92ms)[22m
+
+
+STDERR
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 1 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/battle.product-effects.test.ts[2m > [22m제품 전투 특수 돌 배선[2m > [22mAI가 플레이어 희생석을 포획해도 플레이어의 다음 턴 패 한도가 늘어난다
+[31m[1mAssertionError[22m: expected 4 to be 5 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 5[39m
+[31m+ 4[39m
+
+[36m [2m❯[22m tests/battle.product-effects.test.ts:[2m139:44[22m[39m
+    [90m137| [39m
+    [90m138| [39m    [34mexpect[39m(next[33m.[39mbattle[33m![39m[33m.[39mboard[33m.[39mpoints[[34m1[39m])[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m139| [39m    [34mexpect[39m(next[33m.[39mbattle[33m![39m[33m.[39mdecks[33m.[39m[33mB[39m[33m.[39mhandLimit)[33m.[39m[34mtoBe[39m(before[33m.[39mhandLimit [33m+[39m [34m1[39m)[33m;[39m
+    [90m   | [39m                                           [31m^[39m
+    [90m140| [39m    [34mexpect[39m(next[33m.[39mbattle[33m![39m[33m.[39mdecks[33m.[39m[33mB[39m[33m.[39mhandLimitModifiers)[33m.[39m[34mtoContainEqual[39m({
+    [90m141| [39m      sourceId[33m:[39m [32m'player-sacrifice'[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+EXIT 1

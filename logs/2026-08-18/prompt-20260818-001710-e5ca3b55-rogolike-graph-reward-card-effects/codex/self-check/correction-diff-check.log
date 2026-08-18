@@ -1,0 +1,51 @@
+$ git diff --check
+
+STDOUT
+logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/diff/10-codex-implementation.patch:142290: trailing whitespace.
++ 
+logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/diff/10-codex-implementation.patch:142810: trailing whitespace.
++ 
+logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/diff/10-codex-implementation.patch:147541: trailing whitespace.
++ 
+logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/diff/10-codex-implementation.patch:147912: trailing whitespace.
++ 
+logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/diff/10-codex-implementation.patch:150356: trailing whitespace.
++ 
+
+STDERR
+warning: in the working copy of 'docs/03_content/01_특수돌.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/codex/exec-receipts.jsonl', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/diff/10-codex-implementation.patch', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/manifest.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/balance.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/check-ac-mapping.mjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/playwright-mobile-check.mjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/simulate.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/App.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/audio.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/BoardSvg.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/game/battle.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/game/content/charms.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/game/content/relics.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/game/content/stones.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/game/deck.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/game/economy.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/game/map.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/game/rewards.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/game/run.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/hooks/useGameMusic.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/styles.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/battle.flow.test.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/battle.revival.test.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/deck.test.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/effects.queue.test.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/go.board.test.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/rng.test.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/sim.random.test.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/stones.test.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/ui.game.test.tsx', LF will be replaced by CRLF the next time Git touches it
+
+EXIT 2

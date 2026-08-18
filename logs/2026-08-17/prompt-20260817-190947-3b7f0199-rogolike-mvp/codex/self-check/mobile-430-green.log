@@ -1,0 +1,72 @@
+$ npm.cmd run check:mobile
+
+STDOUT
+
+> sahwal-tower@0.1.0 check:mobile
+> node scripts/playwright-mobile-check.mjs
+
+{
+  "checkedAt": "2026-08-17T13:29:34.546Z",
+  "baseURL": "http://127.0.0.1:4173/",
+  "viewport": {
+    "width": 380,
+    "height": 844
+  },
+  "initial": {
+    "title": "RoGolike",
+    "text": "여정 음악\n음악 끄기\n\n돌 한 장, 수 한 번, 달라지는 길\n\n碁\nRoGolike\n\n바둑판 위에서 열 장의 덱을 순환시키며 두 막을 건너는 로그라이크 대국\n\n등반 시작\n\n게임 수치는 실행 시 주입된 설정을 사용합니다.",
+    "innerWidth": 380,
+    "innerHeight": 844,
+    "scrollWidth": 380,
+    "audio": {
+      "contexts": 0,
+      "plays": 0
+    }
+  },
+  "battleMetrics": {
+    "viewport": 380,
+    "html": 380,
+    "body": 380
+  },
+  "boardWidths": {
+    "board7": {
+      "380": {
+        "viewport": 380,
+        "html": 380,
+        "body": 380
+      },
+      "430": {
+        "viewport": 430,
+        "html": 430,
+        "body": 430
+      }
+    },
+    "board9": {
+      "380": {
+        "viewport": 380,
+        "html": 380,
+        "body": 380
+      },
+      "430": {
+        "viewport": 430,
+        "html": 430,
+        "body": 430
+      }
+    }
+  },
+  "hitTargetCount": 81,
+  "decisiveMoveCount": 3,
+  "consoleErrors": [],
+  "pageErrors": [],
+  "requestFailures": [],
+  "badResponses": [],
+  "screenshots": [
+    "mobile-title.png",
+    "mobile-boss.png"
+  ],
+  "passed": true
+}
+
+STDERR
+
+EXIT 0

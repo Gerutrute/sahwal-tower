@@ -1,0 +1,107 @@
+$ npm.cmd test -- --run tests/audio.manager.test.ts
+
+STDOUT
+
+> sahwal-tower@0.1.0 test
+> vitest run --run tests/audio.manager.test.ts
+
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [31m❯[39m tests/audio.manager.test.ts [2m([22m[2m13 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[90m 11[2mms[22m[39m
+[31m   [31m×[31m AudioManager[2m > [22mresume promise가 미해결이어도 fetch와 BufferSource.start를 진행한다[90m 4[2mms[22m[31m[39m
+[31m     → expected "spy" to be called 1 times, but got 0 times[39m
+[31m   [31m×[31m AudioManager[2m > [22mWebAudio fetch 실패 시 fallback 재생과 상태를 노출한다[90m 1[2mms[22m[31m[39m
+[31m     → expected "spy" to be called 1 times, but got 0 times[39m
+[31m   [31m×[31m AudioManager[2m > [22m정상 WebAudio 시작을 상태로 노출한다[90m 1[2mms[22m[31m[39m
+[31m     → expected undefined to be 'web-audio' // Object.is equality[39m
+[31m   [31m×[31m AudioManager[2m > [22mWebAudio와 fallback이 모두 실패하면 오류와 원인을 노출한다[90m 0[2mms[22m[31m[39m
+[31m     → expected undefined to be 'error' // Object.is equality[39m
+[31m   [31m×[31m AudioManager[2m > [22m오류 상태에서 unlock 재시도는 현재 트랙을 다시 로드한다[90m 0[2mms[22m[31m[39m
+[31m     → expected "spy" to be called 2 times, but got 1 times[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m8 passed[39m[22m[90m (13)[39m
+[2m   Start at [22m 23:37:45
+[2m   Duration [22m 392ms[2m (transform 70ms, setup 16ms, collect 57ms, tests 11ms, environment 0ms, prepare 137ms)[22m
+
+
+STDERR
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 5 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/audio.manager.test.ts[2m > [22mAudioManager[2m > [22mresume promise가 미해결이어도 fetch와 BufferSource.start를 진행한다
+[31m[1mAssertionError[22m: expected "spy" to be called 1 times, but got 0 times[39m
+[36m [2m❯[22m tests/audio.manager.test.ts:[2m78:21[22m[39m
+    [90m 76| [39m    [35mawait[39m [34mtick[39m()[33m;[39m
+    [90m 77| [39m
+    [90m 78| [39m    [34mexpect[39m(fetcher)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                    [31m^[39m
+    [90m 79| [39m    [34mexpect[39m(context[33m.[39msources[33m.[39m[34mreduce[39m((sum[33m,[39m source) [33m=>[39m sum [33m+[39m source[33m.[39mstartC…
+    [90m 80| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/audio.manager.test.ts[2m > [22mAudioManager[2m > [22mWebAudio fetch 실패 시 fallback 재생과 상태를 노출한다
+[31m[1mAssertionError[22m: expected "spy" to be called 1 times, but got 0 times[39m
+[36m [2m❯[22m tests/audio.manager.test.ts:[2m97:24[22m[39m
+    [90m 95| [39m    [35mawait[39m manager[33m.[39m[34munlock[39m()[33m;[39m
+    [90m 96| [39m
+    [90m 97| [39m    [34mexpect[39m(audio[33m.[39mplay)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                       [31m^[39m
+    [90m 98| [39m    [34mexpect[39m(manager[33m.[39m[34msnapshot[39m()[33m.[39mplayback)[33m.[39m[34mtoBe[39m([32m'fallback'[39m)[33m;[39m
+    [90m 99| [39m    [34mexpect[39m(errors[33m.[39mlength)[33m.[39m[34mtoBeGreaterThanOrEqual[39m([34m1[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/audio.manager.test.ts[2m > [22mAudioManager[2m > [22m정상 WebAudio 시작을 상태로 노출한다
+[31m[1mAssertionError[22m: expected undefined to be 'web-audio' // Object.is equality[39m
+
+[32m- Expected:[39m 
+"web-audio"
+
+[31m+ Received:[39m 
+undefined
+
+[36m [2m❯[22m tests/audio.manager.test.ts:[2m110:41[22m[39m
+    [90m108| [39m    managers[33m.[39m[34mpush[39m(manager)[33m;[39m
+    [90m109| [39m    [35mawait[39m manager[33m.[39m[34munlock[39m()[33m;[39m
+    [90m110| [39m    [34mexpect[39m(manager[33m.[39m[34msnapshot[39m()[33m.[39mplayback)[33m.[39m[34mtoBe[39m([32m'web-audio'[39m)[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m111| [39m  })[33m;[39m
+    [90m112| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/audio.manager.test.ts[2m > [22mAudioManager[2m > [22mWebAudio와 fallback이 모두 실패하면 오류와 원인을 노출한다
+[31m[1mAssertionError[22m: expected undefined to be 'error' // Object.is equality[39m
+
+[32m- Expected:[39m 
+"error"
+
+[31m+ Received:[39m 
+undefined
+
+[36m [2m❯[22m tests/audio.manager.test.ts:[2m122:41[22m[39m
+    [90m120| [39m    managers[33m.[39m[34mpush[39m(manager)[33m;[39m
+    [90m121| [39m    [35mawait[39m manager[33m.[39m[34munlock[39m()[33m;[39m
+    [90m122| [39m    [34mexpect[39m(manager[33m.[39m[34msnapshot[39m()[33m.[39mplayback)[33m.[39m[34mtoBe[39m([32m'error'[39m)[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m123| [39m    [34mexpect[39m(manager[33m.[39m[34msnapshot[39m()[33m.[39mlastError)[33m.[39m[34mtoContain[39m([32m'offline'[39m)[33m;[39m
+    [90m124| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/audio.manager.test.ts[2m > [22mAudioManager[2m > [22m오류 상태에서 unlock 재시도는 현재 트랙을 다시 로드한다
+[31m[1mAssertionError[22m: expected "spy" to be called 2 times, but got 1 times[39m
+[36m [2m❯[22m tests/audio.manager.test.ts:[2m137:21[22m[39m
+    [90m135| [39m    [35mawait[39m manager[33m.[39m[34munlock[39m()[33m;[39m
+    [90m136| [39m    [35mawait[39m manager[33m.[39m[34munlock[39m()[33m;[39m
+    [90m137| [39m    [34mexpect[39m(fetcher)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m2[39m)[33m;[39m
+    [90m   | [39m                    [31m^[39m
+    [90m138| [39m  })[33m;[39m
+    [90m139| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯[22m[39m
+
+
+EXIT 1

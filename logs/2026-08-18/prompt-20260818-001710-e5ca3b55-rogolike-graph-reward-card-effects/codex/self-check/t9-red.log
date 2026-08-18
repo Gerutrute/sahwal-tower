@@ -1,0 +1,33 @@
+$ npx.cmd vitest run tests/ai.effects.test.ts -t 병종별 주입 가중치로 직접 효과를 평가한다
+
+STDOUT
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [31m❯[39m tests/ai.effects.test.ts [2m([22m[2m4 tests[22m[2m | [22m[31m1 failed[39m[2m | [22m[33m3 skipped[39m[2m)[22m[90m 4[2mms[22m[39m
+[31m   [31m×[31m AI 병종 효과 가중치[2m > [22m병종별 주입 가중치로 직접 효과를 평가한다[90m 3[2mms[22m[31m[39m
+[31m     → expected { seed: 'draft-ui-seed', …(16) } to have property "aiEffectWeights"[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[33m3 skipped[39m[90m (4)[39m
+[2m   Start at [22m 01:00:33
+[2m   Duration [22m 323ms[2m (transform 58ms, setup 12ms, collect 54ms, tests 4ms, environment 0ms, prepare 100ms)[22m
+
+
+STDERR
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 1 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/ai.effects.test.ts[2m > [22mAI 병종 효과 가중치[2m > [22m병종별 주입 가중치로 직접 효과를 평가한다
+[31m[1mAssertionError[22m: expected { seed: 'draft-ui-seed', …(16) } to have property "aiEffectWeights"[39m
+[36m [2m❯[22m tests/ai.effects.test.ts:[2m15:31[22m[39m
+    [90m 13| [39m[34mdescribe[39m([32m'AI 병종 효과 가중치'[39m[33m,[39m () [33m=>[39m {
+    [90m 14| [39m  [34mit[39m([32m'병종별 주입 가중치로 직접 효과를 평가한다'[39m[33m,[39m () [33m=>[39m {
+    [90m 15| [39m    [34mexpect[39m([33mDRAFT_GAME_CONFIG[39m)[33m.[39m[34mtoHaveProperty[39m([32m'aiEffectWeights'[39m)[33m;[39m
+    [90m   | [39m                              [31m^[39m
+    [90m 16| [39m    [35mconst[39m weights [33m=[39m [32m'aiEffectWeights'[39m [35min[39m [33mDRAFT_GAME_CONFIG[39m [33m?[39m [33mDRAFT_GAM[39m…
+    [90m 17| [39m    [34mexpect[39m(weights [33m&&[39m [33mObject[39m[33m.[39m[34mkeys[39m(weights)[33m.[39m[34msort[39m())[33m.[39m[34mtoEqual[39m([
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+EXIT 1

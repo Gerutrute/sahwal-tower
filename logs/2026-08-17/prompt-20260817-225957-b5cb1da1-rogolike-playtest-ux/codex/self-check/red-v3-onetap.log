@@ -1,0 +1,86 @@
+$ npm.cmd test -- --run tests/ui.onetap.test.tsx
+
+STDOUT
+
+> sahwal-tower@0.1.0 test
+> vitest run --run tests/ui.onetap.test.tsx
+
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [31m❯[39m tests/ui.onetap.test.tsx [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[90m 47[2mms[22m[39m
+[31m   [31m×[31m 교차점 1탭 확정[2m > [22m카드 선택 뒤 한 번의 보드 클릭으로 돌과 버림 더미를 확정한다[90m 34[2mms[22m[31m[39m
+[31m     → expected  to have a length of 1 but got +0[39m
+[31m   [31m×[31m 교차점 1탭 확정[2m > [22m점유 좌표 오류 뒤에도 다음 합법 좌표 한 번으로 정상 확정한다[90m 12[2mms[22m[31m[39m
+[31m     → expected  to have a length of 1 but got +0[39m
+[31m   [31m×[31m 교차점 1탭 확정[2m > [22mCHOOSE_POINT 한 번으로 moveNumber를 올리고 preview 상태를 남기지 않는다[90m 1[2mms[22m[31m[39m
+[31m     → expected +0 to be 1 // Object.is equality[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[90m (3)[39m
+[2m   Start at [22m 23:29:00
+[2m   Duration [22m 712ms[2m (transform 126ms, setup 7ms, collect 178ms, tests 47ms, environment 269ms, prepare 72ms)[22m
+
+
+STDERR
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 3 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/ui.onetap.test.tsx[2m > [22m교차점 1탭 확정[2m > [22m카드 선택 뒤 한 번의 보드 클릭으로 돌과 버림 더미를 확정한다
+[31m[1mAssertionError[22m: expected  to have a length of 1 but got +0[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m tests/ui.onetap.test.tsx:[2m51:47[22m[39m
+    [90m 49| [39m    [34mhit[39m([34m0[39m)[33m;[39m
+    [90m 50| [39m
+    [90m 51| [39m    [34mexpect[39m(host[33m.[39m[34mquerySelectorAll[39m([32m'.stone-b'[39m))[33m.[39m[34mtoHaveLength[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                                              [31m^[39m
+    [90m 52| [39m    [34mexpect[39m(host[33m.[39mtextContent)[33m.[39m[34mtoContain[39m([32m'버림 1'[39m)[33m;[39m
+    [90m 53| [39m    [34mexpect[39m(host[33m.[39mtextContent)[33m.[39mnot[33m.[39m[34mtoContain[39m([32m'합법 수 미리보기'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/ui.onetap.test.tsx[2m > [22m교차점 1탭 확정[2m > [22m점유 좌표 오류 뒤에도 다음 합법 좌표 한 번으로 정상 확정한다
+[31m[1mAssertionError[22m: expected  to have a length of 1 but got +0[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m tests/ui.onetap.test.tsx:[2m75:47[22m[39m
+    [90m 73| [39m
+    [90m 74| [39m    [34mhit[39m([34m1[39m)[33m;[39m
+    [90m 75| [39m    [34mexpect[39m(host[33m.[39m[34mquerySelectorAll[39m([32m'.stone-b'[39m))[33m.[39m[34mtoHaveLength[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                                              [31m^[39m
+    [90m 76| [39m  })[33m;[39m
+    [90m 77| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/ui.onetap.test.tsx[2m > [22m교차점 1탭 확정[2m > [22mCHOOSE_POINT 한 번으로 moveNumber를 올리고 preview 상태를 남기지 않는다
+[31m[1mAssertionError[22m: expected +0 to be 1 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m tests/ui.onetap.test.tsx:[2m84:37[22m[39m
+    [90m 82| [39m    [35mconst[39m next [33m=[39m [34mgameReducer[39m(selected[33m,[39m { type[33m:[39m [32m'CHOOSE_POINT'[39m[33m,[39m point[33m:[39m …
+    [90m 83| [39m
+    [90m 84| [39m    [34mexpect[39m(next[33m.[39mbattle[33m?.[39mmoveNumber)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m 85| [39m    [34mexpect[39m([32m'preview'[39m [35min[39m next)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m 86| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+EXIT 1

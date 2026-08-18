@@ -1,0 +1,8 @@
+$ node scripts/check-ac-mapping.mjs logs/2026-08-18/prompt-20260818-001710-e5ca3b55-rogolike-graph-reward-card-effects/04-claude-acceptance-criteria.md
+
+STDOUT
+AC vitest mappings: 27/27 executed with at least one passing test
+
+STDERR
+
+EXIT 0

@@ -1,0 +1,27 @@
+$ npm.cmd run check:mobile
+
+STDOUT
+
+> sahwal-tower@0.1.0 check:mobile
+> node scripts/playwright-mobile-check.mjs
+
+
+STDERR
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4173/
+Call log:
+[2m  - navigating to "http://127.0.0.1:4173/", waiting until "networkidle"[22m
+
+    at D:\개인 pjt\codex 게임 해커톤\scripts\playwright-mobile-check.mjs:235:31 {
+  log: [
+    '  - navigating to "http://127.0.0.1:4173/", waiting until "networkidle"'
+  ],
+  name: 'Error'
+}
+
+Node.js v24.12.0
+
+EXIT 1

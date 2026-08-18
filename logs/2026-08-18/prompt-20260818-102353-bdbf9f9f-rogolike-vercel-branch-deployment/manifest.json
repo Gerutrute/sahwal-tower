@@ -1,0 +1,573 @@
+{
+  "schema_version": "2.0",
+  "prompt_id": "prompt-20260818-102353-bdbf9f9f-rogolike-vercel-branch-deployment",
+  "created_at": "2026-08-18T10:23:53+09:00",
+  "completed_at": "2026-08-18T11:40:41+09:00",
+  "status": "FINALIZED",
+  "user_request_sha256": "b871535fa61f4c33fdee4b90529106da43085ae7ef0f654748b60cf3be801ac4",
+  "repo_root": "D:\\개인 pjt\\codex 게임 해커톤",
+  "git_branch": "dev",
+  "git_unborn_head": false,
+  "git_head_before": "8df1159983b0642cf5d144761f518188a64bcc15",
+  "baseline_tree": "7f3f17fed42a8a8ff758a11bfaf43629bdcebb62",
+  "snapshots": {
+    "baseline": "7f3f17fed42a8a8ff758a11bfaf43629bdcebb62",
+    "implementation": "e66f4f8e91f3e48ac25dedd139b259904bbf6df5",
+    "verify-before": "e66f4f8e91f3e48ac25dedd139b259904bbf6df5",
+    "verify-after": "e66f4f8e91f3e48ac25dedd139b259904bbf6df5"
+  },
+  "human_decision_status": "captured",
+  "plan_hashes": {
+    "02-claude-requirements-analysis.md": "17232341639efbd42d949307b69a12b76578b248206abbe1e50c1e775d3cce79",
+    "03-claude-implementation-plan.md": "1d5d85bbde412cf0b82d0cffb51942baf0c8dc74be5962afacd725896faa283f",
+    "04-claude-acceptance-criteria.md": "330a0f10bb0907ebd3f3e053c9c6cfca8ca220b2f506ad484fcfd8425596e5e4",
+    "05-codex-implementation-brief.md": "c02394a550af47784237c717b147779ce9339975c9927eef93a80acbb95c767d"
+  },
+  "orca_tasks": {
+    "prompt": null,
+    "plan": null,
+    "implement": null,
+    "verify": []
+  },
+  "orca_dispatches": {
+    "plan": null,
+    "verify": []
+  },
+  "verification": {
+    "vercel-runtime-config-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/vercel.runtime-config.test.ts",
+        "-t",
+        "값이 없으면 RUNTIME_CONFIG_MISSING으로 실패한다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\vercel-runtime-config-red.log"
+    },
+    "vercel-runtime-config-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/vercel.runtime-config.test.ts",
+        "-t",
+        "값이 없으면 RUNTIME_CONFIG_MISSING으로 실패한다"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\vercel-runtime-config-green.log"
+    },
+    "vercel-runtime-config-focused": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/vercel.runtime-config.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\vercel-runtime-config-focused.log"
+    },
+    "vercel-runtime-config-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\vercel-runtime-config-regression.log"
+    },
+    "vercel-validate-boot-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/vercel.validate-boot.test.ts",
+        "-t",
+        "draft fixture 구성으로 게임 상태를 부팅한다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\vercel-validate-boot-red.log"
+    },
+    "vercel-validate-boot-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/vercel.validate-boot.test.ts",
+        "-t",
+        "draft fixture 구성으로 게임 상태를 부팅한다"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\vercel-validate-boot-green.log"
+    },
+    "vercel-validate-boot-focused": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/vercel.validate-boot.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\vercel-validate-boot-focused.log"
+    },
+    "vercel-validate-boot-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\vercel-validate-boot-regression.log"
+    },
+    "vercel-build-unit-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/vercel.runtime-config.test.ts",
+        "tests/vercel.validate-boot.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\vercel-build-unit-regression.log"
+    },
+    "vercel-build-typecheck": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 2,
+      "log": "codex\\self-check\\vercel-build-typecheck.log"
+    },
+    "vercel-build-typecheck-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\vercel-build-typecheck-green.log"
+    },
+    "vercel-build-local-contract": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\vercel-build-local-contract.log"
+    },
+    "deploy-badge-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/ui.deploy-badge.test.tsx",
+        "-t",
+        "preview 배포 메타는 플레이테스트 라벨을 표시한다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\deploy-badge-red.log"
+    },
+    "deploy-badge-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/ui.deploy-badge.test.tsx",
+        "-t",
+        "preview 배포 메타는 플레이테스트 라벨을 표시한다"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\deploy-badge-green.log"
+    },
+    "deploy-badge-focused": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/ui.deploy-badge.test.tsx"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\deploy-badge-focused.log"
+    },
+    "deploy-badge-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\deploy-badge-regression.log"
+    },
+    "vercel-preview-check-focused": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "check:vercel-preview"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\vercel-preview-check-focused.log"
+    },
+    "vercel-preview-check-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "check:vercel-preview"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\vercel-preview-check-green.log"
+    },
+    "ac-env-001-missing": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "build:vercel"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\ac-env-001-missing.log"
+    },
+    "ac-env-002-blank": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "build:vercel"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\ac-env-002-blank.log"
+    },
+    "ac-env-003-invalid-json": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "build:vercel"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\ac-env-003-invalid-json.log"
+    },
+    "ac-env-004-schema-invalid": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "build:vercel"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\ac-env-004-schema-invalid.log"
+    },
+    "ac-env-005-boot-failed": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "build:vercel"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\ac-env-005-boot-failed.log"
+    },
+    "full_tests": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "verification\\full_tests.log"
+    },
+    "typecheck": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "log": "verification\\typecheck.log"
+    },
+    "build": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "log": "verification\\build.log"
+    },
+    "runtime_audit": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "audit",
+        "--omit=dev",
+        "--audit-level=high"
+      ],
+      "exit_code": 0,
+      "log": "verification\\runtime_audit.log"
+    },
+    "benchmark_ai": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "benchmark:ai"
+      ],
+      "exit_code": 0,
+      "log": "verification\\benchmark_ai.log"
+    },
+    "python-tests": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\python-tests.log"
+    },
+    "python-compile": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "python",
+        "-m",
+        "py_compile",
+        "scripts/evidence/*.py",
+        "tests/evidence/*.py"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\python-compile.log"
+    },
+    "python-compile-expanded": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "python",
+        "-m",
+        "py_compile",
+        "D:\\개인 pjt\\codex 게임 해커톤\\scripts\\evidence\\claude_hook.py",
+        "D:\\개인 pjt\\codex 게임 해커톤\\scripts\\evidence\\design_decision.py",
+        "D:\\개인 pjt\\codex 게임 해커톤\\scripts\\evidence\\evidence.py",
+        "D:\\개인 pjt\\codex 게임 해커톤\\scripts\\evidence\\orca_prompt.py",
+        "D:\\개인 pjt\\codex 게임 해커톤\\scripts\\evidence\\redact.py",
+        "D:\\개인 pjt\\codex 게임 해커톤\\scripts\\evidence\\__init__.py",
+        "D:\\개인 pjt\\codex 게임 해커톤\\tests\\evidence\\test_claude_hook.py",
+        "D:\\개인 pjt\\codex 게임 해커톤\\tests\\evidence\\test_design_decision.py",
+        "D:\\개인 pjt\\codex 게임 해커톤\\tests\\evidence\\test_evidence_cli.py",
+        "D:\\개인 pjt\\codex 게임 해커톤\\tests\\evidence\\test_orca_prompt.py",
+        "D:\\개인 pjt\\codex 게임 해커톤\\tests\\evidence\\test_project_rules.py",
+        "D:\\개인 pjt\\codex 게임 해커톤\\tests\\evidence\\test_redact.py",
+        "D:\\개인 pjt\\codex 게임 해커톤\\tests\\evidence\\__init__.py"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\python-compile-expanded.log"
+    },
+    "hook-self-test": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "python",
+        "scripts/evidence/claude_hook.py",
+        "self-test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\hook-self-test.log"
+    },
+    "ac-mapping": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "node",
+        "scripts/check-ac-mapping.mjs",
+        "logs/2026-08-18/prompt-20260818-102353-bdbf9f9f-rogolike-vercel-branch-deployment/04-claude-acceptance-criteria.md"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\ac-mapping.log"
+    },
+    "mobile_check": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "check:mobile"
+      ],
+      "exit_code": 0,
+      "log": "verification\\mobile_check.log"
+    },
+    "vercel_preview_check": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "check:vercel-preview"
+      ],
+      "exit_code": 0,
+      "log": "verification\\vercel_preview_check.log"
+    },
+    "ac-bld-preview": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "build:vercel"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\ac-bld-preview.log"
+    },
+    "ac-bld-production": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "build:vercel"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\ac-bld-production.log"
+    },
+    "vercel-runtime-config-focused-final": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/vercel.runtime-config.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\vercel-runtime-config-focused-final.log"
+    },
+    "diff-check": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 2,
+      "log": "codex\\self-check\\diff-check.log"
+    },
+    "diff-check-task-scope": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        ".gitignore",
+        "evidence.config.json",
+        "package.json",
+        "scripts/playwright-mobile-check.mjs",
+        "src/App.tsx",
+        "src/main.tsx",
+        "src/styles.css",
+        "docs/CHANGELOG.md"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\diff-check-task-scope.log"
+    },
+    "ac_mapping": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "node",
+        "scripts/check-ac-mapping.mjs",
+        "logs/2026-08-18/prompt-20260818-102353-bdbf9f9f-rogolike-vercel-branch-deployment/04-claude-acceptance-criteria.md"
+      ],
+      "exit_code": 0,
+      "log": "verification\\ac_mapping.log"
+    },
+    "config-required-380": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "node",
+        "C:\\Users\\WIN\\AppData\\Local\\Temp\\claude\\D-----pjt-codex-------\\40f74f24-2438-4997-8129-c70e33722845\\scratchpad\\config-required-check.mjs"
+      ],
+      "exit_code": 0,
+      "log": "verification\\config-required-380.log"
+    },
+    "ac-bld-preview-verifier": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "node",
+        "C:\\Users\\WIN\\AppData\\Local\\Temp\\claude\\D-----pjt-codex-------\\40f74f24-2438-4997-8129-c70e33722845\\scratchpad\\ac-bld.mjs",
+        "preview"
+      ],
+      "exit_code": 0,
+      "log": "verification\\ac-bld-preview-verifier.log"
+    },
+    "ac-bld-production-verifier": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "node",
+        "C:\\Users\\WIN\\AppData\\Local\\Temp\\claude\\D-----pjt-codex-------\\40f74f24-2438-4997-8129-c70e33722845\\scratchpad\\ac-bld.mjs",
+        "production"
+      ],
+      "exit_code": 0,
+      "log": "verification\\ac-bld-production-verifier.log"
+    }
+  },
+  "verifier_tree_unchanged": true,
+  "open_defects": [],
+  "final_outcome": "succeeded"
+}

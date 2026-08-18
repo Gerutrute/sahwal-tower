@@ -1,0 +1,33 @@
+$ npx.cmd vitest run tests/rewards.detail.test.ts -t 보상 후보를 요약·조건·효과·전략·연계·보유량으로 서술한다
+
+STDOUT
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [31m❯[39m tests/rewards.detail.test.ts [2m([22m[2m2 tests[22m[2m | [22m[31m1 failed[39m[2m | [22m[33m1 skipped[39m[2m)[22m[90m 12[2mms[22m[39m
+[31m   [31m×[31m 보상 상세 설명[2m > [22m보상 후보를 요약·조건·효과·전략·연계·보유량으로 서술한다[90m 12[2mms[22m[31m[39m
+[31m     → expected { …(2), [Symbol(Symbol.toStringTag)]: '…' } to have property "describeRewardCandidate"[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[33m1 skipped[39m[90m (2)[39m
+[2m   Start at [22m 00:44:19
+[2m   Duration [22m 298ms[2m (transform 39ms, setup 12ms, collect 21ms, tests 12ms, environment 0ms, prepare 95ms)[22m
+
+
+STDERR
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 1 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/rewards.detail.test.ts[2m > [22m보상 상세 설명[2m > [22m보상 후보를 요약·조건·효과·전략·연계·보유량으로 서술한다
+[31m[1mAssertionError[22m: expected { …(2), [Symbol(Symbol.toStringTag)]: '…' } to have property "describeRewardCandidate"[39m
+[36m [2m❯[22m tests/rewards.detail.test.ts:[2m14:20[22m[39m
+    [90m 12| [39m  [34mit[39m([32m'보상 후보를 요약·조건·효과·전략·연계·보유량으로 서술한다'[39m[33m,[39m [35masync[39m…
+    [90m 13| [39m    [35mconst[39m module [33m=[39m [35mawait[39m [35mimport[39m([32m'../src/game/rewards'[39m)[33m;[39m
+    [90m 14| [39m    [34mexpect[39m(module)[33m.[39m[34mtoHaveProperty[39m([32m'describeRewardCandidate'[39m)[33m;[39m
+    [90m   | [39m                   [31m^[39m
+    [90m 15| [39m    [35mif[39m ([33m![39m([32m'describeRewardCandidate'[39m [35min[39m module)) [35mreturn[39m[33m;[39m
+    [90m 16| [39m    [35mfor[39m ([35mconst[39m kind [35mof[39m [[32m'stone'[39m[33m,[39m [32m'charm'[39m[33m,[39m [32m'relic'[39m] [35mas[39m [35mconst[39m) {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+EXIT 1

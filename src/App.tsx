@@ -1,302 +1,401 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { BoardSvg, type BoardStone } from './components/BoardSvg';
-import { useAiTurn, type Screen } from './hooks/useAiTurn';
+import { useCallback, useEffect, useState } from 'react';
+import { BoardSvg } from './components/BoardSvg';
+import { MapGraph } from './components/MapGraph';
+import { useAiTurn } from './hooks/useAiTurn';
 import { useGameMusic } from './hooks/useGameMusic';
-import type { BoardSize, StoneKind } from './game/types';
+import { AudioControls } from './components/AudioControls';
+import {
+  GameProvider,
+  useGame,
+  type GameConfig,
+  type GameScreen,
+  type GameState,
+} from './game/GameProvider';
+import { STONE_DEFINITIONS } from './game/content/stones';
+import { CHARM_DEFINITIONS, type CharmId } from './game/content/charms';
+import { RELIC_DEFINITIONS, type RelicId } from './game/content/relics';
+import { removalPrice } from './game/economy';
+import { describeRewardCandidate } from './game/rewards';
+import { ENEMY_DEFINITIONS } from './game/content/enemies';
+import { type MapNode, type MapNodeType } from './game/map';
 import type { MusicRoute } from './audio';
 
-type BattleKind = 'normal' | 'elite' | 'boss';
-type Turn = 'player' | 'enemy';
-
-interface HandCard {
-  readonly id: string;
-  readonly kind: StoneKind;
-  readonly name: string;
-  readonly effect: string;
-}
-
-const CARD_LIBRARY: readonly HandCard[] = [
-  { id: 'card-1', kind: 'STONE-001', name: '일반석', effect: '추가 효과 없이 단단히 둔다.' },
-  { id: 'card-2', kind: 'STONE-002', name: '척후석', effect: '인접한 빈 곳을 미리 살핀다.' },
-  { id: 'card-3', kind: 'STONE-003', name: '수호석', effect: '연결된 아군의 활로를 지킨다.' },
-  { id: 'card-4', kind: 'STONE-004', name: '희생석', effect: '포획되면 다음 패를 보충한다.' },
-];
-
-const ENEMIES: Readonly<Record<BattleKind, { name: string; style: string; description: string }>> = {
-  normal: { name: '갈대 숲 기객', style: '영역 기풍', description: '변을 넓게 차지하며 안전하게 연결한다.' },
-  elite: { name: '검은 삿갓', style: '공격 기풍', description: '끊음과 포획을 우선하는 정예 상대다.' },
-  boss: { name: '문지기 대국수', style: '부활 기풍', description: '첫 계가 뒤 더 거센 2단계로 되돌아온다.' },
+const NODE_NAMES: Readonly<Record<MapNodeType, string>> = {
+  battle: '일반전',
+  elite: '정예전',
+  shop: '상점',
+  event: '사건',
+  dojo: '도장',
+  shrine: '사당',
+  boss: '보스전',
 };
 
-function routeFor(screen: Screen, battleKind: BattleKind, revival: boolean): MusicRoute {
+export interface DeployMeta {
+  readonly target: 'production' | 'preview';
+  readonly playtest: boolean;
+}
+
+function musicRoute(screen: GameScreen, boss: boolean, revival: boolean): MusicRoute {
   if (screen === 'battle') {
     if (revival) return 'revival';
-    return battleKind === 'normal' ? 'battle' : battleKind;
+    return boss ? 'boss' : 'battle';
   }
   return screen;
 }
 
-function TitleScreen({ start }: { start: () => void }) {
-  return <main className="screen title-screen" data-screen="title">
-    <p className="eyebrow">돌 한 장, 수 한 번, 달라지는 길</p>
-    <div className="title-mark" aria-hidden="true">碁</div>
-    <h1>RoGolike</h1>
-    <p className="lead">바둑판 위에서 덱을 순환시키며 두 막을 건너는 로그라이크 대국</p>
-    <button className="primary start-button" onClick={start}>등반 시작</button>
-    <p className="hint">시작 덱은 정해져 있습니다. 선택 없이 바로 지도에 들어갑니다.</p>
-  </main>;
+function nodeDescription(node: MapNode): string {
+  if (node.enemyId) return ENEMY_DEFINITIONS[node.enemyId].name;
+  if (node.eventId) return `사건 ${node.eventId}`;
+  if (node.type === 'shop') return '돌과 부적';
+  if (node.type === 'dojo') return '덱 다듬기';
+  return '잠시 숨을 고른다';
 }
 
-function MapScreen({ act, currency, open }: {
-  act: 1 | 2;
-  currency: number;
-  open: (screen: Screen, kind?: BattleKind) => void;
-}) {
+function MapScreen() {
+  const { state, dispatch } = useGame();
   return <main className="screen" data-screen="map">
-    <header className="screen-heading"><div><p className="eyebrow">제 {act}막</p><h1>길을 고르세요</h1></div><span className="currency">냥 {currency}</span></header>
-    <p className="lead">모든 길은 전투와 쉼을 지나 막의 문지기로 이어집니다.</p>
-    <nav className="map-path" aria-label={`${act}막 지도`}>
-      <button className="map-node battle-node" onClick={() => open('battle', 'normal')}><b>일반전</b><span>갈대 숲 기객</span></button>
-      <div className="path-branch">
-        <button className="map-node" onClick={() => open('event')}><b>사건</b><span>수상한 바둑판</span></button>
-        <button className="map-node" onClick={() => open('shop')}><b>상점</b><span>돌과 부적</span></button>
-        <button className="map-node" onClick={() => open('dojo')}><b>도장</b><span>덱 다듬기</span></button>
-      </div>
-      <button className="map-node elite-node" onClick={() => open('battle', 'elite')}><b>정예전</b><span>검은 삿갓</span></button>
-      <button className="map-node boss-node" onClick={() => open('battle', 'boss')}><b>보스전 · 9×9</b><span>문지기 대국수</span></button>
-    </nav>
+    <header className="screen-heading">
+      <div><p className="eyebrow">제 {state.run.act}막 · {state.run.boardSize}×{state.run.boardSize}</p><h1>길을 고르세요</h1></div>
+      <span className="currency">냥 {state.run.currency}</span>
+    </header>
+    <p className="lead">실제 생성된 지도 노드는 전투와 쉼을 지나 막의 문지기로 이어집니다.</p>
+    <MapGraph
+      map={state.map}
+      completedNodeIds={state.completedNodeIds}
+      classNameFor={(node) => node.type === 'battle' ? 'battle-node' : node.type === 'elite' ? 'elite-node' : node.type === 'boss' ? 'boss-node' : ''}
+      renderLabel={(node) => <><b>{NODE_NAMES[node.type]} · {node.column + 1}</b><span>{nodeDescription(node)}</span></>}
+      onOpenNode={(node) => dispatch({ type: 'OPEN_NODE', node })}
+    />
   </main>;
 }
 
-function BattleScreen({
-  size,
-  kind,
-  points,
-  hand,
-  selectedCardId,
-  previewPoint,
-  invalidPoint,
-  invalidReason,
-  turn,
-  thinking,
-  consecutivePasses,
-  effectLog,
-  currency,
-  revival,
-  selectCard,
-  choosePoint,
-  pass,
-  leave,
-}: {
-  size: BoardSize;
-  kind: BattleKind;
-  points: readonly (BoardStone | null)[];
-  hand: readonly HandCard[];
-  selectedCardId: string | null;
-  previewPoint: number | null;
-  invalidPoint: number | null;
-  invalidReason: string;
-  turn: Turn;
-  thinking: boolean;
-  consecutivePasses: number;
-  effectLog: readonly string[];
-  currency: number;
-  revival: boolean;
-  selectCard: (id: string) => void;
-  choosePoint: (point: number) => void;
-  pass: () => void;
-  leave: () => void;
-}) {
-  const enemy = ENEMIES[kind];
-  const selected = hand.find(({ id }) => id === selectedCardId);
+function BattleScreen({ thinking }: { readonly thinking: boolean }) {
+  const { state, dispatch } = useGame();
+  const battle = state.battle;
+  if (battle === null) return null;
+  const deck = battle.decks.B;
+  const selected = deck.hand.find(({ id }) => id === battle.selectedCardId);
+  const occupied = battle.board.points.reduce((counts, stone) => {
+    if (stone?.color === 'B') counts.B += 1;
+    if (stone?.color === 'W') counts.W += 1;
+    return counts;
+  }, { B: 0, W: 0 });
+  const majority = Math.ceil(battle.board.points.length / 2);
+  const protectedInstanceIds = new Set(battle.protections.flatMap(({ memberInstanceIds }) => memberInstanceIds));
+  const protectedPoints = battle.board.points.flatMap((stone, point) => stone !== null && protectedInstanceIds.has(stone.instanceId) ? [point] : []);
+  const enemyLabel = state.battleKind === 'boss' ? `제 ${state.run.act}막 문지기` : state.battleKind === 'elite' ? '정예 기객' : '길 위의 기객';
+  const canAct = battle.turn === 'B' && !thinking && state.pendingInspection === null;
+  const inspection = state.pendingInspection;
+  const latestEffect = state.effectLog.at(-1)?.message ?? null;
   return <main className="screen battle-screen" data-screen="battle">
-    <header className="screen-heading compact"><div><p className="eyebrow">{kind === 'boss' ? '보스 대국' : kind === 'elite' ? '정예 대국' : '일반 대국'}{revival ? ' · 부활 2단계' : ''}</p><h1>{enemy.name}</h1></div><span className="currency">냥 {currency}</span></header>
-    <section className="enemy-card" aria-label="상대 정보"><div className="enemy-avatar" aria-hidden="true">敵</div><div><b>{enemy.style}</b><p>{enemy.description}</p></div></section>
-    <div className="battle-stats"><span>내 덱 6</span><span>버림 {4 - hand.length}</span><span>부적 1</span><span>연속 패스 {consecutivePasses}/2</span></div>
-    <BoardSvg size={size} points={points} disabled={turn === 'enemy'} previewPoint={previewPoint} invalidPoint={invalidPoint} onMove={choosePoint} />
-    <p className={`turn-line ${invalidReason ? 'invalid' : ''}`} role="status">
-      {invalidReason || (thinking ? '상대가 수를 읽고 있습니다…' : selected && previewPoint !== null ? `${selected.name} 미리보기 · 같은 곳을 다시 눌러 확정` : '카드를 고르고 교차점을 누르세요.')}
-    </p>
-    <section className="hand" aria-label="손패 4장">
-      {hand.map((card) => <button key={card.id} className={`card ${selectedCardId === card.id ? 'selected' : ''}`} aria-pressed={selectedCardId === card.id} onClick={() => selectCard(card.id)} disabled={turn === 'enemy'}>
-        <span className="card-kind">{card.kind.slice(-1)}</span><strong>{card.name}</strong><small>{card.effect}</small>
-      </button>)}
+    <header className="screen-heading compact">
+      <div>
+        <p className="eyebrow">{state.battleKind === 'boss' ? '보스 대국' : state.battleKind === 'elite' ? '정예 대국' : '일반 대국'}{battle.revivalStage === 2 ? ' · 부활 2단계' : ''}</p>
+        <h1>{enemyLabel}</h1>
+      </div>
+      <span className="currency">냥 {state.run.currency}</span>
+    </header>
+    <section className="enemy-card" aria-label="상대 정보">
+      <div className="enemy-avatar" aria-hidden="true">敵</div>
+      <div><b>{battle.enemy.id}</b><p>{state.battleKind === 'elite' ? '공격 기풍' : state.battleKind === 'boss' ? '부활 기풍' : '영역 기풍'} · AI가 합법 후보를 평가해 카드와 좌표를 고릅니다.</p></div>
     </section>
-    <section className="effect-panel"><h2>효과 기록</h2><ol>{effectLog.slice(-4).map((entry, index) => <li key={`${entry}-${index}`}>{entry}</li>)}</ol></section>
-    <div className="controls"><button onClick={pass} disabled={turn === 'enemy'}>패스</button><button onClick={leave}>지도로 물러나기</button></div>
-  </main>;
-}
-
-function RewardScreen({ choose, decline }: { choose: (name: string) => void; decline: () => void }) {
-  return <main className="screen" data-screen="reward"><p className="eyebrow">대국 보상</p><h1>전리품을 고르세요</h1><div className="choice-grid">
-    {['연화 척후석', '비호의 부적', '흑요 유물'].map((name, index) => <button key={name} className="choice-card" onClick={() => choose(name)}><b>{name}</b><span>{index === 0 ? '덱에 특수 돌 1장 추가' : index === 1 ? '다음 대국 첫 수를 보호' : '포획 보상 강화'}</span></button>)}
-  </div><button onClick={decline}>보상을 받지 않는다</button></main>;
-}
-
-function ShopScreen({ currency, buy, leave }: { currency: number; buy: (price: number, name: string) => void; leave: () => void }) {
-  return <main className="screen" data-screen="shop"><header className="screen-heading"><div><p className="eyebrow">상점</p><h1>행상인의 돌상자</h1></div><span className="currency">냥 {currency}</span></header>
-    <div className="choice-grid">{[['장군석', 60], ['묘수 부적', 45], ['덱에서 돌 제거', 50]].map(([name, price]) => <button key={String(name)} className="choice-card" disabled={currency < Number(price)} onClick={() => buy(Number(price), String(name))}><b>{name}</b><span>{price}냥</span></button>)}</div>
-    <p className="hint">상품은 이번 방문에 고정됩니다.</p><button onClick={leave}>지도로 돌아가기</button>
-  </main>;
-}
-
-function EventScreen({ choose }: { choose: (text: string) => void }) {
-  return <main className="screen" data-screen="event"><p className="eyebrow">사건</p><h1>금이 간 바둑판</h1><p className="lead">돌 틈에서 오래된 기보 한 장이 빛납니다.</p><div className="choice-grid"><button className="choice-card" onClick={() => choose('기보를 읽어 다음 상대 정보를 얻었습니다.')}><b>기보를 읽는다</b><span>다음 전투의 기풍 공개</span></button><button className="choice-card" onClick={() => choose('돌을 챙겨 20냥을 얻었습니다.')}><b>돌을 챙긴다</b><span>20냥 획득</span></button></div><button onClick={() => choose('아무것도 건드리지 않았습니다.')}>조용히 떠난다</button></main>;
-}
-
-function DojoScreen({ used, train, leave }: { used: boolean; train: (action: string) => void; leave: () => void }) {
-  return <main className="screen" data-screen="dojo"><p className="eyebrow">도장</p><h1>한 번의 수련</h1><p className="lead">방문마다 한 가지 작업만 할 수 있습니다.</p><div className="choice-grid">{['돌 1장 제거', '돌 1장 교환', '선택 돌 1장 복제'].map((action) => <button key={action} className="choice-card" disabled={used} onClick={() => train(action)}><b>{action}</b><span>{used ? '이번 방문의 수련을 마쳤습니다' : '비용 40냥'}</span></button>)}</div><button onClick={leave}>지도로 돌아가기</button></main>;
-}
-
-function ResultScreen({ decisiveMoves, restart }: { decisiveMoves: readonly string[]; restart: () => void }) {
-  return <main className="screen result-screen" data-screen="result"><div className="result-mark" aria-hidden="true">勝</div><p className="eyebrow">대국 결과</p><h1>두 막을 완주했습니다</h1>
-    <section className="score-card"><h2>점수 분해</h2><dl><div><dt>돌</dt><dd>18</dd></div><div><dt>영역</dt><dd>21</dd></div><div><dt>덤</dt><dd>+6.5</dd></div><div><dt>최종 차</dt><dd>+4.5</dd></div><div><dt>포획</dt><dd>7</dd></div><div><dt>주요 효과</dt><dd>수호 2회</dd></div></dl></section>
-    <section className="effect-panel"><h2>복기 후보</h2><ol>{decisiveMoves.map((move) => <li key={move}>{move}</li>)}</ol></section>
-    <button className="primary" onClick={restart}>새 런 시작</button>
-  </main>;
-}
-
-export function App() {
-  const [screen, setScreen] = useState<Screen>('title');
-  const [act, setAct] = useState<1 | 2>(1);
-  const [currency, setCurrency] = useState(90);
-  const [battleKind, setBattleKind] = useState<BattleKind>('normal');
-  const [size, setSize] = useState<BoardSize>(7);
-  const [points, setPoints] = useState<readonly (BoardStone | null)[]>(Array(49).fill(null));
-  const [hand, setHand] = useState<readonly HandCard[]>(CARD_LIBRARY);
-  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
-  const [previewPoint, setPreviewPoint] = useState<number | null>(null);
-  const [invalidPoint, setInvalidPoint] = useState<number | null>(null);
-  const [invalidReason, setInvalidReason] = useState('');
-  const [turn, setTurn] = useState<Turn>('player');
-  const [passes, setPasses] = useState(0);
-  const [effectLog, setEffectLog] = useState<readonly string[]>(['대국이 시작되었습니다.']);
-  const [revival, setRevival] = useState(false);
-  const [dojoUsed, setDojoUsed] = useState(false);
-  const [notice, setNotice] = useState('');
-  const [decisiveMoves, setDecisiveMoves] = useState<readonly string[]>(['3행 3열의 연결', '중앙 수호석', '마지막 패스']);
-
-  useEffect(() => { document.title = 'RoGolike'; }, []);
-  const musicRoute = routeFor(screen, battleKind, revival);
-  const music = useGameMusic(musicRoute);
-
-  const finishBattle = useCallback(() => {
-    const candidates = effectLog.filter((entry) => entry.includes('착수')).slice(-3);
-    setDecisiveMoves(candidates.length ? candidates : ['첫 카드 선택', '중앙 압박', '마지막 패스']);
-    setTurn('player');
-    setPasses(0);
-    setPreviewPoint(null);
-    setSelectedCardId(null);
-    if (battleKind === 'boss') {
-      if (!revival && act === 1) {
-        setRevival(true);
-        setEffectLog((log) => [...log, '상대가 부활 2단계에 진입했습니다.']);
-        return;
-      }
-      setAct(2);
-      setScreen('result');
-      return;
-    }
-    setCurrency((value) => value + (battleKind === 'elite' ? 45 : 30));
-    setScreen('reward');
-  }, [act, battleKind, effectLog, revival]);
-
-  const performAi = useCallback(() => {
-    setPoints((current) => {
-      const point = current.findIndex((stone, index) => stone === null && index !== previewPoint);
-      if (point < 0) return current;
-      const next = [...current];
-      next[point] = { color: 'W', kind: 'STONE-001' };
-      setEffectLog((log) => [...log, `상대가 ${Math.floor(point / size) + 1}행 ${point % size + 1}열에 착수했습니다.`]);
-      return next;
-    });
-    setTurn('player');
-  }, [previewPoint, size]);
-  const { thinking } = useAiTurn({ screen, turn, active: screen === 'battle', onAiTurn: performAi });
-
-  const start = () => {
-    void music.unlock();
-    setScreen('map');
-  };
-  const open = (next: Screen, kind: BattleKind = 'normal') => {
-    setNotice('');
-    setBattleKind(kind);
-    if (next === 'battle') {
-      const boardSize: BoardSize = kind === 'boss' || act === 2 ? 9 : 7;
-      setSize(boardSize);
-      setPoints(Array(boardSize * boardSize).fill(null));
-      setHand(CARD_LIBRARY);
-      setSelectedCardId(null);
-      setPreviewPoint(null);
-      setInvalidPoint(null);
-      setInvalidReason('');
-      setEffectLog(['대국이 시작되었습니다.']);
-      setTurn('player');
-      setPasses(0);
-      setRevival(false);
-    }
-    if (next === 'dojo') setDojoUsed(false);
-    setScreen(next);
-  };
-  const selectCard = (id: string) => {
-    setSelectedCardId(id);
-    setPreviewPoint(null);
-    setInvalidPoint(null);
-    setInvalidReason('');
-  };
-  const choosePoint = (point: number) => {
-    if (!selectedCardId) {
-      setInvalidPoint(point);
-      setInvalidReason('놓을 카드를 먼저 선택하세요.');
-      return;
-    }
-    if (points[point]) {
-      setInvalidPoint(point);
-      setInvalidReason('이미 돌이 놓인 자리입니다. 다른 교차점을 고르세요.');
-      return;
-    }
-    setInvalidPoint(null);
-    setInvalidReason('');
-    if (previewPoint !== point) {
-      setPreviewPoint(point);
-      return;
-    }
-    const card = hand.find(({ id }) => id === selectedCardId)!;
-    setPoints((current) => {
-      const next = [...current];
-      next[point] = { color: 'B', kind: card.kind };
-      return next;
-    });
-    setEffectLog((log) => [...log, `${card.name}: ${Math.floor(point / size) + 1}행 ${point % size + 1}열 착수 효과를 해결했습니다.`]);
-    setPreviewPoint(null);
-    setSelectedCardId(null);
-    setPasses(0);
-    setTurn('enemy');
-  };
-  const pass = () => {
-    const next = passes + 2;
-    setPasses(next);
-    setEffectLog((log) => [...log, '나와 상대가 연속으로 패스했습니다.']);
-    if (next >= 2) finishBattle();
-  };
-
-  const screenContent = useMemo(() => {
-    if (screen === 'title') return <TitleScreen start={start} />;
-    if (screen === 'map') return <MapScreen act={act} currency={currency} open={open} />;
-    if (screen === 'battle') return <BattleScreen size={size} kind={battleKind} points={points} hand={hand} selectedCardId={selectedCardId} previewPoint={previewPoint} invalidPoint={invalidPoint} invalidReason={invalidReason} turn={turn} thinking={thinking} consecutivePasses={passes} effectLog={effectLog} currency={currency} revival={revival} selectCard={selectCard} choosePoint={choosePoint} pass={pass} leave={() => setScreen('map')} />;
-    if (screen === 'reward') return <RewardScreen choose={(name) => { setNotice(`${name}을 선택했습니다.`); setScreen('map'); }} decline={() => { setNotice('보상을 받지 않았습니다.'); setScreen('map'); }} />;
-    if (screen === 'shop') return <ShopScreen currency={currency} buy={(price, name) => { if (currency < price) return; setCurrency((value) => value - price); setNotice(`${name} 구매 완료`); }} leave={() => setScreen('map')} />;
-    if (screen === 'event') return <EventScreen choose={(text) => { if (text.includes('20냥')) setCurrency((value) => value + 20); setNotice(text); setScreen('map'); }} />;
-    if (screen === 'dojo') return <DojoScreen used={dojoUsed} train={(action) => { if (dojoUsed || currency < 40) return; setCurrency((value) => value - 40); setDojoUsed(true); setNotice(`${action} 수련 완료`); }} leave={() => setScreen('map')} />;
-    return <ResultScreen decisiveMoves={decisiveMoves.slice(0, 3)} restart={() => { setAct(1); setCurrency(90); setScreen('title'); }} />;
-  }, [screen, act, currency, size, battleKind, points, hand, selectedCardId, previewPoint, invalidPoint, invalidReason, turn, thinking, passes, effectLog, revival, dojoUsed, decisiveMoves]);
-
-  return <div className="app-shell">
-    <div className="audio-controls" aria-label="음악 설정">
-      <span aria-live="polite">{music.track === 'overworld' ? '여정 음악' : music.track === 'battle' ? '전투 음악' : music.track === 'boss' ? '보스 음악' : '상점 음악'}</span>
-      <button aria-label={music.snapshot.muted ? '음악 켜기' : '음악 끄기'} onClick={() => { if (!music.snapshot.unlocked) void music.unlock(); else music.setMuted(!music.snapshot.muted); }}>{music.snapshot.muted ? '음악 켜기' : '음악 끄기'}</button>
+    <div className="battle-stats">
+      <span>내 덱 {state.run.deck.length}</span>
+      <span>뽑기 {deck.drawPile.length}</span>
+      <span>버림 {deck.discardPile.length}</span>
+      <span>부적 {battle.charms.B.length}</span>
+      <span>유물 {battle.relics.B.length}</span>
+      <span>연속 패스 {battle.consecutivePasses}</span>
+      <span>포획 {state.captures.B}</span>
+      <span>점유 흑 {occupied.B} · 백 {occupied.W} / {majority}</span>
     </div>
-    {notice && screen === 'map' && <p className="notice" role="status">{notice}</p>}
-    {screenContent}
+    <details className="deck-summary"><summary>덱 구성 {state.run.deck.length}장</summary><p>{state.run.deck.map((kind) => STONE_DEFINITIONS[kind].name).join(' · ')}</p></details>
+    <BoardSvg
+      size={battle.board.size}
+      points={battle.board.points}
+      disabled={!canAct}
+      invalidPoint={state.invalidPoint}
+      protectedPoints={protectedPoints}
+      onMove={(point) => dispatch({ type: 'CHOOSE_POINT', point })}
+    />
+    <p className={`turn-line ${state.invalidReason ? 'invalid' : ''}`} role="status">
+      {state.invalidReason
+        || (thinking ? '상대가 합법 수를 평가하고 있습니다…'
+          : battle.phase === 'pre-move' ? '부적·유물을 사용하거나 카드를 바로 고르세요.'
+          : selected ? `${STONE_DEFINITIONS[selected.kind].name} 좌표를 누르면 즉시 착수합니다.` : '카드를 고르고 교차점을 누르세요.')}
+    </p>
+    <section className="hand" aria-label={`손패 ${deck.hand.length}장`}>
+      {deck.hand.map((card) => {
+        const definition = STONE_DEFINITIONS[card.kind];
+        return <button
+          key={card.id}
+          className={`card ${battle.selectedCardId === card.id ? 'selected' : ''}`}
+          data-stone-class={definition.ui.classKey}
+          aria-pressed={battle.selectedCardId === card.id}
+          onClick={() => dispatch({ type: 'SELECT_CARD', cardId: card.id })}
+          disabled={!canAct || (battle.phase !== 'pre-move' && battle.phase !== 'choose-card' && battle.phase !== 'choose-point')}
+        >
+          <span className="card-icon" aria-hidden="true">{definition.ui.icon}</span>
+          <strong>{definition.name}</strong>
+          <small>{definition.ui.summary}</small>
+        </button>;
+      })}
+    </section>
+    {selected && <section className="card-detail" aria-label="선택 카드 상세">
+      <h2>{STONE_DEFINITIONS[selected.kind].name}</h2>
+      <p><b>발동 조건</b> {STONE_DEFINITIONS[selected.kind].ui.condition}</p>
+      <p><b>실제 효과</b> {STONE_DEFINITIONS[selected.kind].ui.effect}</p>
+      <p><b>전략</b> {STONE_DEFINITIONS[selected.kind].ui.strategy}</p>
+    </section>}
+    {inspection && <section className="effect-panel inspection-panel" aria-label={inspection.kind === 'scout' ? '척후 정찰' : '기병 교환'}>
+      <h2>{inspection.kind === 'scout' ? '척후 정찰' : '기병 교환'}</h2>
+      {inspection.takenCardId === null && <>
+        <p>덱에서 가져올 카드 1장을 고르세요.</p>
+        <div className="inspection-cards">{inspection.inspected.map((card) => <button key={card.id} data-inspect-card-id={card.id} onClick={() => dispatch({ type: 'INSPECT_TAKE', cardId: card.id })}>{STONE_DEFINITIONS[card.kind].name}</button>)}</div>
+      </>}
+      {inspection.takenCardId !== null
+        && (inspection.kind === 'scout' ? inspection.returnedCardId : inspection.discardedCardId) === null && <>
+        <p>{inspection.kind === 'scout' ? '손패에서 덱으로 되돌릴 카드 1장을 고르세요.' : '손패에서 버릴 카드 1장을 고르세요.'}</p>
+        <div className="inspection-cards">{[
+          ...deck.hand,
+          ...inspection.inspected.filter(({ id }) => id === inspection.takenCardId),
+        ].map((card) => <button key={card.id} data-inspect-card-id={card.id} onClick={() => dispatch({ type: 'INSPECT_RETURN', cardId: card.id })}>{STONE_DEFINITIONS[card.kind].name}</button>)}</div>
+      </>}
+      {inspection.kind === 'scout' && inspection.returnedCardId !== null && <>
+        <p>덱 위에 놓을 순서를 정하세요. 첫 카드가 가장 먼저 뽑힙니다.</p>
+        <ol>{inspection.orderedIds.map((id, index) => {
+          const card = [...inspection.inspected, ...deck.hand].find((candidate) => candidate.id === id);
+          return <li key={id}>{card ? STONE_DEFINITIONS[card.kind].name : '되돌린 카드'} {index > 0 && <button onClick={() => {
+            const orderedIds = [...inspection.orderedIds];
+            [orderedIds[index - 1], orderedIds[index]] = [orderedIds[index], orderedIds[index - 1]];
+            dispatch({ type: 'REORDER_INSPECTION', orderedIds });
+          }}>위로</button>}</li>;
+        })}</ol>
+      </>}
+      <div className="controls">
+        <button onClick={() => dispatch({ type: 'CANCEL_INSPECTION' })}>취소</button>
+        <button onClick={() => dispatch({ type: 'CONFIRM_INSPECTION' })} disabled={inspection.takenCardId === null || (inspection.kind === 'scout' ? inspection.returnedCardId === null : inspection.discardedCardId === null)}>확정</button>
+      </div>
+    </section>}
+    {battle.charms.B.length > 0 && <section className="relic-actions" aria-label="부적">
+      {battle.charms.B.map((charmId) => <button
+        key={charmId}
+        data-charm-id={charmId}
+        onClick={() => dispatch({ type: 'USE_CHARM', charmId: charmId as CharmId })}
+        disabled={battle.phase !== 'pre-move'}
+      >{CHARM_DEFINITIONS[charmId as CharmId].name} 사용</button>)}
+    </section>}
+    {battle.relics.B.length > 0 && <section className="relic-actions" aria-label="유물">
+      {battle.relics.B.map((relicId) => <button
+        key={relicId}
+        data-relic-id={relicId}
+        onClick={() => dispatch({ type: 'USE_RELIC', relicId })}
+        disabled={battle.phase !== 'pre-move' || battle.usedRelicsThisTurn.includes(relicId)}
+      >{RELIC_DEFINITIONS[relicId as RelicId]?.name ?? relicId} 사용</button>)}
+    </section>}
+    {battle.phase === 'pre-move' && <button className="primary" onClick={() => dispatch({ type: 'CONTINUE_TO_MOVE' })}>착수로 진행</button>}
+    {latestEffect && <p className="effect-status" role="status">{latestEffect}</p>}
+    <section className="effect-panel">
+      <h2>효과 기록</h2>
+      <ol>
+        {[...battle.log.slice(-3).map(({ message }) => message), ...state.effectLog.slice(-3).map(({ message }) => message)].map((entry, index) => <li key={`${entry}-${index}`}>{entry}</li>)}
+      </ol>
+    </section>
+    <div className="controls">
+      <button onClick={() => dispatch({ type: 'PASS' })} disabled={!canAct}>패스</button>
+      <button onClick={() => dispatch({ type: 'RESIGN' })} disabled={!canAct}>기권</button>
+      <button onClick={() => dispatch({ type: 'RETURN_TO_MAP' })}>지도로 물러나기</button>
+    </div>
+  </main>;
+}
+
+function RewardScreen() {
+  const { state, dispatch } = useGame();
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  if (state.run.pendingCharm !== null) {
+    return <main className="screen" data-screen="reward"><p className="eyebrow">부적 교체</p><h1>교체할 부적을 고르세요</h1><div className="choice-grid">
+      {state.run.charms.map((charmId, index) => <button key={`${charmId}-${index}`} className="choice-card" onClick={() => dispatch({ type: 'REPLACE_CHARM', index })}><b>{CHARM_DEFINITIONS[charmId].name}</b><span>{CHARM_DEFINITIONS[state.run.pendingCharm!].name}으로 교체</span></button>)}
+    </div></main>;
+  }
+  return <main className="screen" data-screen="reward">
+    <p className="eyebrow">대국 보상</p><h1>전리품을 고르세요</h1>
+    <div className="choice-grid">
+      {(state.run.pendingRewards ?? []).map((candidate) => {
+        const detail = describeRewardCandidate(candidate, state.run);
+        const expanded = expandedId === candidate.id;
+        const detailId = `reward-detail-${candidate.id}`;
+        return <article key={candidate.id} className="reward-card" data-candidate-id={candidate.id} data-expanded={expanded}>
+          <button
+            className="reward-face"
+            aria-expanded={expanded}
+            aria-controls={detailId}
+            onPointerDown={(event) => event.preventDefault()}
+            onClick={() => setExpandedId((current) => current === candidate.id ? null : candidate.id)}
+            onFocus={() => setExpandedId(candidate.id)}
+            onMouseEnter={() => {
+              if (window.matchMedia?.('(hover: hover)').matches) setExpandedId(candidate.id);
+            }}
+          >
+            <b>{detail.name}</b><span>{detail.kindLabel} · {detail.summary}</span>
+          </button>
+          {expanded && <section id={detailId} className="reward-detail" aria-label={`${detail.name} 상세`}>
+            <dl>
+              <div><dt>효과 요약</dt><dd>{detail.summary}</dd></div>
+              <div><dt>발동 조건</dt><dd>{detail.condition}</dd></div>
+              <div><dt>실제 효과</dt><dd>{detail.effect}</dd></div>
+              <div><dt>전략</dt><dd>{detail.strategy}</dd></div>
+              <div><dt>추천 연계</dt><dd>{detail.synergy}</dd></div>
+              <div><dt>현재 보유</dt><dd>{detail.ownedCount}개</dd></div>
+            </dl>
+            <button className="primary reward-select" onClick={() => dispatch({ type: 'CHOOSE_REWARD', candidateId: candidate.id })}>이 보상을 선택</button>
+          </section>}
+        </article>;
+      })}
+    </div>
+    <button onClick={() => dispatch({ type: 'DECLINE_REWARD' })}>보상을 받지 않는다</button>
+  </main>;
+}
+
+function ShopScreen() {
+  const { state, dispatch, config } = useGame();
+  const currentRemovalPrice = removalPrice(config.economy, state.run.removalCount);
+  return <main className="screen" data-screen="shop">
+    <header className="screen-heading"><div><p className="eyebrow">상점</p><h1>행상인의 돌상자</h1></div><span className="currency">냥 {state.run.currency}</span></header>
+    <div className="choice-grid">
+      {(state.shop?.offers ?? []).map((offer) => {
+        const sold = state.shop?.soldOfferIds.includes(offer.id) ?? false;
+        const name = offer.kind === 'stone'
+          ? STONE_DEFINITIONS[offer.productId].name
+          : offer.kind === 'charm'
+            ? CHARM_DEFINITIONS[offer.productId].name
+            : RELIC_DEFINITIONS[offer.productId].name;
+        if (offer.kind === 'charm' && state.run.charms.length >= 2) {
+          return state.run.charms.map((charmId, replaceCharmIndex) => <button key={`${offer.id}-${replaceCharmIndex}`} className="choice-card" disabled={sold || state.run.currency < offer.price} onClick={() => dispatch({ type: 'BUY_OFFER', offerId: offer.id, replaceCharmIndex })}>
+            <b>{CHARM_DEFINITIONS[charmId].name} → {name}</b><span>{offer.price}냥</span>
+          </button>);
+        }
+        return <button key={offer.id} className="choice-card" disabled={sold || state.run.currency < offer.price} onClick={() => dispatch({ type: 'BUY_OFFER', offerId: offer.id })}>
+          <b>{name}</b><span>{sold ? '판매 완료' : `${offer.price}냥`}</span>
+        </button>;
+      })}
+      {state.run.deck.map((kind, cardIndex) => <button key={`remove-${cardIndex}`} className="choice-card" disabled={state.shop?.removalUsed || state.run.currency < currentRemovalPrice} onClick={() => dispatch({ type: 'REMOVE_SHOP_CARD', cardIndex })}>
+        <b>{STONE_DEFINITIONS[kind].name} 제거</b><span>{currentRemovalPrice}냥</span>
+      </button>)}
+    </div>
+    <p className="hint">판매된 상품과 제거는 이번 방문에서 다시 결제되지 않습니다.</p>
+    <button onClick={() => dispatch({ type: 'RETURN_TO_MAP' })}>지도로 돌아가기</button>
+  </main>;
+}
+
+function EventScreen() {
+  const { state, dispatch, config } = useGame();
+  return <main className="screen" data-screen="event">
+    <p className="eyebrow">사건</p><h1>금이 간 바둑판</h1>
+    <p className="lead">돌 틈에서 오래된 기보 한 장이 빛납니다.</p>
+    <div className="choice-grid">
+      <button className="choice-card" onClick={() => dispatch({ type: 'CHOOSE_EVENT', choice: 'scout' })}><b>기보를 읽는다</b><span>다음 상대 정보</span></button>
+      <button className="choice-card" onClick={() => dispatch({ type: 'CHOOSE_EVENT', choice: 'currency' })}><b>돌을 챙긴다</b><span>{config.eventCurrencyReward}냥 획득</span></button>
+    </div>
+    <button onClick={() => dispatch({ type: 'CHOOSE_EVENT', choice: 'leave' })}>조용히 떠난다</button>
+  </main>;
+}
+
+function DojoScreen() {
+  const { state, dispatch, config } = useGame();
+  const used = state.dojo?.used ?? false;
+  const price = (kind: keyof typeof config.economy.dojoPrices) => state.dojo?.free ? 0 : config.economy.dojoPrices[kind];
+  return <main className="screen" data-screen="dojo">
+    <p className="eyebrow">도장</p><h1>한 번의 수련</h1>
+    <p className="lead">대상 돌과 작업을 함께 선택합니다. 방문마다 한 번만 적용됩니다.</p>
+    <div className="dojo-list">
+      {state.run.deck.map((kind, cardIndex) => <section key={`${kind}-${cardIndex}`} className="dojo-card">
+        <b>{cardIndex + 1}. {STONE_DEFINITIONS[kind].name}</b>
+        <div className="controls">
+          <button disabled={used || state.run.currency < price('remove')} onClick={() => dispatch({ type: 'USE_DOJO', action: { type: 'remove', cardIndex } })}>제거 · {price('remove')}냥</button>
+          <button disabled={used || state.run.currency < price('exchange')} onClick={() => dispatch({ type: 'USE_DOJO', action: { type: 'exchange', cardIndex, replacement: 'STONE-006' } })}>희생석 교환 · {price('exchange')}냥</button>
+          <button disabled={used || state.run.currency < price('duplicate')} onClick={() => dispatch({ type: 'USE_DOJO', action: { type: 'duplicate', cardIndex } })}>복제 · {price('duplicate')}냥</button>
+        </div>
+      </section>)}
+    </div>
+    <button onClick={() => dispatch({ type: 'RETURN_TO_MAP' })}>지도로 돌아가기</button>
+  </main>;
+}
+
+function ResultScreen() {
+  const { state, dispatch } = useGame();
+  const analysis = state.result;
+  const won = state.run.status === 'won';
+  return <main className="screen result-screen" data-screen="result">
+    <div className="result-mark" aria-hidden="true">{won ? '勝' : '敗'}</div>
+    <p className="eyebrow">대국 결과</p>
+    <h1>{won ? '두 막을 완주했습니다' : '런 패배'}</h1>
+    {analysis && <section className="score-card"><h2>점수 분해</h2><dl>
+      <div><dt>흑 돌</dt><dd>{analysis.score.black.stones}</dd></div>
+      <div><dt>흑 영역</dt><dd>{analysis.score.black.territory}</dd></div>
+      <div><dt>백 돌</dt><dd>{analysis.score.white.stones}</dd></div>
+      <div><dt>백 영역</dt><dd>{analysis.score.white.territory}</dd></div>
+      <div><dt>덤</dt><dd>{analysis.score.komi}</dd></div>
+      <div><dt>최종 차</dt><dd>{analysis.score.margin}</dd></div>
+      <div><dt>내 포획</dt><dd>{analysis.captures.B}</dd></div>
+      <div><dt>상대 포획</dt><dd>{analysis.captures.W}</dd></div>
+    </dl></section>}
+    <section className="effect-panel"><h2>복기 후보</h2><ol>
+      {(analysis?.criticalMoves ?? []).map((move) => <li key={move.id}>{move.id}</li>)}
+      {(analysis?.criticalMoves.length ?? 0) === 0 && <li>기록된 착수가 없습니다.</li>}
+    </ol></section>
+    <button className="primary" onClick={() => dispatch({ type: 'RESTART' })}>새 런 시작</button>
+  </main>;
+}
+
+function GameShell({ deployMeta }: { readonly deployMeta?: DeployMeta }) {
+  const { state, dispatch, config } = useGame();
+  useEffect(() => { document.title = 'RoGolike'; }, []);
+  const revival = state.battle?.revivalStage === 2;
+  const route = musicRoute(state.screen, state.battleKind === 'boss', revival);
+  const music = useGameMusic(route, config.audioTuning);
+  const performAi = useCallback(() => dispatch({ type: 'AI_TURN' }), [dispatch]);
+  const aiTurn = state.screen === 'battle' && state.battle?.turn === 'W';
+  const { thinking } = useAiTurn({
+    screen: state.screen,
+    turn: aiTurn ? 'enemy' : 'player',
+    active: state.screen === 'battle',
+    onAiTurn: performAi,
+  });
+  const begin = () => {
+    void music.unlock();
+    dispatch({ type: 'START_RUN' });
+  };
+
+  let content;
+  if (state.screen === 'title') content = null;
+  else if (state.screen === 'map') content = <MapScreen />;
+  else if (state.screen === 'battle') content = <BattleScreen thinking={thinking} />;
+  else if (state.screen === 'reward') content = <RewardScreen />;
+  else if (state.screen === 'shop') content = <ShopScreen />;
+  else if (state.screen === 'event') content = <EventScreen />;
+  else if (state.screen === 'dojo') content = <DojoScreen />;
+  else content = <ResultScreen />;
+
+  return <div className="app-shell" data-game-engine="integrated">
+    <AudioControls music={music} />
+    {deployMeta?.playtest === true && <p className="deploy-note" role="note" data-deploy-note="playtest">
+      개발 플레이테스트 구성 · 승인된 제품 수치가 아닙니다
+    </p>}
+    {state.notice && state.screen === 'map' && <p className="notice" role="status">{state.notice}</p>}
+    {state.screen === 'title'
+      ? <main className="screen title-screen" data-screen="title">
+          <p className="eyebrow">돌 한 장, 수 한 번, 달라지는 길</p><div className="title-mark" aria-hidden="true">碁</div><h1>RoGolike</h1>
+          <p className="lead">바둑판 위에서 열 장의 덱을 순환시키며 두 막을 건너는 로그라이크 대국</p>
+          <button className="primary start-button" onClick={begin}>등반 시작</button><p className="hint">게임 수치는 실행 시 주입된 설정을 사용합니다.</p>
+        </main>
+      : content}
   </div>;
+}
+
+export function App({ config, initialState, deployMeta }: {
+  readonly config: GameConfig;
+  readonly initialState?: GameState;
+  readonly deployMeta?: DeployMeta;
+}) {
+  return <GameProvider config={config} initialState={initialState}><GameShell deployMeta={deployMeta} /></GameProvider>;
 }

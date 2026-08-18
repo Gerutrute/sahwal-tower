@@ -2,8 +2,8 @@
   "schema_version": "2.0",
   "prompt_id": "prompt-20260817-190947-3b7f0199-rogolike-mvp",
   "created_at": "2026-08-17T19:09:47+09:00",
-  "completed_at": null,
-  "status": "IMPLEMENTATION_CAPTURED",
+  "completed_at": "2026-08-17T22:39:31+09:00",
+  "status": "FINALIZED",
   "user_request_sha256": "8ab7368087df61e7d8cacbae82892cf341572cef6c853b2ae971339545031b0f",
   "repo_root": "D:\\개인 pjt\\codex 게임 해커톤",
   "git_branch": "dev",
@@ -12,7 +12,10 @@
   "baseline_tree": "94705b8f3df11aaaaf42d1616e685023b6f08d42",
   "snapshots": {
     "baseline": "94705b8f3df11aaaaf42d1616e685023b6f08d42",
-    "implementation": "a83c3e97ca96dd39431b1f4ed68733a213ad520a"
+    "implementation": "952b3b5b6b24a706a34303477522f2e7eb3936bc",
+    "verify-before": "7835c339f4096a28ac32eb7a8bdfd33cb37c6ceb",
+    "after-fix": "7835c339f4096a28ac32eb7a8bdfd33cb37c6ceb",
+    "verify-after": "7835c339f4096a28ac32eb7a8bdfd33cb37c6ceb"
   },
   "human_decision_status": "captured",
   "plan_hashes": {
@@ -25,11 +28,12 @@
   "orca_tasks": {
     "prompt": null,
     "plan": "task_9fde52777d0a",
-    "implement": null,
+    "implement": "task_ef8ddf4bda01",
     "verify": []
   },
   "orca_dispatches": {
     "plan": "ctx_98fa5d528924",
+    "implement": "ctx_c251721db7e9",
     "verify": []
   },
   "verification": {
@@ -553,9 +557,692 @@
       ],
       "exit_code": 0,
       "log": "codex\\self-check\\task7-mobile.log"
+    },
+    "full_tests": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "verification\\full_tests.log"
+    },
+    "typecheck": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "log": "verification\\typecheck.log"
+    },
+    "build": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "log": "verification\\build.log"
+    },
+    "runtime_audit": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "audit",
+        "--omit=dev",
+        "--audit-level=high"
+      ],
+      "exit_code": 0,
+      "log": "verification\\runtime_audit.log"
+    },
+    "benchmark_ai": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "benchmark:ai"
+      ],
+      "exit_code": 0,
+      "log": "verification\\benchmark_ai.log"
+    },
+    "mobile_check": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "check:mobile"
+      ],
+      "exit_code": 0,
+      "log": "verification\\mobile_check.log"
+    },
+    "task8-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/ui.board.test.tsx",
+        "-t",
+        "9×9가 81개 좌표를 비중첩 렌더한다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\task8-red.log"
+    },
+    "task8-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/ui.shell.test.tsx",
+        "tests/ui.board.test.tsx",
+        "tests/ui.battle.test.tsx",
+        "tests/result.analysis.test.ts",
+        "tests/ui.progression.test.tsx",
+        "tests/ui.dojo.test.tsx"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task8-green.log"
+    },
+    "task8-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task8-regression.log"
+    },
+    "task8-build": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task8-build.log"
+    },
+    "task8-mobile": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "check:mobile"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task8-mobile.log"
+    },
+    "task8-typecheck": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task8-typecheck.log"
+    },
+    "task9-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/audio.manager.test.ts",
+        "-t",
+        "첫 gesture 전 context를 만들지 않는다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\task9-red.log"
+    },
+    "task10-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/telemetry.test.ts",
+        "-t",
+        "동일 run은 동일 익명 지표를 낸다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\task10-red.log"
+    },
+    "task10-1-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/unlocks.test.ts",
+        "-t",
+        "잠긴 ID는 후보에서 제외된다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\task10-1-red.log"
+    },
+    "task9-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/audio.manager.test.ts",
+        "tests/audio.routing.test.tsx"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task9-green.log"
+    },
+    "task10-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/telemetry.test.ts",
+        "tests/balance.harness.test.ts",
+        "tests/sim.random.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task10-green.log"
+    },
+    "task10-1-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/unlocks.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task10-1-green.log"
+    },
+    "task9-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task9-regression.log"
+    },
+    "task10-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task10-regression.log"
+    },
+    "final-full-tests": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\final-full-tests.log"
+    },
+    "final-typecheck": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\final-typecheck.log"
+    },
+    "final-build": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\final-build.log"
+    },
+    "final-runtime-audit": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "audit",
+        "--omit=dev",
+        "--audit-level=high"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\final-runtime-audit.log"
+    },
+    "final-benchmark-ai": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "benchmark:ai"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\final-benchmark-ai.log"
+    },
+    "final-python-tests": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\final-python-tests.log"
+    },
+    "final-python-compile": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "python",
+        "-m",
+        "py_compile",
+        "scripts/evidence/__init__.py",
+        "scripts/evidence/claude_hook.py",
+        "scripts/evidence/design_decision.py",
+        "scripts/evidence/evidence.py",
+        "scripts/evidence/orca_prompt.py",
+        "scripts/evidence/redact.py",
+        "tests/evidence/test_claude_hook.py",
+        "tests/evidence/test_design_decision.py",
+        "tests/evidence/test_evidence_cli.py",
+        "tests/evidence/test_orca_prompt.py",
+        "tests/evidence/test_project_rules.py",
+        "tests/evidence/test_redact.py"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\final-python-compile.log"
+    },
+    "final-hook-self-test": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "python",
+        "scripts/evidence/claude_hook.py",
+        "self-test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\final-hook-self-test.log"
+    },
+    "final-ac-mapping": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "node",
+        "scripts/check-ac-mapping.mjs",
+        "logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/04-claude-acceptance-criteria.md"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\final-ac-mapping.log"
+    },
+    "final-mobile": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "check:mobile"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\final-mobile.log"
+    },
+    "task10-balance-7": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "balance",
+        "--",
+        "--size",
+        "7",
+        "--komi",
+        "4.5",
+        "--seed",
+        "corrective-7",
+        "--pairs",
+        "4",
+        "--max-moves",
+        "98",
+        "--target-min",
+        "0.4",
+        "--target-max",
+        "0.6"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task10-balance-7.log"
+    },
+    "task10-balance-9": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "balance",
+        "--",
+        "--size",
+        "9",
+        "--komi",
+        "6.5",
+        "--seed",
+        "corrective-9",
+        "--pairs",
+        "4",
+        "--max-moves",
+        "162",
+        "--target-min",
+        "0.4",
+        "--target-max",
+        "0.6"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task10-balance-9.log"
+    },
+    "task9-nonfatal-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/audio.manager.test.ts",
+        "tests/audio.routing.test.tsx"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\task9-nonfatal-regression.log"
+    },
+    "final-full-tests-latest": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\final-full-tests-latest.log"
+    },
+    "final-typecheck-latest": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\final-typecheck-latest.log"
+    },
+    "python_tests": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "verification\\python_tests.log"
+    },
+    "ac_mapping": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "node",
+        "scripts/check-ac-mapping.mjs",
+        "logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/04-claude-acceptance-criteria.md"
+      ],
+      "exit_code": 0,
+      "log": "verification\\ac_mapping.log"
+    },
+    "corrective-def1-def3-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/battle.revival.test.ts",
+        "tests/battle.product-effects.test.ts",
+        "tests/ui.battle.test.tsx"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\corrective-def1-def3-red.log"
+    },
+    "corrective-def2-ai-sacrifice-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/battle.product-effects.test.ts",
+        "-t",
+        "AI가 플레이어 희생석을 포획해도"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\corrective-def2-ai-sacrifice-red.log"
+    },
+    "corrective-def1-def3-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/battle.revival.test.ts",
+        "tests/battle.product-effects.test.ts",
+        "tests/ui.battle.test.tsx"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\corrective-def1-def3-green.log"
+    },
+    "corrective-full-tests": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\corrective-full-tests.log"
+    },
+    "corrective-typecheck": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\corrective-typecheck.log"
+    },
+    "corrective-build": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\corrective-build.log"
+    },
+    "corrective-benchmark-ai": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "benchmark:ai"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\corrective-benchmark-ai.log"
+    },
+    "corrective-runtime-audit": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "audit",
+        "--omit=dev",
+        "--audit-level=high"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\corrective-runtime-audit.log"
+    },
+    "corrective-python-tests": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\corrective-python-tests.log"
+    },
+    "corrective-python-compile": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "python",
+        "-m",
+        "py_compile",
+        "scripts/evidence/*.py",
+        "tests/evidence/*.py"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\corrective-python-compile.log"
+    },
+    "corrective-python-compile-expanded": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "python",
+        "-m",
+        "py_compile",
+        "scripts/evidence/__init__.py",
+        "scripts/evidence/redact.py",
+        "scripts/evidence/orca_prompt.py",
+        "scripts/evidence/evidence.py",
+        "scripts/evidence/design_decision.py",
+        "scripts/evidence/claude_hook.py",
+        "tests/evidence/__init__.py",
+        "tests/evidence/test_redact.py",
+        "tests/evidence/test_project_rules.py",
+        "tests/evidence/test_orca_prompt.py",
+        "tests/evidence/test_evidence_cli.py",
+        "tests/evidence/test_design_decision.py",
+        "tests/evidence/test_claude_hook.py"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\corrective-python-compile-expanded.log"
+    },
+    "corrective-hook-self-test": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "python",
+        "scripts/evidence/claude_hook.py",
+        "self-test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\corrective-hook-self-test.log"
+    },
+    "corrective-ac-mapping": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "node",
+        "scripts/check-ac-mapping.mjs",
+        "logs/2026-08-17/prompt-20260817-190947-3b7f0199-rogolike-mvp/04-claude-acceptance-criteria.md"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\corrective-ac-mapping.log"
+    },
+    "corrective-mobile": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "check:mobile"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\corrective-mobile.log"
+    },
+    "corrective-mobile-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "check:mobile"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\corrective-mobile-green.log"
+    },
+    "mobile-430-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "check:mobile"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\mobile-430-green.log"
     }
   },
-  "verifier_tree_unchanged": null,
+  "verifier_tree_unchanged": true,
   "open_defects": [],
-  "final_outcome": null
+  "final_outcome": "succeeded"
 }

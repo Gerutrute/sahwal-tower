@@ -1,0 +1,15 @@
+$ npm.cmd run build:vercel
+
+STDOUT
+
+> sahwal-tower@0.1.0 build:vercel
+> node scripts/vercel-build.mjs
+
+[vercel-build] validate boot
+
+STDERR
+RUNTIME_CONFIG_BOOT_FAILED
+(node:28296) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+EXIT 1

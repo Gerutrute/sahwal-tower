@@ -1,0 +1,390 @@
+$ npx.cmd vitest run tests/battle.revival.test.ts tests/battle.product-effects.test.ts tests/ui.battle.test.tsx
+
+STDOUT
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [31m❯[39m tests/battle.revival.test.ts [2m([22m[2m8 tests[22m[2m | [22m[31m8 failed[39m[2m)[22m[90m 15[2mms[22m[39m
+[31m   [31m×[31m 1막 2단계 부활[2m > [22m보상을 보류하고 전투 자산과 판 위 병종을 보존한 채 종료 상태를 초기화한다[90m 7[2mms[22m[31m[39m
+[31m     → expected 'result' to be 'revival-special-move' // Object.is equality[39m
+[31m   [31m×[31m 1막 2단계 부활[2m > [22m1단계 플레이어 패배는 부활을 발동하지 않고 즉시 런을 끝낸다[90m 3[2mms[22m[31m[39m
+[31m     → expected { act: 1, …(19) } to match object { phase: 'result', …(3) }
+(25 matching properties omitted from actual)[39m
+[31m   [31m×[31m 1막 2단계 부활[2m > [22m전용 착수는 손패를 쓰거나 보충 드로우하지 않고 주입된 병종·우선순위·게이지를 쓴다[90m 1[2mms[22m[31m[39m
+[31m     → expected 'result' to be 'turn-start' // Object.is equality[39m
+[31m   [31m×[31m 1막 2단계 부활[2m > [22m전용 착수는 자충수와 단순패를 후보에서 제외한다[90m 1[2mms[22m[31m[39m
+[31m     → expected undefined to be type of 'number'[39m
+[31m   [31m×[31m 1막 2단계 부활[2m > [22m우선순위 1~8을 허용하고 가장 앞선 전용 정의를 먼저 실행한다[90m 1[2mms[22m[31m[39m
+[31m     → expected { type: 'result', actor: 'B', …(1) } to match object { Object (sourceId, priority, ...) }
+(3 matching properties omitted from actual)[39m
+[31m   [31m×[31m 1막 2단계 부활[2m > [22m후보가 없으면 자동 패스를 기록하고 플레이어 턴으로 넘긴다[90m 0[2mms[22m[31m[39m
+[31m     → expected 'result' to be 'turn-start' // Object.is equality[39m
+[31m   [31m×[31m 1막 2단계 부활[2m > [22m2단계 패배는 즉시 런 종료, 승리는 스테이지 최종 승리다[90m 1[2mms[22m[31m[39m
+[31m     → expected { act: 1, …(19) } to match object { phase: 'result', …(2) }
+(26 matching properties omitted from actual)[39m
+[31m   [31m×[31m 1막 2단계 부활[2m > [22m주입된 특성 가중치·전용 착수 가중치·동률 규칙이 행동을 바꾼다[90m 1[2mms[22m[31m[39m
+[31m     → expected undefined to be 4 // Object.is equality[39m
+ [31m❯[39m tests/battle.product-effects.test.ts [2m([22m[2m6 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[90m 14[2mms[22m[39m
+[31m   [31m×[31m 제품 전투 특수 돌 배선[2m > [22m척후석 확인 순서를 확정하면 실제 drawPile 순서가 결정적으로 바뀐다[90m 6[2mms[22m[31m[39m
+[31m     → Cannot read properties of undefined (reading 'cards')[39m
+[31m   [31m×[31m 제품 전투 특수 돌 배선[2m > [22m장군석 포획은 주입된 대국 상한 상태를 갱신하며 실제 런에 5냥을 지급한다[90m 3[2mms[22m[31m[39m
+[31m     → expected 30 to be 35 // Object.is equality[39m
+[31m   [31m×[31m 제품 전투 특수 돌 배선[2m > [22m기병석 드로우와 수호석 구조는 실제 덱 위 카드를 확인 대상으로 만든다[90m 2[2mms[22m[31m[39m
+[31m     → expected undefined to match object { sourceKind: 'cavalry', …(1) }[39m
+[31m   [31m×[31m 제품 전투 특수 돌 배선[2m > [22m상대 희생석 포획은 상대의 실제 다음 턴 패 한도와 손패를 늘린다[90m 1[2mms[22m[31m[39m
+[31m     → expected 4 to be 5 // Object.is equality[39m
+[31m   [31m×[31m 제품 pre-move 자원 상태[2m > [22m명시적 사용·건너뛰기 전까지 멈추고 부적 소비와 유물 사용 상태를 분리한다[90m 1[2mms[22m[31m[39m
+[31m     → expected { act: 1, …(19) } to match object { phase: 'pre-move' }
+(26 matching properties omitted from actual)[39m
+ [31m❯[39m tests/ui.battle.test.tsx [2m([22m[2m6 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[90m 84[2mms[22m[39m
+[31m   [31m×[31m tryPlay/resolveMove dry-run 뒤 재확인하면 카드 소비와 AI 선택을 수행한다[90m 13[2mms[22m[31m[39m
+[31m     → 착수로 진행 버튼: expected undefined to be truthy[39m
+[31m   [31m×[31m pre-move에서 부적과 유물을 구분해 표시하고 실제 사용·건너뛰기 동작을 제공한다[90m 10[2mms[22m[31m[39m
+[31m     → expected '전투 음악음악 끄기일반 대국길 위의 기객냥 30敵RUN-NORMAL…' to contain '유물 1'[39m
+[31m   [31m×[31m 척후석 착수 후 실제 덱 위 카드로 재정렬 패널을 열고 취소·확정한다[90m 16[2mms[22m[31m[39m
+[31m     → the given combination of arguments (undefined and string) is invalid for this assertion. You can use an array, a map, an object, a set, a string, or a weakset instead of a string[39m
+
+[2m Test Files [22m [1m[31m3 failed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[31m16 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (20)[39m
+[2m   Start at [22m 22:02:49
+[2m   Duration [22m 846ms[2m (transform 271ms, setup 52ms, collect 367ms, tests 113ms, environment 355ms, prepare 266ms)[22m
+
+
+STDERR
+[90mstderr[2m | tests/ui.battle.test.tsx[2m > [22m[2m실제 10장 덱에서 손패 4장을 보여주고 병종명을 정확히 표시한다
+[22m[39mWarning: An update to GameShell inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GameShell (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:999:61)
+    at GameProvider (D:\개인 pjt\codex 게임 해커톤\src\game\GameProvider.tsx:402:3)
+    at App (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1108:16)
+
+[90mstderr[2m | tests/ui.battle.test.tsx[2m > [22m[2m기권은 run 패배 결과 경로로 이어진다
+[22m[39mWarning: An update to GameShell inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GameShell (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:999:61)
+    at GameProvider (D:\개인 pjt\codex 게임 해커톤\src\game\GameProvider.tsx:402:3)
+    at App (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1108:16)
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 16 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/battle.product-effects.test.ts[2m > [22m제품 전투 특수 돌 배선[2m > [22m척후석 확인 순서를 확정하면 실제 drawPile 순서가 결정적으로 바뀐다
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading 'cards')[39m
+[36m [2m❯[22m tests/battle.product-effects.test.ts:[2m64:23[22m[39m
+    [90m 62| [39m    [35mconst[39m inspection [33m=[39m placed[33m.[39mpendingInspection[33m![39m[33m;[39m
+    [90m 63| [39m
+    [90m 64| [39m    [34mexpect[39m(inspection[33m.[39mcards[33m.[39m[34mmap[39m(({ id }) [33m=>[39m id))[33m.[39m[34mtoEqual[39m(
+    [90m   | [39m                      [31m^[39m
+    [90m 65| [39m      placed[33m.[39mbattle[33m![39m[33m.[39mdecks[33m.[39m[33mB[39m[33m.[39mdrawPile[33m.[39m[34mslice[39m([34m0[39m[33m,[39m [34m2[39m)[33m.[39m[34mmap[39m(({ id }) [33m=>[39m id)[33m,[39m
+    [90m 66| [39m    )[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/16]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/battle.product-effects.test.ts[2m > [22m제품 전투 특수 돌 배선[2m > [22m장군석 포획은 주입된 대국 상한 상태를 갱신하며 실제 런에 5냥을 지급한다
+[31m[1mAssertionError[22m: expected 30 to be 35 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 35[39m
+[31m+ 30[39m
+
+[36m [2m❯[22m tests/battle.product-effects.test.ts:[2m79:31[22m[39m
+    [90m 77| [39m    [35mconst[39m next [33m=[39m [34mcommit[39m(initial[33m,[39m [34m0[39m)[33m;[39m
+    [90m 78| [39m
+    [90m 79| [39m    [34mexpect[39m(next[33m.[39mrun[33m.[39mcurrency)[33m.[39m[34mtoBe[39m(initial[33m.[39mrun[33m.[39mcurrency [33m+[39m [34m5[39m)[33m;[39m
+    [90m   | [39m                              [31m^[39m
+    [90m 80| [39m    [34mexpect[39m(next[33m.[39mgeneralMoneyAwarded)[33m.[39m[34mtoBe[39m([34m5[39m)[33m;[39m
+    [90m 81| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/16]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/battle.product-effects.test.ts[2m > [22m제품 전투 특수 돌 배선[2m > [22m기병석 드로우와 수호석 구조는 실제 덱 위 카드를 확인 대상으로 만든다
+[31m[1mAssertionError[22m: expected undefined to match object { sourceKind: 'cavalry', …(1) }[39m
+
+[32m- Expected:[39m 
+Object {
+  "reorderable": false,
+  "sourceKind": "cavalry",
+}
+
+[31m+ Received:[39m 
+undefined
+
+[36m [2m❯[22m tests/battle.product-effects.test.ts:[2m89:39[22m[39m
+    [90m 87| [39m      [[32m'STONE-004'[39m[33m,[39m [32m'STONE-003'[39m[33m,[39m [32m'STONE-005'[39m][33m,[39m
+    [90m 88| [39m    )[33m,[39m [34m0[39m)[33m;[39m
+    [90m 89| [39m    [34mexpect[39m(cavalry[33m.[39mpendingInspection)[33m.[39m[34mtoMatchObject[39m({ sourceKind[33m:[39m [32m'cav[39m…
+    [90m   | [39m                                      [31m^[39m
+    [90m 90| [39m    [34mexpect[39m(cavalry[33m.[39mpendingInspection[33m?.[39mcards[33m.[39m[34mmap[39m(({ id }) [33m=>[39m id))[33m.[39m[34mtoEqu[39m…
+    [90m 91| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/16]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/battle.product-effects.test.ts[2m > [22m제품 전투 특수 돌 배선[2m > [22m상대 희생석 포획은 상대의 실제 다음 턴 패 한도와 손패를 늘린다
+[31m[1mAssertionError[22m: expected 4 to be 5 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 5[39m
+[31m+ 4[39m
+
+[36m [2m❯[22m tests/battle.product-effects.test.ts:[2m106:44[22m[39m
+    [90m104| [39m    [35mconst[39m next [33m=[39m [34mcommit[39m(initial[33m,[39m [34m0[39m)[33m;[39m
+    [90m105| [39m
+    [90m106| [39m    [34mexpect[39m(next[33m.[39mbattle[33m![39m[33m.[39mdecks[33m.[39m[33mW[39m[33m.[39mhandLimit)[33m.[39m[34mtoBe[39m(before[33m.[39mhandLimit [33m+[39m [34m1[39m)[33m;[39m
+    [90m   | [39m                                           [31m^[39m
+    [90m107| [39m    [34mexpect[39m(next[33m.[39mbattle[33m![39m[33m.[39mdecks[33m.[39m[33mW[39m[33m.[39mhand)[33m.[39m[34mtoHaveLength[39m(before[33m.[39mhand[33m.[39mlength …
+    [90m108| [39m    [34mexpect[39m(next[33m.[39mbattle[33m![39m[33m.[39mdecks[33m.[39m[33mW[39m[33m.[39mhandLimitModifiers)[33m.[39m[34mtoContainEqual[39m({
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/16]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/battle.product-effects.test.ts[2m > [22m제품 pre-move 자원 상태[2m > [22m명시적 사용·건너뛰기 전까지 멈추고 부적 소비와 유물 사용 상태를 분리한다
+[31m[1mAssertionError[22m: expected { act: 1, …(19) } to match object { phase: 'pre-move' }
+(26 matching properties omitted from actual)[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  Object {[22m
+[32m-   "phase": "pre-move",[39m
+[31m+   "phase": "choose-card",[39m
+[2m  }[22m
+
+[36m [2m❯[22m tests/battle.product-effects.test.ts:[2m140:26[22m[39m
+    [90m138| [39m    state [33m=[39m [34mgameReducer[39m(state[33m,[39m { type[33m:[39m [32m'OPEN_BATTLE'[39m[33m,[39m battle[33m:[39m [32m'normal'[39m…
+    [90m139| [39m
+    [90m140| [39m    [34mexpect[39m(state[33m.[39mbattle)[33m.[39m[34mtoMatchObject[39m({ phase[33m:[39m [32m'pre-move'[39m })[33m;[39m
+    [90m   | [39m                         [31m^[39m
+    [90m141| [39m    [34mexpect[39m(state[33m.[39mbattle[33m![39m[33m.[39mcharms[33m.[39m[33mB[39m)[33m.[39m[34mtoEqual[39m([[32m'ITEM-001'[39m])[33m;[39m
+    [90m142| [39m    state [33m=[39m [34mgameReducer[39m(state[33m,[39m { type[33m:[39m [32m'USE_RELIC'[39m[33m,[39m relicId[33m:[39m [32m'RELIC-00[39m…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/16]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/battle.revival.test.ts[2m > [22m1막 2단계 부활[2m > [22m보상을 보류하고 전투 자산과 판 위 병종을 보존한 채 종료 상태를 초기화한다
+[31m[1mAssertionError[22m: expected 'result' to be 'revival-special-move' // Object.is equality[39m
+
+Expected: [32m"re[7mvival-special-move[27m"[39m
+Received: [31m"re[7msult[27m"[39m
+
+[36m [2m❯[22m tests/battle.revival.test.ts:[2m104:24[22m[39m
+    [90m102| [39m    [35mconst[39m next [33m=[39m [34mresolveBattleOutcome[39m(marked[33m,[39m [32m'B'[39m[33m,[39m [34mcreateSeededRng[39m([32m'fi[39m…
+    [90m103| [39m
+    [90m104| [39m    [34mexpect[39m(next[33m.[39mphase)[33m.[39m[34mtoBe[39m([32m'revival-special-move'[39m)[33m;[39m
+    [90m   | [39m                       [31m^[39m
+    [90m105| [39m    [34mexpect[39m(next[33m.[39mrewardStatus)[33m.[39m[34mtoBe[39m([32m'withheld'[39m)[33m;[39m
+    [90m106| [39m    [34mexpect[39m(next[33m.[39mboard)[33m.[39m[34mtoBe[39m(marked[33m.[39mboard)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/16]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/battle.revival.test.ts[2m > [22m1막 2단계 부활[2m > [22m1단계 플레이어 패배는 부활을 발동하지 않고 즉시 런을 끝낸다
+[31m[1mAssertionError[22m: expected { act: 1, …(19) } to match object { phase: 'result', …(3) }
+(25 matching properties omitted from actual)[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  Object {[22m
+[32m-   "outcome": "run-loss",[39m
+[32m-   "phase": "result",[39m
+[32m-   "revivalStage": 1,[39m
+[31m+   "outcome": null,[39m
+[31m+   "phase": "revival-special-move",[39m
+[31m+   "revivalStage": 2,[39m
+[2m    "rewardStatus": "withheld",[22m
+[2m  }[22m
+
+[36m [2m❯[22m tests/battle.revival.test.ts:[2m127:18[22m[39m
+    [90m125| [39m    [35mconst[39m next [33m=[39m [34mresolveBattleOutcome[39m([34mcreate[39m()[33m,[39m [32m'W'[39m[33m,[39m [34mcreateSeededRng[39m([32m'[39m…
+    [90m126| [39m
+    [90m127| [39m    [34mexpect[39m(next)[33m.[39m[34mtoMatchObject[39m({
+    [90m   | [39m                 [31m^[39m
+    [90m128| [39m      phase[33m:[39m [32m'result'[39m[33m,[39m
+    [90m129| [39m      outcome[33m:[39m [32m'run-loss'[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/16]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/battle.revival.test.ts[2m > [22m1막 2단계 부활[2m > [22m전용 착수는 손패를 쓰거나 보충 드로우하지 않고 주입된 병종·우선순위·게이지를 쓴다
+[31m[1mAssertionError[22m: expected 'result' to be 'turn-start' // Object.is equality[39m
+
+Expected: [32m"[7mturn-star[27mt"[39m
+Received: [31m"[7mresul[27mt"[39m
+
+[36m [2m❯[22m tests/battle.revival.test.ts:[2m144:24[22m[39m
+    [90m142| [39m
+    [90m143| [39m    [34mexpect[39m(next[33m.[39mturn)[33m.[39m[34mtoBe[39m([32m'B'[39m)[33m;[39m
+    [90m144| [39m    [34mexpect[39m(next[33m.[39mphase)[33m.[39m[34mtoBe[39m([32m'turn-start'[39m)[33m;[39m
+    [90m   | [39m                       [31m^[39m
+    [90m145| [39m    [34mexpect[39m(next[33m.[39mdecks[33m.[39m[33mB[39m)[33m.[39m[34mtoEqual[39m(beforePlayerDeck)[33m;[39m
+    [90m146| [39m    [34mexpect[39m(next[33m.[39mdecks[33m.[39m[33mW[39m)[33m.[39m[34mtoEqual[39m(beforeEnemyDeck)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/16]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/battle.revival.test.ts[2m > [22m1막 2단계 부활[2m > [22m전용 착수는 자충수와 단순패를 후보에서 제외한다
+[31m[1mAssertionError[22m: expected undefined to be type of 'number'[39m
+
+Expected: [32m"number"[39m
+Received: [31m"undefined"[39m
+
+[36m [2m❯[22m tests/battle.revival.test.ts:[2m182:20[22m[39m
+    [90m180| [39m    [34mexpect[39m(chosen)[33m.[39mnot[33m.[39m[34mtoBe[39m([34m48[39m)[33m;[39m
+    [90m181| [39m    [34mexpect[39m(chosen)[33m.[39mnot[33m.[39m[34mtoBe[39m([34m8[39m)[33m;[39m
+    [90m182| [39m    [34mexpect[39m(chosen)[33m.[39m[34mtoBeTypeOf[39m([32m'number'[39m)[33m;[39m
+    [90m   | [39m                   [31m^[39m
+    [90m183| [39m  })[33m;[39m
+    [90m184| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/16]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/battle.revival.test.ts[2m > [22m1막 2단계 부활[2m > [22m우선순위 1~8을 허용하고 가장 앞선 전용 정의를 먼저 실행한다
+[31m[1mAssertionError[22m: expected { type: 'result', actor: 'B', …(1) } to match object { Object (sourceId, priority, ...) }
+(3 matching properties omitted from actual)[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  Object {[22m
+[32m-   "point": 9,[39m
+[32m-   "priority": 1,[39m
+[32m-   "sourceId": "EARLY",[39m
+[31m+   "actor": "B",[39m
+[31m+   "message": "스테이지 최종 승리",[39m
+[31m+   "type": "result",[39m
+[2m  }[22m
+
+[36m [2m❯[22m tests/battle.revival.test.ts:[2m205:29[22m[39m
+    [90m203| [39m    }[33m;[39m
+    [90m204| [39m    [35mconst[39m next [33m=[39m [34mperformRevivalSpecialMove[39m([34mrevive[39m([34mcreate[39m(enemy))[33m,[39m [34mcrea[39m…
+    [90m205| [39m    [34mexpect[39m(next[33m.[39mlog[33m.[39m[34mat[39m([33m-[39m[34m1[39m))[33m.[39m[34mtoMatchObject[39m({ sourceId[33m:[39m [32m'EARLY'[39m[33m,[39m priorit…
+    [90m   | [39m                            [31m^[39m
+    [90m206| [39m    [34mexpect[39m(next[33m.[39mboard[33m.[39mpoints[[34m9[39m][33m?.[39mkind)[33m.[39m[34mtoBe[39m([32m'STONE-002'[39m)[33m;[39m
+    [90m207| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/16]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/battle.revival.test.ts[2m > [22m1막 2단계 부활[2m > [22m후보가 없으면 자동 패스를 기록하고 플레이어 턴으로 넘긴다
+[31m[1mAssertionError[22m: expected 'result' to be 'turn-start' // Object.is equality[39m
+
+Expected: [32m"[7mturn-star[27mt"[39m
+Received: [31m"[7mresul[27mt"[39m
+
+[36m [2m❯[22m tests/battle.revival.test.ts:[2m221:24[22m[39m
+    [90m219| [39m    [34mexpect[39m(next[33m.[39mboard)[33m.[39m[34mtoBe[39m(state[33m.[39mboard)[33m;[39m
+    [90m220| [39m    [34mexpect[39m(next[33m.[39mturn)[33m.[39m[34mtoBe[39m([32m'B'[39m)[33m;[39m
+    [90m221| [39m    [34mexpect[39m(next[33m.[39mphase)[33m.[39m[34mtoBe[39m([32m'turn-start'[39m)[33m;[39m
+    [90m   | [39m                       [31m^[39m
+    [90m222| [39m    [34mexpect[39m(next[33m.[39mconsecutivePasses)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m223| [39m    [34mexpect[39m(next[33m.[39mlog[33m.[39m[34mat[39m([33m-[39m[34m1[39m))[33m.[39m[34mtoMatchObject[39m({ type[33m:[39m [32m'pass'[39m[33m,[39m actor[33m:[39m [32m'W'[39m[33m,[39m …
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/16]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/battle.revival.test.ts[2m > [22m1막 2단계 부활[2m > [22m2단계 패배는 즉시 런 종료, 승리는 스테이지 최종 승리다
+[31m[1mAssertionError[22m: expected { act: 1, …(19) } to match object { phase: 'result', …(2) }
+(26 matching properties omitted from actual)[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  Object {[22m
+[32m-   "outcome": "run-loss",[39m
+[32m-   "phase": "result",[39m
+[31m+   "outcome": null,[39m
+[31m+   "phase": "revival-special-move",[39m
+[2m    "rewardStatus": "withheld",[22m
+[2m  }[22m
+
+[36m [2m❯[22m tests/battle.revival.test.ts:[2m231:18[22m[39m
+    [90m229| [39m    [35mconst[39m won [33m=[39m [34mresolveBattleOutcome[39m(stageTwo[33m,[39m [32m'B'[39m[33m,[39m [34mcreateSeededRng[39m([32m'w[39m…
+    [90m230| [39m
+    [90m231| [39m    [34mexpect[39m(lost)[33m.[39m[34mtoMatchObject[39m({ phase[33m:[39m [32m'result'[39m[33m,[39m outcome[33m:[39m [32m'run-loss'[39m[33m,[39m…
+    [90m   | [39m                 [31m^[39m
+    [90m232| [39m    [34mexpect[39m(won)[33m.[39m[34mtoMatchObject[39m({ phase[33m:[39m [32m'result'[39m[33m,[39m outcome[33m:[39m [32m'stage-win'[39m[33m,[39m…
+    [90m233| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/16]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/battle.revival.test.ts[2m > [22m1막 2단계 부활[2m > [22m주입된 특성 가중치·전용 착수 가중치·동률 규칙이 행동을 바꾼다
+[31m[1mAssertionError[22m: expected undefined to be 4 // Object.is equality[39m
+
+[32m- Expected:[39m 
+4
+
+[31m+ Received:[39m 
+undefined
+
+[36m [2m❯[22m tests/battle.revival.test.ts:[2m245:41[22m[39m
+    [90m243| [39m    [35mconst[39m tieB [33m=[39m [34mperformRevivalSpecialMove[39m([34mrevive[39m([34mcreate[39m(seeded))[33m,[39m [34mcre[39m…
+    [90m244| [39m
+    [90m245| [39m    [34mexpect[39m(traitMove[33m.[39mlog[33m.[39m[34mat[39m([33m-[39m[34m1[39m)[33m?.[39mpoint)[33m.[39m[34mtoBe[39m([34m4[39m)[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m246| [39m    [34mexpect[39m(specialMove[33m.[39mlog[33m.[39m[34mat[39m([33m-[39m[34m1[39m)[33m?.[39mpoint)[33m.[39m[34mtoBe[39m([34m5[39m)[33m;[39m
+    [90m247| [39m    [34mexpect[39m(tieA[33m.[39mlog[33m.[39m[34mat[39m([33m-[39m[34m1[39m)[33m?.[39mpoint)[33m.[39m[34mtoBe[39m(tieB[33m.[39mlog[33m.[39m[34mat[39m([33m-[39m[34m1[39m)[33m?.[39mpoint)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/16]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/ui.battle.test.tsx[2m > [22mtryPlay/resolveMove dry-run 뒤 재확인하면 카드 소비와 AI 선택을 수행한다
+[31m[1mAssertionError[22m: 착수로 진행 버튼: expected undefined to be truthy[39m
+
+[32m- Expected:[39m 
+true
+
+[31m+ Received:[39m 
+undefined
+
+[36m [2m❯[22m click tests/ui.battle.test.tsx:[2m25:32[22m[39m
+    [90m 23| [39m  [35mconst[39m button [33m=[39m [[33m...[39m(host[33m?.[39m[34mquerySelectorAll[39m([32m'button'[39m) [33m??[39m [])]
+    [90m 24| [39m    [33m.[39m[34mfind[39m((candidate) [33m=>[39m candidate[33m.[39mtextContent[33m?.[39m[34mincludes[39m(text))[33m;[39m
+    [90m 25| [39m  [34mexpect[39m(button[33m,[39m [32m`[39m[36m${[39mtext[36m}[39m[32m 버튼`[39m)[33m.[39m[34mtoBeTruthy[39m()[33m;[39m
+    [90m   | [39m                               [31m^[39m
+    [90m 26| [39m  [34mact[39m(() [33m=>[39m button[33m?.[39m[34mclick[39m())[33m;[39m
+    [90m 27| [39m}
+[90m [2m❯[22m tests/ui.battle.test.tsx:[2m73:3[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/16]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/ui.battle.test.tsx[2m > [22mpre-move에서 부적과 유물을 구분해 표시하고 실제 사용·건너뛰기 동작을 제공한다
+[31m[1mAssertionError[22m: expected '전투 음악음악 끄기일반 대국길 위의 기객냥 30敵RUN-NORMAL…' to contain '유물 1'[39m
+
+Expected: [32m"유물 1"[39m
+Received: [31m"전투 음악음악 끄기일반 대국길 위의 기객냥 30敵RUN-NORMAL영역 기풍 · AI가 합법 후보를 평가해 카드와 좌표를 고릅니다.내 덱 10뽑기 6버림 0부적 1연속 패스 0포획 0덱 구성 10장일반석 · 일반석 · 일반석 · 일반석 · 일반석 · 일반석 · 척후석 · 수호석 · 희생석 · 장군석카드를 고르고 교차점을 누르세요.1일반석기본 착수1일반석기본 착수1일반석기본 착수6희생석captured-by-opponent-placementRELIC-001 사용효과 기록패스기권지도로 물러나기"[39m
+
+[36m [2m❯[22m tests/ui.battle.test.tsx:[2m100:28[22m[39m
+    [90m 98| [39m  [34mclick[39m([32m'일반전'[39m)[33m;[39m
+    [90m 99| [39m  [34mexpect[39m(host[33m.[39mtextContent)[33m.[39m[34mtoContain[39m([32m'부적 1'[39m)[33m;[39m
+    [90m100| [39m  [34mexpect[39m(host[33m.[39mtextContent)[33m.[39m[34mtoContain[39m([32m'유물 1'[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m101| [39m  [34mexpect[39m(host[33m.[39m[34mquerySelector[39m([32m'[aria-label="부적"]'[39m)[33m?.[39mtextContent)[33m.[39m[34mtoCon[39m…
+    [90m102| [39m  [34mexpect[39m(host[33m.[39m[34mquerySelector[39m([32m'[aria-label="유물"]'[39m)[33m?.[39mtextContent)[33m.[39m[34mtoCon[39m…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/16]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/ui.battle.test.tsx[2m > [22m척후석 착수 후 실제 덱 위 카드로 재정렬 패널을 열고 취소·확정한다
+[31m[1mAssertionError[22m: the given combination of arguments (undefined and string) is invalid for this assertion. You can use an array, a map, an object, a set, a string, or a weakset instead of a string[39m
+[36m [2m❯[22m tests/ui.battle.test.tsx:[2m126:30[22m[39m
+    [90m124| [39m  [34mmountScout[39m()[33m;[39m
+    [90m125| [39m  [35mconst[39m panel [33m=[39m host[33m.[39m[34mquerySelector[39m([32m'[aria-label="덱 확인 및 재정렬"]'[39m)[33m;[39m
+    [90m126| [39m  [34mexpect[39m(panel[33m?.[39mtextContent)[33m.[39m[34mtoContain[39m([32m'장군석'[39m)[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m127| [39m  [34mexpect[39m(panel[33m?.[39mtextContent)[33m.[39m[34mtoContain[39m([32m'수호석'[39m)[33m;[39m
+    [90m128| [39m  [34mclick[39m([32m'취소'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/16]⎯[22m[39m
+
+
+EXIT 1

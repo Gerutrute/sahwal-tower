@@ -1,0 +1,20 @@
+$ npm.cmd run check:mobile
+
+STDOUT
+
+> sahwal-tower@0.1.0 check:mobile
+> node scripts/playwright-mobile-check.mjs
+
+
+STDERR
+file:///D:/%EA%B0%9C%EC%9D%B8%20pjt/codex%20%EA%B2%8C%EC%9E%84%20%ED%95%B4%EC%BB%A4%ED%86%A4/scripts/playwright-mobile-check.mjs:181
+      if (overlap) throw new Error(`${label} 지도 노드 겹침: ${a.id}, ${b.id}`);
+                         ^
+
+Error: 막 시작 지도 노드 겹침: act-1-column-0-lane-0, act-1-column-1-lane-0
+    at assertMapLayout (file:///D:/%EA%B0%9C%EC%9D%B8%20pjt/codex%20%EA%B2%8C%EC%9E%84%20%ED%95%B4%EC%BB%A4%ED%86%A4/scripts/playwright-mobile-check.mjs:181:26)
+    at async file:///D:/%EA%B0%9C%EC%9D%B8%20pjt/codex%20%EA%B2%8C%EC%9E%84%20%ED%95%B4%EC%BB%A4%ED%86%A4/scripts/playwright-mobile-check.mjs:260:22
+
+Node.js v24.12.0
+
+EXIT 1

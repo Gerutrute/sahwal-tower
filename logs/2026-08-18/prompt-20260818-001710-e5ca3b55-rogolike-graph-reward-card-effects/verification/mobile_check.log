@@ -1,0 +1,172 @@
+$ npm.cmd run check:mobile
+
+STDOUT
+
+> sahwal-tower@0.1.0 check:mobile
+> node scripts/playwright-mobile-check.mjs
+
+{
+  "checkedAt": "2026-08-17T16:57:13.091Z",
+  "baseURL": "http://127.0.0.1:4173/",
+  "viewport": {
+    "width": 380,
+    "height": 844
+  },
+  "initial": {
+    "title": "RoGolike",
+    "text": "여정 음악\n음악 끄기\n\n돌 한 장, 수 한 번, 달라지는 길\n\n碁\nRoGolike\n\n바둑판 위에서 열 장의 덱을 순환시키며 두 막을 건너는 로그라이크 대국\n\n등반 시작\n\n게임 수치는 실행 시 주입된 설정을 사용합니다.",
+    "innerWidth": 380,
+    "innerHeight": 844,
+    "scrollWidth": 380,
+    "audio": {
+      "contexts": 0,
+      "plays": 0,
+      "starts": 0
+    }
+  },
+  "postGestureAudio": {
+    "contexts": 1,
+    "plays": 1,
+    "starts": 0
+  },
+  "battleMetrics": {
+    "viewport": 380,
+    "html": 380,
+    "body": 380
+  },
+  "boardWidths": {
+    "board7": {
+      "380": {
+        "viewport": 380,
+        "html": 380,
+        "body": 380
+      },
+      "430": {
+        "viewport": 430,
+        "html": 430,
+        "body": 430
+      }
+    },
+    "board9": {
+      "380": {
+        "viewport": 380,
+        "html": 380,
+        "body": 380
+      },
+      "430": {
+        "viewport": 430,
+        "html": 430,
+        "body": 430
+      }
+    }
+  },
+  "mapMetrics": {
+    "viewport": 380,
+    "html": 380,
+    "body": 380,
+    "nodes": [
+      {
+        "id": "act-1-column-0-lane-0",
+        "left": 29.484375,
+        "right": 150.515625,
+        "top": 704.78125,
+        "bottom": 772.78125
+      },
+      {
+        "id": "act-1-column-0-lane-1",
+        "left": 229.484375,
+        "right": 350.515625,
+        "top": 704.78125,
+        "bottom": 772.78125
+      },
+      {
+        "id": "act-1-column-1-lane-0",
+        "left": 29.484375,
+        "right": 150.515625,
+        "top": 608.78125,
+        "bottom": 676.78125
+      },
+      {
+        "id": "act-1-column-1-lane-1",
+        "left": 229.484375,
+        "right": 350.515625,
+        "top": 608.78125,
+        "bottom": 676.78125
+      },
+      {
+        "id": "act-1-column-2-lane-0",
+        "left": 29.484375,
+        "right": 150.515625,
+        "top": 512.78125,
+        "bottom": 580.78125
+      },
+      {
+        "id": "act-1-column-2-lane-1",
+        "left": 229.484375,
+        "right": 350.515625,
+        "top": 512.78125,
+        "bottom": 580.78125
+      },
+      {
+        "id": "act-1-column-3-lane-0",
+        "left": 29.484375,
+        "right": 150.515625,
+        "top": 416.78125,
+        "bottom": 484.78125
+      },
+      {
+        "id": "act-1-column-3-lane-1",
+        "left": 229.484375,
+        "right": 350.515625,
+        "top": 416.78125,
+        "bottom": 484.78125
+      },
+      {
+        "id": "act-1-column-4-lane-0",
+        "left": 29.484375,
+        "right": 150.515625,
+        "top": 320.78125,
+        "bottom": 388.78125
+      },
+      {
+        "id": "act-1-column-4-lane-1",
+        "left": 229.484375,
+        "right": 350.515625,
+        "top": 320.78125,
+        "bottom": 388.78125
+      },
+      {
+        "id": "act-1-boss",
+        "left": 129.484375,
+        "right": 250.515625,
+        "top": 224.78125,
+        "bottom": 292.78125
+      }
+    ]
+  },
+  "hitTargetCount": 81,
+  "decisiveMoveCount": 2,
+  "mapEdgeCount": 18,
+  "rewardTapFirstExpanded": true,
+  "aiEffectKinds": [
+    "STONE-001",
+    "STONE-002",
+    "STONE-003",
+    "STONE-004",
+    "STONE-005",
+    "STONE-006"
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "requestFailures": [],
+  "badResponses": [],
+  "screenshots": [
+    "mobile-title.png",
+    "mobile-boss.png"
+  ],
+  "passed": true
+}
+
+STDERR
+
+EXIT 0

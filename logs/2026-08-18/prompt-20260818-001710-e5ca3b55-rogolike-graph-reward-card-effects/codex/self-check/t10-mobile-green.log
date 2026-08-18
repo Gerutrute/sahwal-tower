@@ -1,0 +1,42 @@
+$ npm.cmd run check:mobile
+
+STDOUT
+
+> sahwal-tower@0.1.0 check:mobile
+> node scripts/playwright-mobile-check.mjs
+
+
+STDERR
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for locator('.reward-detail').first().getByRole('button', { name: '이 보상을 선택' })[22m
+[2m    - locator resolved to <button class="primary reward-select">이 보상을 선택</button>[22m
+[2m  - attempting click action[22m
+[2m    - waiting for element to be visible, enabled and stable[22m
+[2m    - element is not stable[22m
+[2m  - retrying click action[22m
+[2m    - waiting for element to be visible, enabled and stable[22m
+[2m  - element was detached from the DOM, retrying[22m
+
+    at finishOrdinaryBattle (D:\개인 pjt\codex 게임 해커톤\scripts\playwright-mobile-check.mjs:128:60)
+    at async file:///D:/%EA%B0%9C%EC%9D%B8%20pjt/codex%20%EA%B2%8C%EC%9E%84%20%ED%95%B4%EC%BB%A4%ED%86%A4/scripts/playwright-mobile-check.mjs:265:3 {
+  log: [
+    "  - waiting for locator('.reward-detail').first().getByRole('button', { name: '이 보상을 선택' })",
+    '    - locator resolved to <button class="primary reward-select">이 보상을 선택</button>',
+    '  - attempting click action',
+    '    - waiting for element to be visible, enabled and stable',
+    '    - element is not stable',
+    '  - retrying click action',
+    '    - waiting for element to be visible, enabled and stable',
+    '  - element was detached from the DOM, retrying'
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v24.12.0
+
+EXIT 1

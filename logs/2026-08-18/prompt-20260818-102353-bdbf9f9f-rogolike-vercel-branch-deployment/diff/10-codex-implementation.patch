@@ -1,0 +1,984 @@
+diff --git a/.gitignore b/.gitignore
+index af25936..d3d60ed 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -7,3 +7,5 @@ dist/
+ dist-debug-old/
+ .vite/
+ playwright-results/
++.vercel/
++runtime-config.js
+diff --git a/docs/04_prototype/04_Vercel_배포.md b/docs/04_prototype/04_Vercel_배포.md
+new file mode 100644
+index 0000000..cb3c532
+--- /dev/null
++++ b/docs/04_prototype/04_Vercel_배포.md
+@@ -0,0 +1,56 @@
++# Vercel 브랜치 배포 실행서
++
++이 실행서는 하나의 Vercel 프로젝트에서 `main`을 Production, `dev`를 Preview로 운영하기 위한 사람 수행 절차다. 실제 환경 변수 값과 승인 수치는 Vercel에만 두고 저장소, 이슈, 채팅, 증적 로그에는 복제하지 않는다.
++
++## 1. 프로젝트 Import
++
++1. vercel.com에 GitHub 계정으로 로그인한다.
++2. **Add New → Project**에서 `Gerutrute/sahwal-tower`를 Import한다.
++3. Import 화면은 기본 브랜치 `main`을 기준으로 표시된다. 현재 `main`에는 `vercel.json`이 없으므로 Vite 기본값인 `npm run build`와 `dist`가 보이는 것이 정상이다. H-3에서 Production 차단을 선택하지 않는 한 이 화면의 Build Command를 override하지 않는다.
++4. `dev` 커밋은 해당 커밋의 `vercel.json`에 선언된 `npm run build:vercel`, `dist`, `npm ci`를 배포 단위로 사용하며 이 설정은 대시보드의 프로젝트 기본값보다 우선한다.
++
++이번 설정은 한 프로젝트만 사용한다. `vercel.json`이 병합 전까지 `dev`에만 있으므로, `main` Production은 자체 Vite 기본값으로 구형 프로토타입을 빌드하고 `dev` Preview만 fail-closed 런타임 설정 빌드를 사용한다.
++
++## 2. 환경 변수 등록
++
++Project → Settings → Environment Variables에서 같은 이름의 `ROGOLIKE_GAME_CONFIG_JSON`을 두 번 등록한다.
++
++- Production만 선택: 사람이 승인한 Production GameConfig JSON. 현재 승인 수치가 미확정이므로 등록 전 Production 빌드가 fail closed로 실패하는 것이 정상이다.
++- Preview만 선택: 개발 플레이테스트 JSON. 로컬에서 아래 명령으로 미승인 draft를 생성해 복사하고, 필요하면 Vercel 입력 화면에서 seed만 바꾼다.
++
++```bash
++npx vite-node scripts/vercel-export-draft-config.ts
++```
++
++출력은 미승인 플레이테스트 draft다. 값은 Vercel에만 보관하고 파일, 커밋, 이슈, 채팅, 빌드 로그에 남기지 않는다. `NODE_ENV` 환경 변수는 추가하지 않는다. 이를 `production`으로 지정하면 Vite 같은 devDependencies가 설치되지 않아 빌드가 깨질 수 있다.
++
++## 3. 브랜치와 자동 배포
++
++1. Settings → Git에서 **Production Branch**가 `main`인지 확인한다.
++2. `dev` push는 Preview 배포를 만든다. 고정 브랜치 URL은 `sahwal-tower-git-dev-<scope>.vercel.app` 형식이며, 각 배포 URL은 Deployments 탭에서 확인한다.
++3. `vercel.json`의 `git.deploymentEnabled`는 `"**": false`, `main: true`, `dev: true` 화이트리스트다. Vercel은 미명시 브랜치를 기본 활성화하므로 `"**": false`가 반드시 필요하다.
++4. 이 규칙은 push된 커밋에 `vercel.json`이 있을 때 적용된다. 아직 이 파일이 없는 `main` 또는 그 지점에서 갈라진 브랜치에는 병합 전까지 적용되지 않는다.
++
++## 4. H-3: 현재 Production 상태 선택
++
++현재 `main`은 구형 프로토타입 커밋이다. 사람은 아래 중 하나를 선택한다.
++
++- 기본값 유지: Production 도메인에 현재 `main`의 구형 빌드가 배포된다.
++- Production 차단: Project Build Command를 `npm run build:vercel`로 override한다. 구형 `main`에는 이 스크립트가 없으므로 빌드가 실패해 Production을 사실상 비워 둔다. `dev` Preview는 커밋의 `vercel.json`이 우선하므로 영향받지 않는다.
++
++## 5. 배포 확인
++
++1. 환경 변수를 등록한 뒤 이전 실패 배포는 Deployments → Redeploy로 다시 실행한다.
++2. Preview URL을 380px 모바일 에뮬레이션 또는 실기기에서 연다.
++3. 타이틀 화면, `등반 시작`, 지도 진입, 가로 스크롤 부재를 확인한다.
++4. 화면에 `개발 플레이테스트 구성 · 승인된 제품 수치가 아닙니다` 배너가 계속 표시되는지 확인한다. 이 Preview 수치는 승인된 제품 수치가 아니다.
++
++로컬 재현은 `npm run check:vercel-preview`로 수행한다. 이 명령은 draft를 메모리에서 환경 변수로 전달해 Vercel 방식 빌드를 실행하고, 380×844 브라우저 검사를 마친 뒤 `dist`를 정리한다.
++
++## 6. 아직 사람에게 남은 작업
++
++- H-1: Vercel 로그인, GitHub Import, 프로젝트 생성
++- H-2: Production/Preview 범위를 분리한 환경 변수 등록
++- H-3: 구형 `main` 노출 허용 또는 Production 차단 선택
++- H-4: 실제 Preview URL을 380px 실기기에서 확인
++- H-5: 추후 `main` 병합 시점과 승인
+diff --git a/docs/CHANGELOG.md b/docs/CHANGELOG.md
+index 15d8e82..eb1967e 100644
+--- a/docs/CHANGELOG.md
++++ b/docs/CHANGELOG.md
+@@ -1,5 +1,15 @@
+ # 변경 이력
+ 
++## 0.3.1 — 2026-08-18
++
++### 배포 기반
++
++- `dev` Preview와 `main` Production을 한 Vercel 프로젝트에서 운영하는 브랜치 화이트리스트 추가
++- 환경 변수 GameConfig를 얕은 구조 검증과 실제 게임 부팅 검증에 통과시킨 뒤에만 `dist/runtime-config.js`를 만드는 fail-closed 빌드 추가
++- 일반 로컬 빌드에는 런타임 로더를 넣지 않고 Vercel 빌드 산출물에만 주입하도록 분리
++- Preview 플레이테스트 배너와 380×844 무주입 브라우저 검사, 무누출 보고서 및 정리 절차 추가
++- 대시보드 Import, 환경 변수 범위 분리, Production 선택지를 설명하는 실행서 추가
++
+ ## 0.3.0 — 2026-08-18
+ 
+ ### 확정
+diff --git a/evidence.config.json b/evidence.config.json
+index 4db753c..42ed876 100644
+--- a/evidence.config.json
++++ b/evidence.config.json
+@@ -7,8 +7,9 @@
+     "build": ["npm.cmd", "run", "build"],
+     "benchmark_ai": ["npm.cmd", "run", "benchmark:ai"],
+     "runtime_audit": ["npm.cmd", "audit", "--omit=dev", "--audit-level=high"],
+-    "mobile_check": ["npm.cmd", "run", "check:mobile"]
++    "mobile_check": ["npm.cmd", "run", "check:mobile"],
++    "vercel_preview_check": ["npm.cmd", "run", "check:vercel-preview"]
+   },
+-  "required": ["full_tests", "typecheck", "build", "benchmark_ai", "runtime_audit", "mobile_check"],
++  "required": ["full_tests", "typecheck", "build", "benchmark_ai", "runtime_audit", "mobile_check", "vercel_preview_check"],
+   "note": "RoGolike MVP의 정식 검증 명령. required receipt는 이름뿐 아니라 설정된 exact argv와 일치해야 한다."
+ }
+diff --git a/package.json b/package.json
+index cc6728c..33e45c1 100644
+--- a/package.json
++++ b/package.json
+@@ -6,13 +6,15 @@
+   "scripts": {
+     "dev": "vite --host 127.0.0.1",
+     "build": "node scripts/clean-dist.mjs && tsc --noEmit && vite build",
++    "build:vercel": "node scripts/vercel-build.mjs",
+     "preview": "vite preview --host 127.0.0.1",
+     "test": "vitest run",
+     "typecheck": "tsc --noEmit",
+     "balance": "vite-node scripts/balance.ts",
+     "benchmark:ai": "node scripts/benchmark-ai.mjs",
+     "simulate": "vite-node scripts/simulate.ts",
+-    "check:mobile": "node scripts/playwright-mobile-check.mjs"
++    "check:mobile": "node scripts/playwright-mobile-check.mjs",
++    "check:vercel-preview": "node scripts/vercel-preview-check.mjs"
+   },
+   "dependencies": {
+     "react": "18.3.1",
+diff --git a/scripts/playwright-mobile-check.mjs b/scripts/playwright-mobile-check.mjs
+index 901ff6b..5af52d8 100644
+--- a/scripts/playwright-mobile-check.mjs
++++ b/scripts/playwright-mobile-check.mjs
+@@ -2,6 +2,7 @@ import { chromium } from '@playwright/test';
+ import { existsSync } from 'node:fs';
+ import { mkdir, writeFile } from 'node:fs/promises';
+ import path from 'node:path';
++import { preview as startVitePreview } from 'vite';
+ 
+ const baseURL = process.env.BASE_URL ?? 'http://127.0.0.1:4173/';
+ const outputDir = path.resolve('playwright-results');
+@@ -184,13 +185,22 @@ async function assertMapLayout(page, label) {
+   return metrics;
+ }
+ 
+-const browser = await chromium.launch({ headless: true, ...browserOptions() });
++let previewServer;
++let browser;
+ const consoleErrors = [];
+ const pageErrors = [];
+ const requestFailures = [];
+ const badResponses = [];
+ 
+ try {
++  if (process.env.BASE_URL === undefined) {
++    previewServer = await startVitePreview({
++      root: process.cwd(),
++      logLevel: 'error',
++      preview: { host: '127.0.0.1', port: 4173, strictPort: true },
++    });
++  }
++  browser = await chromium.launch({ headless: true, ...browserOptions() });
+   const context = await browser.newContext({
+     viewport: { width: 380, height: 844 },
+     deviceScaleFactor: 2,
+@@ -368,5 +378,11 @@ try {
+   if (!report.passed) throw new Error(JSON.stringify(report, null, 2));
+   console.log(JSON.stringify(report, null, 2));
+ } finally {
+-  await browser.close();
++  if (browser !== undefined) await browser.close();
++  if (previewServer !== undefined) {
++    await new Promise((resolve, reject) => previewServer.httpServer.close((error) => {
++      if (error) reject(error);
++      else resolve();
++    }));
++  }
+ }
+diff --git a/scripts/vercel-build.mjs b/scripts/vercel-build.mjs
+new file mode 100644
+index 0000000..fd8196e
+--- /dev/null
++++ b/scripts/vercel-build.mjs
+@@ -0,0 +1,92 @@
++import { existsSync } from 'node:fs';
++import { readFile, writeFile } from 'node:fs/promises';
++import { basename, dirname, resolve } from 'node:path';
++import { fileURLToPath } from 'node:url';
++import { spawnSync } from 'node:child_process';
++import {
++  injectRuntimeConfigScript,
++  renderRuntimeConfigJs,
++  RUNTIME_CONFIG_SCRIPT_TAG,
++  validateGameConfigText,
++} from './vercel-runtime-config.mjs';
++
++const root = fileURLToPath(new URL('../', import.meta.url));
++const dist = resolve(root, 'dist');
++const indexPath = resolve(dist, 'index.html');
++const runtimeConfigPath = resolve(dist, 'runtime-config.js');
++
++function assertDistPath(filePath) {
++  if (dirname(filePath) !== dist || dirname(dist) !== resolve(root) || basename(dist) !== 'dist') {
++    throw new Error('RUNTIME_CONFIG_OUTPUT_PATH_INVALID');
++  }
++}
++
++function reportFailure(result) {
++  const suffix = result.fields?.length ? ` ${result.fields.join(',')}` : '';
++  console.error(`${result.code}${suffix}`);
++}
++
++function run(command, args, options = {}) {
++  const result = spawnSync(command, args, {
++    cwd: root,
++    stdio: 'inherit',
++    shell: process.platform === 'win32',
++    ...options,
++  });
++  if (result.error) {
++    console.error('RUNTIME_CONFIG_BUILD_COMMAND_FAILED');
++    return false;
++  }
++  return result.status === 0;
++}
++
++async function main() {
++  const sourceText = process.env.ROGOLIKE_GAME_CONFIG_JSON;
++  const validation = validateGameConfigText(sourceText);
++  if (!validation.ok) {
++    reportFailure(validation);
++    return false;
++  }
++
++  console.log('[vercel-build] validate boot');
++  const npxCommand = process.platform === 'win32' ? 'npx.cmd' : 'npx';
++  if (!run(npxCommand, ['vite-node', 'scripts/vercel-validate-boot.ts'], { env: process.env })) {
++    return false;
++  }
++
++  console.log('[vercel-build] local build');
++  const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
++  if (!run(npmCommand, ['run', 'build'])) {
++    return false;
++  }
++
++  try {
++    assertDistPath(indexPath);
++    assertDistPath(runtimeConfigPath);
++    if (!existsSync(indexPath)) throw new Error('RUNTIME_CONFIG_INDEX_MISSING');
++
++    const target = process.env.VERCEL_ENV === 'production' ? 'production' : 'preview';
++    const runtimeJs = renderRuntimeConfigJs(validation.config, target);
++    const html = await readFile(indexPath, 'utf8');
++    const injectedHtml = injectRuntimeConfigScript(html);
++    const tagCount = injectedHtml.split(RUNTIME_CONFIG_SCRIPT_TAG).length - 1;
++    const tagIndex = injectedHtml.indexOf(RUNTIME_CONFIG_SCRIPT_TAG);
++    const firstModuleIndex = injectedHtml.indexOf('<script type="module"');
++    if (tagCount !== 1 || tagIndex === -1 || firstModuleIndex === -1 || tagIndex >= firstModuleIndex) {
++      throw new Error('RUNTIME_CONFIG_INJECTION_INVALID');
++    }
++
++    await writeFile(runtimeConfigPath, runtimeJs, 'utf8');
++    await writeFile(indexPath, injectedHtml, 'utf8');
++    if (!existsSync(runtimeConfigPath)) throw new Error('RUNTIME_CONFIG_OUTPUT_MISSING');
++
++    console.log(`[vercel-build] runtime config ${Buffer.byteLength(runtimeJs)} bytes`);
++    console.log('RUNTIME_CONFIG_OK');
++    return true;
++  } catch (error) {
++    console.error(error instanceof Error ? error.message : 'RUNTIME_CONFIG_BUILD_FAILED');
++    return false;
++  }
++}
++
++if (!await main()) process.exitCode = 1;
+diff --git a/scripts/vercel-export-draft-config.ts b/scripts/vercel-export-draft-config.ts
+new file mode 100644
+index 0000000..487ec62
+--- /dev/null
++++ b/scripts/vercel-export-draft-config.ts
+@@ -0,0 +1,4 @@
++import { DRAFT_GAME_CONFIG } from '../tests/fixtures/draft-game-config';
++
++// This is an unapproved playtest draft. The fixture module is the single source of truth.
++process.stdout.write(JSON.stringify(DRAFT_GAME_CONFIG));
+diff --git a/scripts/vercel-preview-check.mjs b/scripts/vercel-preview-check.mjs
+new file mode 100644
+index 0000000..877f441
+--- /dev/null
++++ b/scripts/vercel-preview-check.mjs
+@@ -0,0 +1,184 @@
++import { chromium } from '@playwright/test';
++import { randomUUID } from 'node:crypto';
++import { existsSync } from 'node:fs';
++import { mkdir, readFile, writeFile } from 'node:fs/promises';
++import { spawn, spawnSync } from 'node:child_process';
++import path from 'node:path';
++
++const root = process.cwd();
++const outputDir = path.resolve(root, 'playwright-results');
++const baseURL = 'http://127.0.0.1:4174/';
++const sentinel = process.env.VERCEL_CHECK_SENTINEL ?? randomUUID().replaceAll('-', '');
++const npxCommand = process.platform === 'win32' ? 'npx.cmd' : 'npx';
++const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
++
++function runCaptured(command, args, options = {}) {
++  return spawnSync(command, args, {
++    cwd: root,
++    encoding: 'utf8',
++    shell: process.platform === 'win32',
++    maxBuffer: 16 * 1024 * 1024,
++    ...options,
++  });
++}
++
++function browserOptions() {
++  const explicit = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE;
++  if (explicit) {
++    if (!existsSync(explicit)) throw new Error('PLAYWRIGHT_CHROMIUM_EXECUTABLE_NOT_FOUND');
++    return { executablePath: explicit };
++  }
++  const managed = chromium.executablePath();
++  if (existsSync(managed)) return { executablePath: managed };
++  const installed = [
++    'C:/Program Files/Google/Chrome/Application/chrome.exe',
++    'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
++  ].find(existsSync);
++  return installed ? { executablePath: installed } : {};
++}
++
++async function waitForPreview() {
++  const deadline = Date.now() + 30_000;
++  while (Date.now() < deadline) {
++    try {
++      const response = await fetch(baseURL);
++      if (response.ok) return;
++    } catch {
++      // The preview process may still be starting.
++    }
++    await new Promise((resolve) => setTimeout(resolve, 200));
++  }
++  throw new Error('VERCEL_PREVIEW_NOT_READY');
++}
++
++async function stopPreview(child) {
++  if (child === undefined || child.exitCode !== null || child.pid === undefined) return;
++  if (process.platform === 'win32') {
++    spawnSync('taskkill.exe', ['/PID', String(child.pid), '/T', '/F'], { stdio: 'ignore' });
++  } else {
++    child.kill('SIGTERM');
++  }
++}
++
++let previewProcess;
++let browser;
++
++try {
++  await mkdir(outputDir, { recursive: true });
++
++  const exported = runCaptured(npxCommand, ['vite-node', 'scripts/vercel-export-draft-config.ts']);
++  if (exported.status !== 0) throw new Error('VERCEL_DRAFT_EXPORT_FAILED');
++  const config = JSON.parse(exported.stdout);
++  config.seed = `vercel-check-${sentinel}`;
++  const configText = JSON.stringify(config);
++
++  const build = runCaptured(npmCommand, ['run', 'build:vercel'], {
++    env: {
++      ...process.env,
++      ROGOLIKE_GAME_CONFIG_JSON: configText,
++      VERCEL_ENV: 'preview',
++    },
++  });
++  const buildLog = `${build.stdout ?? ''}${build.stderr ?? ''}`;
++  await writeFile(path.join(outputDir, 'vercel-build.log'), buildLog, 'utf8');
++  if (buildLog.includes(sentinel)) throw new Error('VERCEL_BUILD_LOG_SECRET_LEAK');
++  if (build.status !== 0) throw new Error('VERCEL_BUILD_FAILED');
++
++  const runtimePath = path.resolve(root, 'dist', 'runtime-config.js');
++  const indexPath = path.resolve(root, 'dist', 'index.html');
++  if (!existsSync(runtimePath) || !existsSync(indexPath)) throw new Error('VERCEL_RUNTIME_ASSET_MISSING');
++  const runtimeJs = await readFile(runtimePath, 'utf8');
++  const indexHtml = await readFile(indexPath, 'utf8');
++  if (!runtimeJs.includes(sentinel)) throw new Error('VERCEL_RUNTIME_SENTINEL_MISSING');
++  const loaderTag = '<script src="./runtime-config.js"></script>';
++  const loaderIndex = indexHtml.indexOf(loaderTag);
++  const firstModuleIndex = indexHtml.indexOf('<script type="module"');
++  if (indexHtml.split(loaderTag).length - 1 !== 1
++    || !indexHtml.includes(`${loaderTag}</head>`)
++    || loaderIndex === -1
++    || firstModuleIndex === -1
++    || loaderIndex >= firstModuleIndex) {
++    throw new Error('VERCEL_RUNTIME_LOADER_COUNT_INVALID');
++  }
++
++  previewProcess = spawn(npxCommand, ['vite', 'preview', '--host', '127.0.0.1', '--port', '4174', '--strictPort'], {
++    cwd: root,
++    env: process.env,
++    shell: process.platform === 'win32',
++    stdio: ['ignore', 'ignore', 'ignore'],
++  });
++  await waitForPreview();
++
++  browser = await chromium.launch({ headless: true, ...browserOptions() });
++  const context = await browser.newContext({ viewport: { width: 380, height: 844 } });
++  const page = await context.newPage();
++  const errors = { console: 0, page: 0, request: 0, response: 0 };
++  let runtimeConfigStatus = 0;
++  page.on('console', (message) => { if (message.type() === 'error') errors.console += 1; });
++  page.on('pageerror', () => { errors.page += 1; });
++  page.on('requestfailed', () => { errors.request += 1; });
++  page.on('response', (response) => {
++    if (response.url().endsWith('/runtime-config.js')) runtimeConfigStatus = response.status();
++    if (response.status() >= 400) errors.response += 1;
++  });
++
++  const documentResponse = await page.goto(baseURL, { waitUntil: 'networkidle', timeout: 30_000 });
++  const documentStatus = documentResponse?.status() ?? 0;
++  const heading = page.getByRole('heading', { name: 'RoGolike', exact: true });
++  const start = page.getByRole('button', { name: '등반 시작' });
++  const badge = page.locator('[data-deploy-note="playtest"]');
++  await heading.waitFor();
++  await start.waitFor();
++  await badge.waitFor();
++
++  const badgeText = (await badge.textContent())?.trim() ?? '';
++  const headingVisible = await heading.isVisible();
++  const startVisible = await start.isVisible();
++  const badgeVisible = await badge.isVisible();
++  const scrollWidth = await page.evaluate(() => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth));
++  await start.click();
++  await page.locator('[data-screen="map"]').waitFor();
++  const mapVisible = await page.locator('[data-screen="map"]').isVisible();
++  await page.screenshot({ path: path.join(outputDir, 'vercel-preview-380.png'), fullPage: true });
++
++  const report = {
++    checkedAt: new Date().toISOString(),
++    viewport: { width: 380, height: 844 },
++    documentStatus,
++    headingVisible,
++    startVisible,
++    badgeVisible,
++    badgeTextMatched: badgeText === '개발 플레이테스트 구성 · 승인된 제품 수치가 아닙니다',
++    scrollWidth,
++    runtimeConfigStatus,
++    mapVisible,
++    errors,
++    screenshot: 'vercel-preview-380.png',
++  };
++  const passed = documentStatus === 200
++    && report.headingVisible
++    && report.startVisible
++    && report.badgeVisible
++    && report.badgeTextMatched
++    && scrollWidth <= 380
++    && runtimeConfigStatus === 200
++    && mapVisible
++    && Object.values(errors).every((count) => count === 0);
++  const reportText = `${JSON.stringify({ ...report, passed }, null, 2)}\n`;
++  if (reportText.includes(sentinel) || reportText.includes(configText)) throw new Error('VERCEL_REPORT_SECRET_LEAK');
++  await writeFile(path.join(outputDir, 'vercel-report.json'), reportText, 'utf8');
++  if (!passed) throw new Error('VERCEL_PREVIEW_ASSERTION_FAILED');
++
++  console.log('VERCEL_PREVIEW_CHECK_OK');
++} catch (error) {
++  console.error(error instanceof Error ? error.message : 'VERCEL_PREVIEW_CHECK_FAILED');
++  process.exitCode = 1;
++} finally {
++  if (browser !== undefined) await browser.close().catch(() => undefined);
++  await stopPreview(previewProcess);
++  const cleanup = runCaptured(process.execPath, ['scripts/clean-dist.mjs'], { shell: false });
++  if (cleanup.status !== 0) {
++    console.error('VERCEL_PREVIEW_CLEANUP_FAILED');
++    process.exitCode = 1;
++  }
++}
+diff --git a/scripts/vercel-runtime-config.d.mts b/scripts/vercel-runtime-config.d.mts
+new file mode 100644
+index 0000000..7b9f45c
+--- /dev/null
++++ b/scripts/vercel-runtime-config.d.mts
+@@ -0,0 +1,4 @@
++export const RUNTIME_CONFIG_SCRIPT_TAG: string;
++export function validateGameConfigText(text: unknown): any;
++export function renderRuntimeConfigJs(config: unknown, target: string): string;
++export function injectRuntimeConfigScript(html: string): string;
+diff --git a/scripts/vercel-runtime-config.mjs b/scripts/vercel-runtime-config.mjs
+new file mode 100644
+index 0000000..96a2324
+--- /dev/null
++++ b/scripts/vercel-runtime-config.mjs
+@@ -0,0 +1,122 @@
++const REQUIRED_TOP_LEVEL_FIELDS = [
++  'seed',
++  'komiBySize',
++  'economy',
++  'mapWeights',
++  'effectLimits',
++  'generalCaptureMoneyCap',
++  'enemyDeck',
++  'bossByAct',
++  'rewards',
++  'shop',
++  'eventCurrencyReward',
++  'aiCaptureWeight',
++  'aiEffectWeights',
++  'aiPassScoreThreshold',
++  'analysisCaptureWeight',
++  'analysisEffectWeight',
++  'audioTuning',
++];
++
++const STONE_KINDS = [
++  'STONE-001',
++  'STONE-002',
++  'STONE-003',
++  'STONE-004',
++  'STONE-005',
++  'STONE-006',
++];
++
++export const RUNTIME_CONFIG_SCRIPT_TAG = '<script src="./runtime-config.js"></script>';
++
++function schemaFailure(fields) {
++  return { ok: false, code: 'RUNTIME_CONFIG_SCHEMA_INVALID', fields: [...new Set(fields)] };
++}
++
++export function validateGameConfigText(text) {
++  if (typeof text !== 'string' || text.trim() === '') {
++    return { ok: false, code: 'RUNTIME_CONFIG_MISSING' };
++  }
++
++  let config;
++  try {
++    config = JSON.parse(text);
++  } catch {
++    return { ok: false, code: 'RUNTIME_CONFIG_INVALID_JSON' };
++  }
++
++  if (config === null || typeof config !== 'object' || Array.isArray(config)) {
++    return schemaFailure(['$']);
++  }
++
++  const fields = REQUIRED_TOP_LEVEL_FIELDS.filter((field) => !Object.hasOwn(config, field));
++  const komiBySize = config.komiBySize;
++  if (komiBySize === null || typeof komiBySize !== 'object' || Array.isArray(komiBySize)) {
++    fields.push('komiBySize');
++  } else {
++    if (!Number.isFinite(komiBySize[7])) fields.push('komiBySize.7');
++    if (!Number.isFinite(komiBySize[9])) fields.push('komiBySize.9');
++  }
++
++  const aiEffectWeights = config.aiEffectWeights;
++  if (aiEffectWeights === null || typeof aiEffectWeights !== 'object' || Array.isArray(aiEffectWeights)) {
++    fields.push('aiEffectWeights');
++  } else {
++    const actualKinds = Object.keys(aiEffectWeights).sort();
++    if (actualKinds.length !== STONE_KINDS.length
++      || actualKinds.some((kind, index) => kind !== STONE_KINDS[index])) {
++      fields.push('aiEffectWeights');
++    }
++  }
++
++  if (!Array.isArray(config.enemyDeck) || config.enemyDeck.length === 0) {
++    fields.push('enemyDeck');
++  }
++
++  return fields.length > 0 ? schemaFailure(fields) : { ok: true, config };
++}
++
++export function renderRuntimeConfigJs(config, target) {
++  const deployTarget = target === 'production' ? 'production' : 'preview';
++  const deployMeta = { target: deployTarget, playtest: deployTarget !== 'production' };
++  return [
++    `window.__ROGOLIKE_DEPLOY_META__ = Object.freeze(${JSON.stringify(deployMeta)});`,
++    `window.__ROGOLIKE_GAME_CONFIG__ = ${JSON.stringify(config)};`,
++    '',
++  ].join('\n');
++}
++
++export function injectRuntimeConfigScript(html) {
++  if (html.includes(RUNTIME_CONFIG_SCRIPT_TAG)) {
++    throw new Error('RUNTIME_CONFIG_SCRIPT_ALREADY_INJECTED');
++  }
++  const headEnd = html.indexOf('</head>');
++  if (headEnd === -1) {
++    throw new Error('RUNTIME_CONFIG_HEAD_MISSING');
++  }
++  const headStart = html.indexOf('<head');
++  const headOpenEnd = headStart === -1 ? -1 : html.indexOf('>', headStart);
++  if (headOpenEnd === -1 || headOpenEnd > headEnd) {
++    throw new Error('RUNTIME_CONFIG_HEAD_MISSING');
++  }
++
++  const moduleScripts = [];
++  const headContent = html.slice(headOpenEnd + 1, headEnd).replace(
++    /\s*<script\b[^>]*\btype=["']module["'][^>]*>[\s\S]*?<\/script>/gi,
++    (script) => {
++      moduleScripts.push(script.trim());
++      return '';
++    },
++  );
++  const beforeHeadContent = html.slice(0, headOpenEnd + 1);
++  const afterHead = html.slice(headEnd + '</head>'.length);
++  const injectedHead = `${beforeHeadContent}${headContent}${RUNTIME_CONFIG_SCRIPT_TAG}</head>`;
++  if (moduleScripts.length === 0) return `${injectedHead}${afterHead}`;
++
++  const bodyOpen = afterHead.match(/<body\b[^>]*>/i);
++  if (bodyOpen === null || bodyOpen.index === undefined) {
++    return `${injectedHead}\n${moduleScripts.join('\n')}${afterHead}`;
++  }
++  const bodyOpenEnd = bodyOpen.index + bodyOpen[0].length;
++  return `${injectedHead}${afterHead.slice(0, bodyOpenEnd)}\n${moduleScripts.join('\n')}${afterHead.slice(bodyOpenEnd)}`;
++}
+diff --git a/scripts/vercel-validate-boot.ts b/scripts/vercel-validate-boot.ts
+new file mode 100644
+index 0000000..f49ba34
+--- /dev/null
++++ b/scripts/vercel-validate-boot.ts
+@@ -0,0 +1,47 @@
++import { createInitialGameState, type GameConfig } from '../src/game/GameProvider';
++import { validateGameConfigText } from './vercel-runtime-config.mjs';
++
++interface ValidationFailure {
++  readonly ok: false;
++  readonly code: string;
++  readonly fields?: readonly string[];
++}
++
++export type BootValidationResult =
++  | { readonly ok: true }
++  | ValidationFailure
++  | { readonly ok: false; readonly code: 'RUNTIME_CONFIG_BOOT_FAILED'; readonly message: string };
++
++export function validateBootFromText(text: string | undefined): BootValidationResult {
++  const validation = validateGameConfigText(text) as
++    | { readonly ok: true; readonly config: GameConfig }
++    | ValidationFailure;
++  if (!validation.ok) return validation;
++
++  try {
++    createInitialGameState(validation.config);
++    return { ok: true };
++  } catch (error) {
++    return {
++      ok: false,
++      code: 'RUNTIME_CONFIG_BOOT_FAILED',
++      message: error instanceof Error ? error.message : 'GameConfig boot validation failed',
++    };
++  }
++}
++
++function isDirectExecution(): boolean {
++  // vite-node replaces argv[1] with its own runner path; Vitest provides an explicit test marker.
++  return process.env.VITEST !== 'true' && process.env.NODE_ENV !== 'test';
++}
++
++if (isDirectExecution()) {
++  const result = validateBootFromText(process.env.ROGOLIKE_GAME_CONFIG_JSON);
++  if (result.ok) {
++    console.log('RUNTIME_CONFIG_OK');
++  } else {
++    const suffix = 'fields' in result && result.fields?.length ? ` ${result.fields.join(',')}` : '';
++    console.error(`${result.code}${suffix}`);
++    process.exitCode = 1;
++  }
++}
+diff --git a/src/App.tsx b/src/App.tsx
+index 61d9095..a7faf6a 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -30,6 +30,11 @@ const NODE_NAMES: Readonly<Record<MapNodeType, string>> = {
+   boss: '보스전',
+ };
+ 
++export interface DeployMeta {
++  readonly target: 'production' | 'preview';
++  readonly playtest: boolean;
++}
++
+ function musicRoute(screen: GameScreen, boss: boolean, revival: boolean): MusicRoute {
+   if (screen === 'battle') {
+     if (revival) return 'revival';
+@@ -342,7 +347,7 @@ function ResultScreen() {
+   </main>;
+ }
+ 
+-function GameShell() {
++function GameShell({ deployMeta }: { readonly deployMeta?: DeployMeta }) {
+   const { state, dispatch, config } = useGame();
+   useEffect(() => { document.title = 'RoGolike'; }, []);
+   const revival = state.battle?.revivalStage === 2;
+@@ -373,6 +378,9 @@ function GameShell() {
+ 
+   return <div className="app-shell" data-game-engine="integrated">
+     <AudioControls music={music} />
++    {deployMeta?.playtest === true && <p className="deploy-note" role="note" data-deploy-note="playtest">
++      개발 플레이테스트 구성 · 승인된 제품 수치가 아닙니다
++    </p>}
+     {state.notice && state.screen === 'map' && <p className="notice" role="status">{state.notice}</p>}
+     {state.screen === 'title'
+       ? <main className="screen title-screen" data-screen="title">
+@@ -384,6 +392,10 @@ function GameShell() {
+   </div>;
+ }
+ 
+-export function App({ config, initialState }: { readonly config: GameConfig; readonly initialState?: GameState }) {
+-  return <GameProvider config={config} initialState={initialState}><GameShell /></GameProvider>;
++export function App({ config, initialState, deployMeta }: {
++  readonly config: GameConfig;
++  readonly initialState?: GameState;
++  readonly deployMeta?: DeployMeta;
++}) {
++  return <GameProvider config={config} initialState={initialState}><GameShell deployMeta={deployMeta} /></GameProvider>;
+ }
+diff --git a/src/main.tsx b/src/main.tsx
+index 3518f30..5dbdbbc 100644
+--- a/src/main.tsx
++++ b/src/main.tsx
+@@ -1,20 +1,22 @@
+ import { StrictMode } from 'react';
+ import { createRoot } from 'react-dom/client';
+-import { App } from './App';
++import { App, type DeployMeta } from './App';
+ import type { GameConfig } from './game/GameProvider';
+ import './styles.css';
+ 
+ declare global {
+   interface Window {
+     __ROGOLIKE_GAME_CONFIG__?: GameConfig;
++    __ROGOLIKE_DEPLOY_META__?: DeployMeta;
+   }
+ }
+ 
+ const config = window.__ROGOLIKE_GAME_CONFIG__;
++const deployMeta = window.__ROGOLIKE_DEPLOY_META__;
+ 
+ createRoot(document.getElementById('root')!).render(
+   <StrictMode>{config
+-    ? <App config={config} />
++    ? <App config={config} deployMeta={deployMeta} />
+     : <main className="screen configuration-required" role="alert">
+         <h1>RoGolike</h1>
+         <p>승인된 GameConfig가 필요합니다. 제품 빌드는 미승인 수치 기본값을 제공하지 않습니다.</p>
+diff --git a/src/styles.css b/src/styles.css
+index d236935..c44d9cf 100644
+--- a/src/styles.css
++++ b/src/styles.css
+@@ -51,6 +51,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
+ 
+ .audio-controls { position: absolute; z-index: 5; top: 10px; right: 12px; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: .72rem; }
+ .audio-controls button { min-height: 36px; padding: 0 10px; border-radius: 999px; font-size: .72rem; }
++.deploy-note { width: 100%; margin: 42px 0 0; padding: 9px 11px; border: 1px solid #8a713d; border-radius: 10px; color: #f2d99f; background: #2b2417; font-size: .72rem; font-weight: 800; line-height: 1.45; overflow-wrap: anywhere; }
+ .notice { position: absolute; top: 50px; inset-inline: 12px; margin: 0; padding: 10px 12px; border: 1px solid var(--jade); border-radius: 10px; background: #162b24; color: #d9f5e7; font-size: .82rem; }
+ 
+ .title-screen { min-height: calc(100dvh - 48px); justify-content: center; align-items: stretch; text-align: center; }
+diff --git a/tests/ui.deploy-badge.test.tsx b/tests/ui.deploy-badge.test.tsx
+new file mode 100644
+index 0000000..cc6ef42
+--- /dev/null
++++ b/tests/ui.deploy-badge.test.tsx
+@@ -0,0 +1,53 @@
++// @vitest-environment jsdom
++import { act } from 'react';
++import { createRoot } from 'react-dom/client';
++import { afterEach, expect, it } from 'vitest';
++import { App, type DeployMeta } from '../src/App';
++import { DRAFT_GAME_CONFIG } from './fixtures/draft-game-config';
++
++let root: ReturnType<typeof createRoot> | null = null;
++let host: HTMLDivElement | null = null;
++
++function renderApp(deployMeta?: DeployMeta) {
++  host = document.createElement('div');
++  document.body.append(host);
++  root = createRoot(host);
++  act(() => root?.render(<App config={DRAFT_GAME_CONFIG} deployMeta={deployMeta} />));
++  return host;
++}
++
++afterEach(() => {
++  if (root) act(() => root?.unmount());
++  host?.remove();
++  root = null;
++  host = null;
++});
++
++it('preview 배포 메타는 플레이테스트 라벨을 표시한다', () => {
++  const rendered = renderApp({ target: 'preview', playtest: true });
++  const badge = rendered.querySelector('[data-deploy-note="playtest"]');
++
++  expect(badge?.getAttribute('role')).toBe('note');
++  expect(badge?.textContent?.trim()).toBe('개발 플레이테스트 구성 · 승인된 제품 수치가 아닙니다');
++});
++
++it('production 또는 메타 부재에는 플레이테스트 라벨이 없다', () => {
++  let rendered = renderApp({ target: 'production', playtest: false });
++  expect(rendered.querySelectorAll('[data-deploy-note="playtest"]')).toHaveLength(0);
++
++  act(() => root?.unmount());
++  rendered.remove();
++  root = null;
++  host = null;
++  rendered = renderApp();
++  expect(rendered.querySelectorAll('[data-deploy-note="playtest"]')).toHaveLength(0);
++});
++
++it('플레이테스트 라벨은 등반 시작 뒤 지도 화면에도 유지된다', () => {
++  const rendered = renderApp({ target: 'preview', playtest: true });
++  const start = [...rendered.querySelectorAll('button')].find((button) => button.textContent === '등반 시작');
++
++  act(() => start?.click());
++  expect(rendered.querySelector('[data-screen="map"]')).toBeTruthy();
++  expect(rendered.querySelectorAll('[data-deploy-note="playtest"]')).toHaveLength(1);
++});
+diff --git a/tests/vercel.runtime-config.test.ts b/tests/vercel.runtime-config.test.ts
+new file mode 100644
+index 0000000..ff183a5
+--- /dev/null
++++ b/tests/vercel.runtime-config.test.ts
+@@ -0,0 +1,105 @@
++import { describe, expect, it } from 'vitest';
++import {
++  injectRuntimeConfigScript,
++  renderRuntimeConfigJs,
++  validateGameConfigText,
++} from '../scripts/vercel-runtime-config.mjs';
++import { DRAFT_GAME_CONFIG } from './fixtures/draft-game-config';
++
++describe('Vercel runtime config', () => {
++  it('값이 없으면 RUNTIME_CONFIG_MISSING으로 실패한다', () => {
++    expect(validateGameConfigText(undefined)).toEqual({ ok: false, code: 'RUNTIME_CONFIG_MISSING' });
++    expect(validateGameConfigText('   ')).toEqual({ ok: false, code: 'RUNTIME_CONFIG_MISSING' });
++  });
++
++  it('잘못된 JSON은 원문을 노출하지 않고 RUNTIME_CONFIG_INVALID_JSON으로 실패한다', () => {
++    const marker = 'LEAKCHECK-RUNTIME-CONFIG';
++    const result = validateGameConfigText(`{"seed":${marker}`);
++
++    expect(result).toEqual({ ok: false, code: 'RUNTIME_CONFIG_INVALID_JSON' });
++    expect(JSON.stringify(result)).not.toContain(marker);
++  });
++
++  it('객체와 필수 최상위 필드를 필드 경로만으로 검증한다', () => {
++    expect(validateGameConfigText('[]')).toEqual({
++      ok: false,
++      code: 'RUNTIME_CONFIG_SCHEMA_INVALID',
++      fields: ['$'],
++    });
++
++    const marker = 'LEAKCHECK-SCHEMA-VALUE';
++    const result = validateGameConfigText(JSON.stringify({ seed: marker }));
++    expect(result).toMatchObject({ ok: false, code: 'RUNTIME_CONFIG_SCHEMA_INVALID' });
++    expect(result.fields).toContain('audioTuning');
++    expect(JSON.stringify(result)).not.toContain(marker);
++  });
++
++  it('komiBySize의 7·9 유한 수치를 검증한다', () => {
++    const config = structuredClone(DRAFT_GAME_CONFIG) as unknown as {
++      komiBySize: Record<7 | 9, number>;
++    };
++    config.komiBySize[7] = Number.POSITIVE_INFINITY;
++
++    expect(validateGameConfigText(JSON.stringify(config))).toEqual({
++      ok: false,
++      code: 'RUNTIME_CONFIG_SCHEMA_INVALID',
++      fields: ['komiBySize.7'],
++    });
++  });
++
++  it('aiEffectWeights의 여섯 병종이 정확히 일치해야 한다', () => {
++    const config = structuredClone(DRAFT_GAME_CONFIG) as unknown as Record<string, unknown>;
++    const weights = config.aiEffectWeights as Record<string, number>;
++    delete weights['STONE-006'];
++    weights['STONE-007'] = 1;
++
++    expect(validateGameConfigText(JSON.stringify(config))).toEqual({
++      ok: false,
++      code: 'RUNTIME_CONFIG_SCHEMA_INVALID',
++      fields: ['aiEffectWeights'],
++    });
++  });
++
++  it('enemyDeck은 비어 있지 않아야 한다', () => {
++    const config = { ...structuredClone(DRAFT_GAME_CONFIG), enemyDeck: [] };
++
++    expect(validateGameConfigText(JSON.stringify(config))).toEqual({
++      ok: false,
++      code: 'RUNTIME_CONFIG_SCHEMA_INVALID',
++      fields: ['enemyDeck'],
++    });
++  });
++
++  it('draft fixture의 얕은 스키마는 통과한다', () => {
++    expect(validateGameConfigText(JSON.stringify(DRAFT_GAME_CONFIG))).toEqual({
++      ok: true,
++      config: DRAFT_GAME_CONFIG,
++    });
++  });
++
++  it.each([
++    ['preview', true],
++    ['production', false],
++  ] as const)('%s 대상 전역 두 종류를 직렬화한다', (target, playtest) => {
++    const runtimeJs = renderRuntimeConfigJs(DRAFT_GAME_CONFIG, target);
++    const runtimeWindow: Record<string, unknown> = {};
++    Function('window', runtimeJs)(runtimeWindow);
++
++    expect(runtimeWindow.__ROGOLIKE_GAME_CONFIG__).toEqual(DRAFT_GAME_CONFIG);
++    expect(runtimeWindow.__ROGOLIKE_DEPLOY_META__).toEqual({ target, playtest });
++    expect(Object.isFrozen(runtimeWindow.__ROGOLIKE_DEPLOY_META__)).toBe(true);
++  });
++
++  it('runtime-config 로더를 head 끝 직전에 정확히 한 번 주입한다', () => {
++    const html = '<html><head><title>x</title><script type="module" src="./main.js"></script></head><body></body></html>';
++    const injected = injectRuntimeConfigScript(html);
++    const tag = '<script src="./runtime-config.js"></script>';
++
++    expect(injected.split(tag)).toHaveLength(2);
++    expect(injected).toContain(`${tag}</head>`);
++    expect(injected.indexOf(tag)).toBeLessThan(injected.indexOf('<script type="module"'));
++    expect(injected.indexOf('<script type="module"')).toBeGreaterThan(injected.indexOf('<body>'));
++    expect(() => injectRuntimeConfigScript(injected)).toThrow('RUNTIME_CONFIG_SCRIPT_ALREADY_INJECTED');
++    expect(() => injectRuntimeConfigScript('<main></main>')).toThrow('RUNTIME_CONFIG_HEAD_MISSING');
++  });
++});
+diff --git a/tests/vercel.validate-boot.test.ts b/tests/vercel.validate-boot.test.ts
+new file mode 100644
+index 0000000..57e12f7
+--- /dev/null
++++ b/tests/vercel.validate-boot.test.ts
+@@ -0,0 +1,34 @@
++import { describe, expect, it } from 'vitest';
++import { validateBootFromText } from '../scripts/vercel-validate-boot';
++import { DRAFT_GAME_CONFIG } from './fixtures/draft-game-config';
++
++describe('Vercel boot validation', () => {
++  it('draft fixture 구성으로 게임 상태를 부팅한다', () => {
++    const result = validateBootFromText(JSON.stringify(DRAFT_GAME_CONFIG));
++
++    expect(result).toEqual({ ok: true });
++  });
++
++  it('빈 enemyDeck은 얕은 검증에서 RUNTIME_CONFIG_SCHEMA_INVALID로 실패한다', () => {
++    const config = { ...structuredClone(DRAFT_GAME_CONFIG), enemyDeck: [] };
++
++    expect(validateBootFromText(JSON.stringify(config))).toEqual({
++      ok: false,
++      code: 'RUNTIME_CONFIG_SCHEMA_INVALID',
++      fields: ['enemyDeck'],
++    });
++  });
++
++  it('얕은 검증을 통과한 유효하지 않은 수치는 부팅 단계에서 실패한다', () => {
++    const config = structuredClone(DRAFT_GAME_CONFIG) as unknown as {
++      audioTuning: { masterGain: number | null };
++    };
++    config.audioTuning.masterGain = null;
++
++    expect(validateBootFromText(JSON.stringify(config))).toEqual({
++      ok: false,
++      code: 'RUNTIME_CONFIG_BOOT_FAILED',
++      message: 'GameConfig numeric values must be finite',
++    });
++  });
++});
+diff --git a/vercel.json b/vercel.json
+new file mode 100644
+index 0000000..f432659
+--- /dev/null
++++ b/vercel.json
+@@ -0,0 +1,12 @@
++{
++  "buildCommand": "npm run build:vercel",
++  "outputDirectory": "dist",
++  "installCommand": "npm ci",
++  "git": {
++    "deploymentEnabled": {
++      "**": false,
++      "main": true,
++      "dev": true
++    }
++  }
++}

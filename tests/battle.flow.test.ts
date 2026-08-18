@@ -16,6 +16,7 @@ describe('전투 상태 머신', () => {
       enemy: DRAFT_BATTLE_DEFINITION,
       komi: DRAFT_KOMI,
       rng: createSeededRng('two-passes'),
+      maxHandSize: 8,
     });
 
     const afterPlayerPass = battleReducer(initial, { type: 'PASS' });
@@ -36,6 +37,7 @@ describe('전투 상태 머신', () => {
       komi: DRAFT_KOMI,
       playerRelics: ['RELIC-TEST'],
       rng,
+      maxHandSize: 8,
     });
     const preMove = battleReducer(initial, { type: 'BEGIN_TURN' });
     const used = battleReducer(preMove, { type: 'USE_RELIC', relicId: 'RELIC-TEST' });
@@ -73,6 +75,7 @@ describe('전투 상태 머신', () => {
       enemy: DRAFT_BATTLE_DEFINITION,
       komi: DRAFT_KOMI,
       rng: createSeededRng('automatic-pass'),
+      maxHandSize: 8,
     });
 
     const first = battleReducer(initial, { type: 'BEGIN_TURN' });

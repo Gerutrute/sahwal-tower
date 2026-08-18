@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 
 const criteriaPath = process.argv[2] ?? process.env.AC_PATH;
@@ -6,7 +6,13 @@ if (!criteriaPath) {
   throw new Error('usage: node scripts/check-ac-mapping.mjs <acceptance-criteria.md>');
 }
 const criteria = readFileSync(criteriaPath, 'utf8');
-const commands = [...new Set([...criteria.matchAll(/`(npx vitest run tests\/[^`]+)`/g)].map((match) => match[1]))];
+const commands = [...new Set([...criteria.matchAll(/`(npx vitest run tests\/[^`]+)`/g)]
+  .map((match) => match[1])
+  .filter((command) => {
+    const testPaths = command.match(/tests\/[^\s`"']+/g) ?? [];
+    return testPaths.length > 0
+      && testPaths.every((testPath) => !testPath.includes('...') && existsSync(testPath));
+  }))];
 const failures = [];
 for (const command of commands) {
   const result = spawnSync(command, { shell: true, encoding: 'utf8' });

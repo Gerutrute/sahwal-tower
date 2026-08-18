@@ -1,0 +1,7 @@
+$ python -m py_compile D:\개인 pjt\codex 게임 해커톤\scripts\evidence\claude_hook.py D:\개인 pjt\codex 게임 해커톤\scripts\evidence\design_decision.py D:\개인 pjt\codex 게임 해커톤\scripts\evidence\evidence.py D:\개인 pjt\codex 게임 해커톤\scripts\evidence\orca_prompt.py D:\개인 pjt\codex 게임 해커톤\scripts\evidence\redact.py D:\개인 pjt\codex 게임 해커톤\scripts\evidence\__init__.py D:\개인 pjt\codex 게임 해커톤\tests\evidence\test_claude_hook.py D:\개인 pjt\codex 게임 해커톤\tests\evidence\test_design_decision.py D:\개인 pjt\codex 게임 해커톤\tests\evidence\test_evidence_cli.py D:\개인 pjt\codex 게임 해커톤\tests\evidence\test_orca_prompt.py D:\개인 pjt\codex 게임 해커톤\tests\evidence\test_project_rules.py D:\개인 pjt\codex 게임 해커톤\tests\evidence\test_redact.py D:\개인 pjt\codex 게임 해커톤\tests\evidence\__init__.py
+
+STDOUT
+
+STDERR
+
+EXIT 0

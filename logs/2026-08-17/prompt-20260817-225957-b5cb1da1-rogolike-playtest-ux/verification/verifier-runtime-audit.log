@@ -1,0 +1,8 @@
+$ npm.cmd audit --omit=dev --audit-level=high
+
+STDOUT
+found 0 vulnerabilities
+
+STDERR
+
+EXIT 0

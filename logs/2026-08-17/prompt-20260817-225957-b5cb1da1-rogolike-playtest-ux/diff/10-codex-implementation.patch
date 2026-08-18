@@ -1,0 +1,2345 @@
+diff --git a/scripts/playwright-mobile-check.mjs b/scripts/playwright-mobile-check.mjs
+index b5003eb..05328a8 100644
+--- a/scripts/playwright-mobile-check.mjs
++++ b/scripts/playwright-mobile-check.mjs
+@@ -65,6 +65,7 @@ const draftGameConfig = {
+   },
+   eventCurrencyReward: 20,
+   aiCaptureWeight: 10,
++  aiEffectWeight: 2,
+   aiPassScoreThreshold: 1,
+   analysisCaptureWeight: 10,
+   analysisEffectWeight: 1,
+@@ -93,6 +94,51 @@ function browserOptions() {
+   return installed ? { executablePath: installed } : {};
+ }
+ 
++async function playSinglePlacement(page, coordinate) {
++  const normal = page.locator('.hand .card:enabled').filter({ hasText: '일반석' }).first();
++  if (await normal.count()) await normal.click();
++  else await page.locator('.hand .card:enabled').first().click();
++  const hit = coordinate === undefined
++    ? page.locator('.hit[aria-label$=", 착수"]').first()
++    : page.locator(`[data-hit="${coordinate}"]`);
++  await hit.click();
++  await page.waitForTimeout(470);
++}
++
++async function finishOrdinaryBattle(page) {
++  await playSinglePlacement(page);
++  await page.getByRole('button', { name: '패스' }).click();
++  await page.getByRole('heading', { name: '전리품을 고르세요' }).waitFor();
++  await page.getByRole('button', { name: '보상을 받지 않는다' }).click();
++  await page.locator('[data-screen="map"]').waitFor();
++}
++
++async function visitOpenNode(page) {
++  const open = page.locator('[data-state="open"]').first();
++  await open.click();
++  const screen = await page.locator('[data-screen]').getAttribute('data-screen');
++  if (screen === 'battle') {
++    await finishOrdinaryBattle(page);
++  } else if (screen === 'shop' || screen === 'dojo') {
++    if (screen === 'shop' && !(await page.locator('body').innerText()).includes('상점 음악')) {
++      throw new Error('상점 음악 라우팅 실패');
++    }
++    await page.getByRole('button', { name: '지도로 돌아가기' }).click();
++  } else if (screen === 'event') {
++    await page.getByRole('button', { name: '조용히 떠난다' }).click();
++  }
++  await page.locator('[data-screen="map"]').waitFor();
++}
++
++async function reachBoss(page) {
++  const boss = page.locator('[data-node-id$="-boss"]');
++  for (let step = 0; step < 6 && await boss.getAttribute('data-state') !== 'open'; step += 1) {
++    await visitOpenNode(page);
++  }
++  if (await boss.getAttribute('data-state') !== 'open') throw new Error('경로 완주 후에도 보스가 열리지 않음');
++  await boss.click();
++}
++
+ const browser = await chromium.launch({ headless: true, ...browserOptions() });
+ const consoleErrors = [];
+ const pageErrors = [];
+@@ -108,11 +154,20 @@ try {
+     userAgent: 'Mozilla/5.0 (Linux; Android 15; Mobile) AppleWebKit/537.36 Chrome/131 Mobile Safari/537.36',
+   });
+   await context.addInitScript(() => {
+-    window.__audioAudit = { contexts: 0, plays: 0 };
++    window.__audioAudit = { contexts: 0, plays: 0, starts: 0 };
+     const NativeAudioContext = window.AudioContext || window.webkitAudioContext;
+     if (NativeAudioContext) {
+       class AuditedAudioContext extends NativeAudioContext {
+         constructor(...args) { super(...args); window.__audioAudit.contexts += 1; }
++        createBufferSource() {
++          const source = super.createBufferSource();
++          const nativeStart = source.start.bind(source);
++          source.start = (...args) => {
++            window.__audioAudit.starts += 1;
++            return nativeStart(...args);
++          };
++          return source;
++        }
+       }
+       window.AudioContext = AuditedAudioContext;
+       window.webkitAudioContext = AuditedAudioContext;
+@@ -158,8 +213,16 @@ try {
+   await page.getByRole('button', { name: '등반 시작' }).click();
+   await page.getByRole('navigation', { name: '1막 지도' }).waitFor();
+   if (!(await page.locator('body').innerText()).includes('여정 음악')) throw new Error('지도 음악 라우팅 실패');
++  await page.waitForFunction(() => window.__audioAudit.starts + window.__audioAudit.plays > 0);
++  const postGestureAudio = await page.evaluate(() => ({ ...window.__audioAudit }));
++  if (postGestureAudio.starts < 1 && postGestureAudio.plays < 1) throw new Error('첫 gesture 뒤 실제 재생 신호가 없음');
++
++  const lockedBoss = page.locator('[data-node-id$="-boss"]');
++  if (await lockedBoss.getAttribute('data-state') !== 'locked') throw new Error('막 시작 시 보스가 잠기지 않음');
++  await lockedBoss.evaluate((button) => button.click());
++  if (await page.locator('[data-screen="map"]').count() !== 1) throw new Error('잠긴 노드 클릭이 화면을 전환함');
+ 
+-  await page.getByRole('button', { name: /일반전/ }).first().click();
++  await page.locator('[data-state="open"]').first().click();
+   await page.locator('[data-board-size="7"]').waitFor();
+   if (await page.locator('.hit').count() !== 49) throw new Error('7×7 좌표 수 불일치');
+   const board7Widths = {};
+@@ -175,43 +238,19 @@ try {
+     }
+   }
+   await page.setViewportSize({ width: 380, height: 844 });
+-  await page.getByRole('button', { name: '착수로 진행' }).click();
+-  await page.locator('.hand .card').first().click();
+-  const normalHit = page.locator('[data-hit="0-0"]');
+-  await normalHit.click();
+-  await normalHit.click();
+-  await page.waitForTimeout(470);
+-  await page.getByRole('button', { name: '패스' }).click();
+-  await page.getByRole('heading', { name: '전리품을 고르세요' }).waitFor();
+-  await page.locator('[data-screen="reward"] .choice-card').first().click();
+-  await page.getByRole('navigation', { name: '1막 지도' }).waitFor();
+-
+-  await page.getByRole('button', { name: /상점/ }).first().click();
+-  if (!(await page.locator('body').innerText()).includes('상점 음악')) throw new Error('상점 음악 라우팅 실패');
+-  if ((await page.locator('body').innerText()).includes('새로고침')) throw new Error('금지된 상점 새로고침이 있음');
+-  await page.getByRole('button', { name: '지도로 돌아가기' }).click();
+-  await page.getByRole('button', { name: /보스전/ }).click();
++  await finishOrdinaryBattle(page);
++  await reachBoss(page);
+   await page.locator('[data-board-size="7"]').waitFor();
+   if (!(await page.locator('body').innerText()).includes('보스 음악')) throw new Error('보스 음악 라우팅 실패');
+-  await page.getByRole('button', { name: '착수로 진행' }).click();
+-  await page.locator('.hand .card').first().click();
+-  const act1BossHit = page.locator('[data-hit="0-0"]');
+-  await act1BossHit.click();
+-  await act1BossHit.click();
+-  await page.waitForTimeout(470);
++  await playSinglePlacement(page, '0-0');
+   await page.getByRole('button', { name: '패스' }).click();
+   await page.getByText('부활 2단계', { exact: false }).waitFor();
+   if (!(await page.locator('body').innerText()).includes('보스 음악')) throw new Error('1막 첫 승리 뒤 bosstheme 유지 실패');
+-  await page.getByRole('button', { name: '착수로 진행' }).click();
+-  await page.locator('.hand .card').first().click();
+-  const act1RevivalHit = page.locator('[data-hit="6-6"]');
+-  await act1RevivalHit.click();
+-  await act1RevivalHit.click();
+-  await page.waitForTimeout(470);
++  await playSinglePlacement(page, '6-6');
+   await page.getByRole('button', { name: '패스' }).click();
+   await page.getByRole('navigation', { name: '2막 지도' }).waitFor();
+   if (!(await page.locator('body').innerText()).includes('제 2막 · 9×9')) throw new Error('2막 9×9 전환 실패');
+-  await page.getByRole('button', { name: /보스전/ }).click();
++  await page.locator('[data-state="open"]').first().click();
+   await page.locator('[data-board-size="9"]').waitFor();
+   const hitRects = await page.locator('.hit').evaluateAll((hits) => hits.map((hit) => {
+     const rect = hit.getBoundingClientRect();
+@@ -227,15 +266,6 @@ try {
+       if (overlap) throw new Error(`9×9 타깃 겹침: ${left}, ${right}`);
+     }
+   }
+-  for (const coordinate of ['0-0', '0-8', '8-0', '8-8']) {
+-    await page.getByRole('button', { name: '착수로 진행' }).click();
+-    await page.locator('.hand .card').first().click();
+-    const hit = page.locator(`[data-hit="${coordinate}"]`);
+-    await hit.click();
+-    await hit.click();
+-    await page.waitForTimeout(470);
+-  }
+-  if (await page.locator('.stone-b').count() !== 4) throw new Error('9×9 네 귀 실제 탭 실패');
+   const board9Widths = {};
+   for (const width of [380, 430]) {
+     await page.setViewportSize({ width, height: 844 });
+@@ -250,8 +280,12 @@ try {
+   }
+   await page.setViewportSize({ width: 380, height: 844 });
+   const battleMetrics = board9Widths[380];
++  await finishOrdinaryBattle(page);
++  await reachBoss(page);
++  await page.locator('[data-board-size="9"]').waitFor();
+   await page.screenshot({ path: path.join(outputDir, 'mobile-boss.png'), fullPage: true });
+ 
++  await playSinglePlacement(page);
+   await page.getByRole('button', { name: '패스' }).click();
+   await page.getByRole('heading', { name: '두 막을 완주했습니다' }).waitFor();
+   const candidates = await page.locator('.effect-panel li').count();
+@@ -262,6 +296,7 @@ try {
+     baseURL,
+     viewport: { width: 380, height: 844 },
+     initial,
++    postGestureAudio,
+     battleMetrics,
+     boardWidths: { board7: board7Widths, board9: board9Widths },
+     hitTargetCount: hitRects.length,
+diff --git a/src/App.tsx b/src/App.tsx
+index ddf7adb..7fda147 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -15,7 +15,7 @@ import { CHARM_DEFINITIONS, type CharmId } from './game/content/charms';
+ import { RELIC_DEFINITIONS, type RelicId } from './game/content/relics';
+ import { removalPrice } from './game/economy';
+ import { ENEMY_DEFINITIONS } from './game/content/enemies';
+-import type { MapNode, MapNodeType } from './game/map';
++import { selectableNodeIds, type MapNode, type MapNodeType } from './game/map';
+ import type { MusicRoute } from './audio';
+ 
+ const NODE_NAMES: Readonly<Record<MapNodeType, string>> = {
+@@ -46,7 +46,23 @@ function nodeDescription(node: MapNode): string {
+ 
+ function MapScreen() {
+   const { state, dispatch } = useGame();
+-  const nodes = [...state.map.columns.flat(), state.map.boss];
++  const openNodeIds = new Set(selectableNodeIds(state.map, state.completedNodeIds));
++  const completedNodeIds = new Set(state.completedNodeIds);
++  const renderNode = (node: MapNode) => {
++    const done = completedNodeIds.has(node.id);
++    const open = openNodeIds.has(node.id);
++    return <button
++      key={node.id}
++      className={`map-node ${node.type === 'battle' ? 'battle-node' : node.type === 'elite' ? 'elite-node' : node.type === 'boss' ? 'boss-node' : ''}`}
++      data-node-id={node.id}
++      data-state={done ? 'done' : open ? 'open' : 'locked'}
++      disabled={!open}
++      onClick={() => dispatch({ type: 'OPEN_NODE', node })}
++    >
++      <b>{NODE_NAMES[node.type]} · {node.column + 1}</b>
++      <span>{nodeDescription(node)}</span>
++    </button>;
++  };
+   return <main className="screen" data-screen="map">
+     <header className="screen-heading">
+       <div><p className="eyebrow">제 {state.run.act}막 · {state.run.boardSize}×{state.run.boardSize}</p><h1>길을 고르세요</h1></div>
+@@ -54,23 +70,11 @@ function MapScreen() {
+     </header>
+     <p className="lead">실제 생성된 지도 노드는 전투와 쉼을 지나 막의 문지기로 이어집니다.</p>
+     <nav className="map-path" aria-label={`${state.run.act}막 지도`}>
+-      {nodes.map((node) => <button
+-        key={node.id}
+-        className={`map-node ${node.type === 'battle' ? 'battle-node' : node.type === 'elite' ? 'elite-node' : node.type === 'boss' ? 'boss-node' : ''}`}
+-        onClick={() => dispatch({ type: 'OPEN_NODE', node })}
+-      >
+-        <b>{NODE_NAMES[node.type]} · {node.column + 1}</b>
+-        <span>{nodeDescription(node)}</span>
+-      </button>)}
++      {state.map.columns.map((column, index) => <div className="map-column" data-map-column={index} key={`column-${index}`}>
++        {column.map(renderNode)}
++      </div>)}
++      <div className="map-column boss-column">{renderNode(state.map.boss)}</div>
+     </nav>
+-    <section className="map-facilities" aria-label="여정 시설">
+-      <h2>여정 시설</h2>
+-      <div className="controls">
+-        <button onClick={() => dispatch({ type: 'OPEN_SHOP' })}>상점</button>
+-        <button onClick={() => dispatch({ type: 'OPEN_EVENT' })}>사건</button>
+-        <button onClick={() => dispatch({ type: 'OPEN_DOJO' })}>도장</button>
+-      </div>
+-    </section>
+   </main>;
+ }
+ 
+@@ -80,10 +84,16 @@ function BattleScreen({ thinking }: { readonly thinking: boolean }) {
+   if (battle === null) return null;
+   const deck = battle.decks.B;
+   const selected = deck.hand.find(({ id }) => id === battle.selectedCardId);
++  const occupied = battle.board.points.reduce((counts, stone) => {
++    if (stone?.color === 'B') counts.B += 1;
++    if (stone?.color === 'W') counts.W += 1;
++    return counts;
++  }, { B: 0, W: 0 });
++  const majority = Math.ceil(battle.board.points.length / 2);
+   const enemyLabel = state.battleKind === 'boss' ? `제 ${state.run.act}막 문지기` : state.battleKind === 'elite' ? '정예 기객' : '길 위의 기객';
+-  const previewEffects = state.preview?.effects.map((entry) => entry.message) ?? [];
+   const canAct = battle.turn === 'B' && !thinking && state.pendingInspection === null;
+   const inspection = state.pendingInspection;
++  const latestEffect = state.effectLog.at(-1)?.message ?? null;
+   return <main className="screen battle-screen" data-screen="battle">
+     <header className="screen-heading compact">
+       <div>
+@@ -104,22 +114,21 @@ function BattleScreen({ thinking }: { readonly thinking: boolean }) {
+       <span>유물 {battle.relics.B.length}</span>
+       <span>연속 패스 {battle.consecutivePasses}</span>
+       <span>포획 {state.captures.B}</span>
++      <span>점유 흑 {occupied.B} · 백 {occupied.W} / {majority}</span>
+     </div>
+     <details className="deck-summary"><summary>덱 구성 {state.run.deck.length}장</summary><p>{state.run.deck.map((kind) => STONE_DEFINITIONS[kind].name).join(' · ')}</p></details>
+     <BoardSvg
+       size={battle.board.size}
+       points={battle.board.points}
+       disabled={!canAct}
+-      previewPoint={state.preview?.point}
+       invalidPoint={state.invalidPoint}
+       onMove={(point) => dispatch({ type: 'CHOOSE_POINT', point })}
+     />
+     <p className={`turn-line ${state.invalidReason ? 'invalid' : ''}`} role="status">
+       {state.invalidReason
+         || (thinking ? '상대가 합법 수를 평가하고 있습니다…'
+-          : battle.phase === 'pre-move' ? '부적·유물 사용을 마치거나 착수로 진행하세요.'
+-          : state.preview ? `합법 수 미리보기 · ${state.preview.capturedCount}개 포획 · 같은 곳을 다시 눌러 확정`
+-            : selected ? `${STONE_DEFINITIONS[selected.kind].name} 좌표를 고르세요.` : '카드를 고르고 교차점을 누르세요.')}
++          : battle.phase === 'pre-move' ? '부적·유물을 사용하거나 카드를 바로 고르세요.'
++          : selected ? `${STONE_DEFINITIONS[selected.kind].name} 좌표를 누르면 즉시 착수합니다.` : '카드를 고르고 교차점을 누르세요.')}
+     </p>
+     <section className="hand" aria-label={`손패 ${deck.hand.length}장`}>
+       {deck.hand.map((card) => {
+@@ -127,16 +136,22 @@ function BattleScreen({ thinking }: { readonly thinking: boolean }) {
+         return <button
+           key={card.id}
+           className={`card ${battle.selectedCardId === card.id ? 'selected' : ''}`}
++          data-stone-class={definition.ui.classKey}
+           aria-pressed={battle.selectedCardId === card.id}
+           onClick={() => dispatch({ type: 'SELECT_CARD', cardId: card.id })}
+-          disabled={!canAct || (battle.phase !== 'choose-card' && battle.phase !== 'choose-point')}
++          disabled={!canAct || (battle.phase !== 'pre-move' && battle.phase !== 'choose-card' && battle.phase !== 'choose-point')}
+         >
+-          <span className="card-kind">{card.kind.slice(-1)}</span>
++          <span className="card-icon" aria-hidden="true">{definition.ui.icon}</span>
+           <strong>{definition.name}</strong>
+-          <small>{definition.effect?.trigger ?? '기본 착수'}</small>
++          <small>{definition.ui.summary}</small>
+         </button>;
+       })}
+     </section>
++    {selected && <section className="card-detail" aria-label="선택 카드 상세">
++      <h2>{STONE_DEFINITIONS[selected.kind].name}</h2>
++      <p><b>발동 조건</b> {STONE_DEFINITIONS[selected.kind].ui.condition}</p>
++      <p><b>전략</b> {STONE_DEFINITIONS[selected.kind].ui.strategy}</p>
++    </section>}
+     {inspection && <section className="effect-panel inspection-panel" aria-label="덱 확인 및 재정렬">
+       <h2>덱 확인 및 재정렬</h2>
+       <ol>{inspection.orderedIds.map((id) => {
+@@ -166,10 +181,11 @@ function BattleScreen({ thinking }: { readonly thinking: boolean }) {
+       >{RELIC_DEFINITIONS[relicId as RelicId]?.name ?? relicId} 사용</button>)}
+     </section>}
+     {battle.phase === 'pre-move' && <button className="primary" onClick={() => dispatch({ type: 'CONTINUE_TO_MOVE' })}>착수로 진행</button>}
++    {latestEffect && <p className="effect-status" role="status">{latestEffect}</p>}
+     <section className="effect-panel">
+       <h2>효과 기록</h2>
+       <ol>
+-        {[...battle.log.slice(-3).map(({ message }) => message), ...state.effectLog.slice(-3).map(({ message }) => message), ...previewEffects].map((entry, index) => <li key={`${entry}-${index}`}>{entry}</li>)}
++        {[...battle.log.slice(-3).map(({ message }) => message), ...state.effectLog.slice(-3).map(({ message }) => message)].map((entry, index) => <li key={`${entry}-${index}`}>{entry}</li>)}
+       </ol>
+     </section>
+     <div className="controls">
+@@ -184,14 +200,14 @@ function RewardScreen() {
+   const { state, dispatch } = useGame();
+   if (state.run.pendingCharm !== null) {
+     return <main className="screen" data-screen="reward"><p className="eyebrow">부적 교체</p><h1>교체할 부적을 고르세요</h1><div className="choice-grid">
+-      {state.run.charms.map((charmId, index) => <button key={`${charmId}-${index}`} className="choice-card" onClick={() => dispatch({ type: 'REPLACE_CHARM', index })}><b>{charmId}</b><span>{state.run.pendingCharm}으로 교체</span></button>)}
++      {state.run.charms.map((charmId, index) => <button key={`${charmId}-${index}`} className="choice-card" onClick={() => dispatch({ type: 'REPLACE_CHARM', index })}><b>{CHARM_DEFINITIONS[charmId].name}</b><span>{CHARM_DEFINITIONS[state.run.pendingCharm!].name}으로 교체</span></button>)}
+     </div></main>;
+   }
+   return <main className="screen" data-screen="reward">
+     <p className="eyebrow">대국 보상</p><h1>전리품을 고르세요</h1>
+     <div className="choice-grid">
+       {(state.run.pendingRewards ?? []).map((candidate) => <button key={candidate.id} className="choice-card" onClick={() => dispatch({ type: 'CHOOSE_REWARD', candidateId: candidate.id })}>
+-        <b>{candidate.name}</b><span>{candidate.kind === 'stone' ? STONE_DEFINITIONS[candidate.stoneKind].name : candidate.kind === 'charm' ? candidate.charmId : candidate.relicId}</span>
++        <b>{candidate.name}</b><span>{candidate.kind === 'stone' ? STONE_DEFINITIONS[candidate.stoneKind].name : candidate.kind === 'charm' ? CHARM_DEFINITIONS[candidate.charmId].name : RELIC_DEFINITIONS[candidate.relicId].name}</span>
+       </button>)}
+     </div>
+     <button onClick={() => dispatch({ type: 'DECLINE_REWARD' })}>보상을 받지 않는다</button>
+@@ -206,10 +222,14 @@ function ShopScreen() {
+     <div className="choice-grid">
+       {(state.shop?.offers ?? []).map((offer) => {
+         const sold = state.shop?.soldOfferIds.includes(offer.id) ?? false;
+-        const name = offer.kind === 'stone' ? STONE_DEFINITIONS[offer.productId].name : offer.productId;
++        const name = offer.kind === 'stone'
++          ? STONE_DEFINITIONS[offer.productId].name
++          : offer.kind === 'charm'
++            ? CHARM_DEFINITIONS[offer.productId].name
++            : RELIC_DEFINITIONS[offer.productId].name;
+         if (offer.kind === 'charm' && state.run.charms.length >= 2) {
+           return state.run.charms.map((charmId, replaceCharmIndex) => <button key={`${offer.id}-${replaceCharmIndex}`} className="choice-card" disabled={sold || state.run.currency < offer.price} onClick={() => dispatch({ type: 'BUY_OFFER', offerId: offer.id, replaceCharmIndex })}>
+-            <b>{charmId} → {name}</b><span>{offer.price}냥</span>
++            <b>{CHARM_DEFINITIONS[charmId].name} → {name}</b><span>{offer.price}냥</span>
+           </button>);
+         }
+         return <button key={offer.id} className="choice-card" disabled={sold || state.run.currency < offer.price} onClick={() => dispatch({ type: 'BUY_OFFER', offerId: offer.id })}>
+diff --git a/src/audio/AudioManager.ts b/src/audio/AudioManager.ts
+index 8d42ad3..20ba5fb 100644
+--- a/src/audio/AudioManager.ts
++++ b/src/audio/AudioManager.ts
+@@ -15,8 +15,11 @@ export interface AudioManagerOptions {
+   readonly storage?: Pick<Storage, 'getItem' | 'setItem'> | null;
+   readonly baseUrl?: string;
+   readonly onError?: (error: unknown) => void;
++  readonly onStatusChange?: () => void;
+ }
+ 
++export type AudioPlaybackState = 'idle' | 'pending' | 'web-audio' | 'fallback' | 'error';
++
+ export interface AudioSnapshot {
+   readonly unlocked: boolean;
+   readonly route: MusicRoute;
+@@ -25,6 +28,8 @@ export interface AudioSnapshot {
+   readonly muted: boolean;
+   readonly volume: number;
+   readonly generation: number;
++  readonly playback: AudioPlaybackState;
++  readonly lastError: string | null;
+ }
+ 
+ interface ActiveTrack {
+@@ -61,6 +66,14 @@ function clamp(value: number, minimum: number, maximum: number): number {
+   return Math.min(maximum, Math.max(minimum, value));
+ }
+ 
++function scheduleTimeout(callback: () => void, delayMs: number): number {
++  return globalThis.setTimeout(callback, delayMs) as unknown as number;
++}
++
++function cancelTimeout(timer: number): void {
++  globalThis.clearTimeout(timer);
++}
++
+ export function equalPowerCurve(direction: 'in' | 'out', samples = 24): Float32Array {
+   if (!Number.isSafeInteger(samples) || samples < 2) throw new RangeError('curve samples must be at least two');
+   return Float32Array.from({ length: samples }, (_, index) => {
+@@ -83,6 +96,7 @@ export class AudioManager {
+   private readonly storage: Pick<Storage, 'getItem' | 'setItem'> | null;
+   private readonly baseUrl: string;
+   private readonly onError: (error: unknown) => void;
++  private readonly onStatusChange: () => void;
+   private readonly cache = new Map<MusicTrack, AudioBuffer>();
+   private readonly positions = new Map<MusicTrack, number>();
+   private context: AudioContext | null = null;
+@@ -95,6 +109,8 @@ export class AudioManager {
+   private unlocked = false;
+   private muted = false;
+   private volume = 1;
++  private playback: AudioPlaybackState = 'idle';
++  private lastError: string | null = null;
+ 
+   constructor(options: AudioManagerOptions) {
+     validateTuning(options?.tuning);
+@@ -112,6 +128,7 @@ export class AudioManager {
+       : options.storage ?? (typeof localStorage === 'undefined' ? null : localStorage);
+     this.baseUrl = options.baseUrl ?? import.meta.env.BASE_URL;
+     this.onError = options.onError ?? (() => undefined);
++    this.onStatusChange = options.onStatusChange ?? (() => undefined);
+     this.readPreferences();
+   }
+ 
+@@ -124,14 +141,27 @@ export class AudioManager {
+       muted: this.muted,
+       volume: this.volume,
+       generation: this.generation,
++      playback: this.playback,
++      lastError: this.lastError,
+     };
+   }
+ 
+   async unlock(): Promise<void> {
+-    if (this.unlocked) return this.resume();
++    if (this.unlocked) {
++      if (this.playback !== 'error') return this.resume();
++      this.setPlayback('pending', null);
++      const track = routeMusic(this.route);
++      if (this.context !== null && this.master !== null) {
++        await this.switchWebAudio(track, ++this.generation);
++      } else {
++        await this.switchFallback(track, new Error('WebAudio를 사용할 수 없습니다.'));
++      }
++      return;
++    }
+     this.unlocked = true;
++    this.setPlayback('pending', null);
+     if (this.createContext === null) {
+-      await this.switchFallback(routeMusic(this.route));
++      await this.switchFallback(routeMusic(this.route), new Error('WebAudio를 사용할 수 없습니다.'));
+       return;
+     }
+     try {
+@@ -139,13 +169,13 @@ export class AudioManager {
+       this.master = this.context.createGain();
+       this.master.connect(this.context.destination);
+       this.applyMasterGain();
+-      await this.context.resume().catch(this.onError);
++      void this.context.resume().catch((error) => this.reportError(error));
+       await this.switchWebAudio(routeMusic(this.route), ++this.generation);
+     } catch (error) {
+-      this.onError(error);
++      this.reportError(error);
+       this.context = null;
+       this.master = null;
+-      await this.switchFallback(routeMusic(this.route));
++      await this.switchFallback(routeMusic(this.route), error);
+     }
+   }
+ 
+@@ -157,7 +187,7 @@ export class AudioManager {
+     const token = ++this.generation;
+     this.aborter?.abort();
+     if (this.context !== null) void this.switchWebAudio(next, token);
+-    else void this.switchFallback(next);
++    else void this.switchFallback(next, new Error('WebAudio를 사용할 수 없습니다.'));
+   }
+ 
+   setMuted(muted: boolean): void {
+@@ -227,6 +257,19 @@ export class AudioManager {
+     if (this.master !== null) this.master.gain.value = this.muted ? 0 : this.volume * this.tuning.masterGain;
+   }
+ 
++  private reportError(error: unknown): void {
++    this.lastError = error instanceof Error ? error.message : String(error);
++    this.onError(error);
++    this.onStatusChange();
++  }
++
++  private setPlayback(playback: AudioPlaybackState, lastError = this.lastError): void {
++    const changed = playback !== this.playback || lastError !== this.lastError;
++    this.playback = playback;
++    this.lastError = lastError;
++    if (changed) this.onStatusChange();
++  }
++
+   private async switchWebAudio(track: MusicTrack, token: number): Promise<void> {
+     const context = this.context;
+     const master = this.master;
+@@ -263,7 +306,9 @@ export class AudioManager {
+         this.stopTrack(previous, this.tuning.crossfadeSeconds);
+       }
+     } catch (error) {
+-      if (!(error instanceof DOMException && error.name === 'AbortError')) this.onError(error);
++      if (error instanceof DOMException && error.name === 'AbortError') return;
++      this.reportError(error);
++      await this.switchFallback(track, error);
+     }
+   }
+ 
+@@ -303,12 +348,13 @@ export class AudioManager {
+     source.buffer = active.buffer;
+     source.connect(layer);
+     source.start(when, offset);
++    this.setPlayback('web-audio', null);
+     source.stop(when + remaining);
+     active.sources.add(source);
+     source.onended = () => active.sources.delete(source);
+     const nextAt = when + remaining - overlap;
+     const waitMs = Math.max(0, (nextAt - context.currentTime - 0.1) * 1000);
+-    active.loopTimer = window.setTimeout(() => this.scheduleSegment(active, nextAt, 0, token), waitMs);
++    active.loopTimer = scheduleTimeout(() => this.scheduleSegment(active, nextAt, 0, token), waitMs);
+   }
+ 
+   private rememberPosition(active: ActiveTrack, now: number): void {
+@@ -319,7 +365,7 @@ export class AudioManager {
+   private stopTrack(active: ActiveTrack | null, delaySeconds: number): void {
+     if (active === null || active.stopped) return;
+     active.stopped = true;
+-    if (active.loopTimer !== null) window.clearTimeout(active.loopTimer);
++    if (active.loopTimer !== null) cancelTimeout(active.loopTimer);
+     const stop = () => {
+       for (const source of active.sources) {
+         try { source.stop(); } catch { /* source already stopped */ }
+@@ -329,11 +375,16 @@ export class AudioManager {
+       active.gain.disconnect();
+     };
+     if (delaySeconds === 0) stop();
+-    else window.setTimeout(stop, delaySeconds * 1000);
++    else scheduleTimeout(stop, delaySeconds * 1000);
+   }
+ 
+-  private async switchFallback(track: MusicTrack): Promise<void> {
+-    if (this.createAudio === null) return;
++  private async switchFallback(track: MusicTrack, cause?: unknown): Promise<void> {
++    if (this.createAudio === null) {
++      const error = cause ?? new Error('fallback audio를 사용할 수 없습니다.');
++      if (this.lastError === null) this.reportError(error);
++      this.setPlayback('error', this.lastError ?? String(error));
++      return;
++    }
+     const audio = this.fallback ?? this.createAudio();
+     this.fallback?.pause();
+     this.fallback = audio;
+@@ -341,6 +392,12 @@ export class AudioManager {
+     audio.loop = true;
+     audio.muted = this.muted;
+     audio.volume = this.volume;
+-    await audio.play().catch(this.onError);
++    try {
++      await audio.play();
++      this.setPlayback('fallback', null);
++    } catch (error) {
++      this.reportError(error);
++      this.setPlayback('error', this.lastError);
++    }
+   }
+ }
+diff --git a/src/audio/useGameMusic.ts b/src/audio/useGameMusic.ts
+index 1cfa6b6..423d1d6 100644
+--- a/src/audio/useGameMusic.ts
++++ b/src/audio/useGameMusic.ts
+@@ -3,8 +3,12 @@ import { AudioManager, type AudioTuning } from './AudioManager';
+ import { routeMusic, type MusicRoute } from './tracks';
+ 
+ export function useGameMusic(route: MusicRoute, tuning: AudioTuning) {
+-  const manager = useMemo(() => new AudioManager({ tuning }), [tuning]);
+   const [version, refresh] = useState(0);
++  const manager = useMemo(() => new AudioManager({
++    tuning,
++    onError: () => refresh((value) => value + 1),
++    onStatusChange: () => refresh((value) => value + 1),
++  }), [tuning]);
+ 
+   useEffect(() => () => manager.dispose(), [manager]);
+   useEffect(() => { manager.setRoute(route); }, [manager, route]);
+diff --git a/src/components/AudioControls.tsx b/src/components/AudioControls.tsx
+index 2432da6..b5999f2 100644
+--- a/src/components/AudioControls.tsx
++++ b/src/components/AudioControls.tsx
+@@ -10,5 +10,6 @@ export function AudioControls({ music }: { readonly music: ReturnTypeOfUseGameMu
+       aria-label={music.snapshot.muted ? '음악 켜기' : '음악 끄기'}
+       onClick={() => { if (!music.snapshot.unlocked) void music.unlock(); else music.setMuted(!music.snapshot.muted); }}
+     >{music.snapshot.muted ? '음악 켜기' : '음악 끄기'}</button>
++    {music.snapshot.playback === 'error' && <button onClick={() => void music.unlock()}>음악 다시 시도</button>}
+   </div>;
+ }
+diff --git a/src/components/BoardSvg.tsx b/src/components/BoardSvg.tsx
+index 401f4d7..c0efc5f 100644
+--- a/src/components/BoardSvg.tsx
++++ b/src/components/BoardSvg.tsx
+@@ -10,7 +10,6 @@ interface BoardSvgProps {
+   readonly size: BoardSize;
+   readonly points: readonly (BoardStone | null)[];
+   readonly disabled?: boolean;
+-  readonly previewPoint?: number | null;
+   readonly invalidPoint?: number | null;
+   readonly onMove: (point: number) => void;
+ }
+@@ -25,7 +24,6 @@ export function BoardSvg({
+   size,
+   points,
+   disabled = false,
+-  previewPoint = null,
+   invalidPoint = null,
+   onMove,
+ }: BoardSvgProps) {
+@@ -57,7 +55,6 @@ export function BoardSvg({
+         const y = coordinate(size, row);
+         const stone = points[point] ?? null;
+         return <g key={`point-${point}`} role="row">
+-          {previewPoint === point && !stone && <circle className="preview-stone" cx={x} cy={y} r="17" />}
+           {stone && <g className="stone-pop">
+             <circle className={`stone stone-${stone.color.toLowerCase()}`} cx={x} cy={y} r="17" />
+             <text className={`stone-kind stone-kind-${stone.color.toLowerCase()}`} x={x} y={y + 5}>{stone.kind.slice(-1)}</text>
+diff --git a/src/game/GameProvider.tsx b/src/game/GameProvider.tsx
+index 69f4ce8..0614d8e 100644
+--- a/src/game/GameProvider.tsx
++++ b/src/game/GameProvider.tsx
+@@ -30,7 +30,7 @@ import {
+ } from './economy';
+ import { resolveMove, type EffectDefinition, type EffectLimits, type EffectLog } from './effects';
+ import { createBoard, tryPlay, type IllegalMoveCode } from './go';
+-import { generateActMap, type ActMap, type MapNode, type MapWeights } from './map';
++import { generateActMap, selectableNodeIds, type ActMap, type MapNode, type MapWeights } from './map';
+ import {
+   decisiveMoveCandidates,
+   generateRewardCandidates,
+@@ -42,6 +42,7 @@ import { createRunState, runReducer, type BattleNodeKind, type BattleResolution,
+ import { scoreArea, type AreaScore } from './scoring';
+ import {
+   createStoneEffectDefinition,
++  candidatePlacementTriggersEffect,
+   resolveCavalryEffect,
+   resolveGeneralCaptureEffect,
+   resolveGuardianEffect,
+@@ -68,6 +69,7 @@ export interface GameConfig {
+   readonly shop: ShopCatalog;
+   readonly eventCurrencyReward: number;
+   readonly aiCaptureWeight: number;
++  readonly aiEffectWeight: number;
+   readonly aiPassScoreThreshold: number;
+   readonly analysisCaptureWeight: number;
+   readonly analysisEffectWeight: number;
+@@ -81,13 +83,6 @@ export interface ResultAnalysis {
+   readonly effects: readonly string[];
+ }
+ 
+-export interface MovePreview {
+-  readonly point: number;
+-  readonly board: BoardState;
+-  readonly capturedCount: number;
+-  readonly effects: readonly EffectLog[];
+-}
+-
+ export type DeckInspectionSource = 'scout' | 'cavalry' | 'guardian';
+ 
+ export interface PendingDeckInspection {
+@@ -105,7 +100,7 @@ export interface GameState {
+   readonly battle: BattleState | null;
+   readonly battleKind: BattleNodeKind;
+   readonly selectedNodeId: string | null;
+-  readonly preview: MovePreview | null;
++  readonly completedNodeIds: readonly string[];
+   readonly pendingInspection: PendingDeckInspection | null;
+   readonly invalidPoint: number | null;
+   readonly invalidReason: string;
+@@ -156,6 +151,7 @@ function assertConfig(config: GameConfig): void {
+     config.komiBySize[9],
+     config.eventCurrencyReward,
+     config.aiCaptureWeight,
++    config.aiEffectWeight,
+     config.aiPassScoreThreshold,
+     config.analysisCaptureWeight,
+     config.analysisEffectWeight,
+@@ -221,7 +217,7 @@ export function createInitialGameState(config: GameConfig): GameState {
+     battle: null,
+     battleKind: 'normal',
+     selectedNodeId: null,
+-    preview: null,
++    completedNodeIds: [],
+     pendingInspection: null,
+     invalidPoint: null,
+     invalidReason: '',
+@@ -264,7 +260,6 @@ function openBattle(state: GameState, kind: BattleNodeKind, config: GameConfig,
+     battle,
+     battleKind: kind,
+     selectedNodeId: nodeId ?? null,
+-    preview: null,
+     pendingInspection: null,
+     invalidPoint: null,
+     invalidReason: '',
+@@ -285,6 +280,11 @@ function completeRunBattle(
+   capturedStones: number,
+   config: GameConfig,
+ ): GameState {
++  const completedNodeIds = resolution === 'win'
++    && state.selectedNodeId !== null
++    && !state.completedNodeIds.includes(state.selectedNodeId)
++    ? [...state.completedNodeIds, state.selectedNodeId]
++    : state.completedNodeIds;
+   let run = runReducer(state.run, {
+     type: 'BATTLE_RESOLVED',
+     battle: battleKind,
+@@ -292,7 +292,7 @@ function completeRunBattle(
+     capturedStones,
+   }, config.economy);
+   if (run.status !== 'active') {
+-    return { ...state, run, screen: 'result', battle: null, preview: null, pendingInspection: null };
++    return { ...state, run, completedNodeIds, screen: 'result', battle: null, pendingInspection: null };
+   }
+   if (battleKind === 'boss') {
+     const map = generateActMap(run.act, config.mapWeights, rngFor(config, state.sequence, 'next-map'));
+@@ -302,9 +302,9 @@ function completeRunBattle(
+       map,
+       screen: 'map',
+       battle: null,
+-      preview: null,
+       pendingInspection: null,
+       selectedNodeId: null,
++      completedNodeIds: [],
+       notice: `${run.act}막 지도가 열렸습니다.`,
+       sequence: state.sequence + 1,
+     };
+@@ -314,9 +314,9 @@ function completeRunBattle(
+   return {
+     ...state,
+     run,
++    completedNodeIds,
+     screen: 'reward',
+     battle: null,
+-    preview: null,
+     pendingInspection: null,
+     sequence: state.sequence + 1,
+   };
+@@ -346,7 +346,7 @@ function scoreIfReady(state: GameState, battle: BattleState, config: GameConfig)
+   if (battle.phase !== 'scoring') return { ...state, battle };
+   const scored = battleReducer(battle, { type: 'SCORE', rng: rngFor(config, state.sequence, 'score') });
+   if (scored.phase === 'revival-special-move') {
+-    return { ...state, battle: scored, preview: null, sequence: state.sequence + 1 };
++    return { ...state, battle: scored, sequence: state.sequence + 1 };
+   }
+   return settleEngineBattle({ ...state, sequence: state.sequence + 1 }, scored, config);
+ }
+@@ -453,16 +453,16 @@ function inspectionAfterMove(
+   return null;
+ }
+ 
+-function previewOrCommit(state: GameState, point: number, config: GameConfig): GameState {
++function commitMove(state: GameState, point: number, config: GameConfig): GameState {
+   const battle = state.battle;
+   if (battle === null || battle.turn !== 'B' || battle.phase !== 'choose-point' || battle.selectedCardId === null) {
+     return { ...state, invalidPoint: point, invalidReason: '놓을 카드를 먼저 선택하세요.' };
+   }
+   const card = battle.decks.B.hand.find(({ id }) => id === battle.selectedCardId);
+   if (card === undefined) return state;
+-  const stone = createStoneFromCard(card, 'B', `ui-preview-${battle.moveNumber + 1}`);
++  const stone = createStoneFromCard(card, 'B', `ui-move-${battle.moveNumber + 1}`);
+   const play = tryPlay(battle.board, point, stone, battle.koForbiddenKey);
+-  if (!play.ok) return { ...state, preview: null, invalidPoint: point, invalidReason: illegalReason(play.code) };
++  if (!play.ok) return { ...state, invalidPoint: point, invalidReason: illegalReason(play.code) };
+   const moveRng = rngFor(config, state.sequence, 'player-move');
+   const projectedDeck = battleReducer(battle, { type: 'PLAY_CARD', point, rng: moveRng }).decks.B;
+   const capturedStones = play.captured.flatMap((capturedPoint) => {
+@@ -471,21 +471,13 @@ function previewOrCommit(state: GameState, point: number, config: GameConfig): G
+   });
+   const sacrificeModifiers = resolveSacrificeEffects(capturedStones, 'opponent-placement');
+   if (battle.decks.W.handLimit + sacrificeModifiers.length > config.effectLimits.maxHandSize) {
+-    return { ...state, preview: null, invalidPoint: point, invalidReason: '효과 처리 안전 한도를 초과하여 착수를 취소했습니다.' };
++    return { ...state, invalidPoint: point, invalidReason: '효과 처리 안전 한도를 초과하여 착수를 취소했습니다.' };
+   }
+   const effects = moveEffectDefinitions(battle, card, point, capturedStones, projectedDeck);
+   const effectState: ProductEffectState = { battle, run: state.run, log: state.effectLog };
+   const dryRun = resolveMove(effectState, effects, config.effectLimits, { dryRun: true });
+   if (!dryRun.ok) {
+-    return { ...state, preview: null, invalidPoint: point, invalidReason: dryRun.log[0]?.message ?? '효과를 해결할 수 없습니다.' };
+-  }
+-  if (state.preview?.point !== point) {
+-    return {
+-      ...state,
+-      preview: { point, board: play.board, capturedCount: play.capturedCount, effects: dryRun.log },
+-      invalidPoint: null,
+-      invalidReason: '',
+-    };
++    return { ...state, invalidPoint: point, invalidReason: dryRun.log[0]?.message ?? '효과를 해결할 수 없습니다.' };
+   }
+   const committedEffects = resolveMove(effectState, effects, config.effectLimits, { dryRun: false });
+   if (!committedEffects.ok) return state;
+@@ -499,9 +491,12 @@ function previewOrCommit(state: GameState, point: number, config: GameConfig): G
+       },
+     };
+   });
+-  nextBattle = battleReducer(nextBattle, { type: 'RESOLVE_MOVE' });
+-  const pendingInspection = inspectionAfterMove(battle, nextBattle, card, point, play.capturedCount);
+-  if (pendingInspection === null) nextBattle = battleReducer(nextBattle, { type: 'END_TURN' });
++  let pendingInspection: PendingDeckInspection | null = null;
++  if (nextBattle.phase === 'resolving') {
++    nextBattle = battleReducer(nextBattle, { type: 'RESOLVE_MOVE' });
++    pendingInspection = inspectionAfterMove(battle, nextBattle, card, point, play.capturedCount);
++    if (pendingInspection === null) nextBattle = battleReducer(nextBattle, { type: 'END_TURN' });
++  }
+ 
+   let nextRun = state.run;
+   let generalMoneyAwarded = state.generalMoneyAwarded;
+@@ -519,11 +514,10 @@ function previewOrCommit(state: GameState, point: number, config: GameConfig): G
+       generalMoneyAwarded = general.generalMoneyAwarded;
+     }
+   }
+-  return {
++  const advanced = {
+     ...state,
+     run: nextRun,
+     battle: nextBattle,
+-    preview: null,
+     pendingInspection,
+     invalidPoint: null,
+     invalidReason: '',
+@@ -538,17 +532,20 @@ function previewOrCommit(state: GameState, point: number, config: GameConfig): G
+     generalMoneyAwarded,
+     sequence: state.sequence + 1,
+   };
++  return nextBattle.phase === 'result' ? settleEngineBattle(advanced, nextBattle, config) : advanced;
+ }
+ 
+ function performAiTurn(state: GameState, config: GameConfig): GameState {
+   const current = state.battle;
+   if (current === null || current.turn !== 'W') return state;
+   if (current.phase === 'revival-special-move') {
+-    return {
++    const moved = performRevivalSpecialMove(current, rngFor(config, state.sequence, 'revival'));
++    const advanced = {
+       ...state,
+-      battle: readyBattle(performRevivalSpecialMove(current, rngFor(config, state.sequence, 'revival'))),
++      battle: moved.phase === 'result' ? moved : readyBattle(moved),
+       sequence: state.sequence + 1,
+     };
++    return moved.phase === 'result' ? settleEngineBattle(advanced, moved, config) : advanced;
+   }
+   let battle = readyBattle(current);
+   if (battle.phase === 'scoring') return scoreIfReady(state, battle, config);
+@@ -558,7 +555,14 @@ function performAiTurn(state: GameState, config: GameConfig): GameState {
+     color: 'W',
+     hand: battle.decks.W.hand,
+     koForbiddenKey: battle.koForbiddenKey,
+-  }, (candidate) => candidate.captured.length * config.aiCaptureWeight, rngFor(config, state.sequence, 'ai-choice'));
++  }, (candidate) => candidate.captured.length * config.aiCaptureWeight
++    + (candidatePlacementTriggersEffect(
++      battle.board,
++      candidate.point,
++      'W',
++      candidate.card.kind,
++      candidate.captured.length,
++    ) ? config.aiEffectWeight : 0), rngFor(config, state.sequence, 'ai-choice'));
+   if (choice.move === null || choice.move.score < config.aiPassScoreThreshold) {
+     battle = battleReducer(battle, { type: 'PASS' });
+     const scored = scoreIfReady({ ...state, sequence: state.sequence + 1 }, battle, config);
+@@ -573,7 +577,7 @@ function performAiTurn(state: GameState, config: GameConfig): GameState {
+   const aiPlay = tryPlay(
+     battle.board,
+     choice.move.point,
+-    createStoneFromCard(choice.move.card, 'W', `ai-preview-${battle.moveNumber + 1}`),
++    createStoneFromCard(choice.move.card, 'W', `ai-move-${battle.moveNumber + 1}`),
+     battle.koForbiddenKey,
+   );
+   if (!aiPlay.ok) return { ...state, battle };
+@@ -617,9 +621,11 @@ function performAiTurn(state: GameState, config: GameConfig): GameState {
+     };
+   });
+   const placed = battle.board.points[choice.move.point];
+-  battle = battleReducer(battleReducer(battle, { type: 'RESOLVE_MOVE' }), { type: 'END_TURN' });
+-  battle = readyBattle(battle);
+-  return {
++  if (battle.phase === 'resolving') {
++    battle = battleReducer(battleReducer(battle, { type: 'RESOLVE_MOVE' }), { type: 'END_TURN' });
++    battle = readyBattle(battle);
++  }
++  const advanced = {
+     ...state,
+     battle,
+     captures: { ...state.captures, W: state.captures.W + choice.move.captured.length },
+@@ -632,16 +638,24 @@ function performAiTurn(state: GameState, config: GameConfig): GameState {
+     effectLog: resolvedEffects.state.log,
+     sequence: state.sequence + 1,
+   };
++  return battle.phase === 'result' ? settleEngineBattle(advanced, battle, config) : advanced;
+ }
+ 
+ function openNode(state: GameState, node: MapNode, config: GameConfig): GameState {
++  if (!selectableNodeIds(state.map, state.completedNodeIds).includes(node.id)) {
++    return { ...state, notice: '아직 이어지지 않은 길입니다.' };
++  }
+   if (node.type === 'battle' || node.type === 'elite' || node.type === 'boss') {
+     return openBattle(state, node.type === 'battle' ? 'normal' : node.type, config, node.id);
+   }
+-  if (node.type === 'shop') return gameReducer(state, { type: 'OPEN_SHOP' }, config);
+-  if (node.type === 'event') return gameReducer(state, { type: 'OPEN_EVENT' }, config);
+-  if (node.type === 'dojo') return gameReducer(state, { type: 'OPEN_DOJO' }, config);
+-  return { ...state, screen: 'map', notice: '사당은 이번 MVP에서 안전한 휴식 노드로 처리됩니다.' };
++  const completed = {
++    ...state,
++    completedNodeIds: [...state.completedNodeIds, node.id],
++  };
++  if (node.type === 'shop') return gameReducer(completed, { type: 'OPEN_SHOP' }, config);
++  if (node.type === 'event') return gameReducer(completed, { type: 'OPEN_EVENT' }, config);
++  if (node.type === 'dojo') return gameReducer(completed, { type: 'OPEN_DOJO' }, config);
++  return { ...completed, screen: 'map', notice: '사당은 이번 MVP에서 안전한 휴식 노드로 처리됩니다.' };
+ }
+ 
+ function finishInspection(state: GameState, confirm: boolean): GameState {
+@@ -683,10 +697,10 @@ export function gameReducer(state: GameState, action: GameAction, config: GameCo
+     case 'SELECT_CARD': {
+       if (state.battle === null || state.battle.turn !== 'B') return state;
+       const battle = battleReducer(state.battle, { type: 'SELECT_CARD', cardId: action.cardId });
+-      return { ...state, battle, preview: null, invalidPoint: null, invalidReason: '' };
++      return { ...state, battle, invalidPoint: null, invalidReason: '' };
+     }
+     case 'CHOOSE_POINT':
+-      return previewOrCommit(state, action.point, config);
++      return commitMove(state, action.point, config);
+     case 'AI_TURN':
+       return performAiTurn(state, config);
+     case 'CONTINUE_TO_MOVE':
+@@ -706,7 +720,7 @@ export function gameReducer(state: GameState, action: GameAction, config: GameCo
+     case 'PASS': {
+       if (state.battle === null || state.battle.turn !== 'B') return state;
+       const battle = battleReducer(state.battle, { type: 'PASS' });
+-      return scoreIfReady({ ...state, preview: null }, battle, config);
++      return scoreIfReady(state, battle, config);
+     }
+     case 'RESIGN': {
+       if (state.battle === null) return state;
+@@ -797,7 +811,7 @@ export function gameReducer(state: GameState, action: GameAction, config: GameCo
+       return { ...state, run, dojo: result.visit, notice: '수련 결과를 덱에 반영했습니다.' };
+     }
+     case 'RETURN_TO_MAP':
+-      return { ...state, screen: 'map', battle: null, preview: null, pendingInspection: null, invalidPoint: null, invalidReason: '' };
++      return { ...state, screen: 'map', battle: null, pendingInspection: null, invalidPoint: null, invalidReason: '' };
+     case 'RESTART':
+       return createInitialGameState(config);
+     case 'RESOLVE_BATTLE_FOR_ENGINE': {
+diff --git a/src/game/battle.ts b/src/game/battle.ts
+index 7167e40..6eec64b 100644
+--- a/src/game/battle.ts
++++ b/src/game/battle.ts
+@@ -218,6 +218,19 @@ export function hasLegalCardMove(state: BattleState): boolean {
+   });
+ }
+ 
++export function stoneMajorityWinner(board: BoardState): StoneColor | null {
++  const threshold = Math.ceil(board.points.length / 2);
++  let black = 0;
++  let white = 0;
++  board.points.forEach((stone) => {
++    if (stone?.color === 'B') black += 1;
++    if (stone?.color === 'W') white += 1;
++  });
++  if (black >= threshold) return 'B';
++  if (white >= threshold) return 'W';
++  return null;
++}
++
+ function passBattle(state: BattleState, automatic: boolean): BattleState {
+   const consecutivePasses = state.consecutivePasses + 1;
+   return {
+@@ -409,7 +422,7 @@ export function performRevivalSpecialMove(
+         ...state.bossGauges,
+         [gauge.id]: (state.bossGauges[gauge.id] ?? gauge.initial) + gauge.specialMoveDelta,
+       };
+-  return {
++  const placed: BattleState = {
+     ...state,
+     board: candidate.play.board,
+     turn: 'B',
+@@ -426,6 +439,16 @@ export function performRevivalSpecialMove(
+       message: '부활 전용 착수를 수행했습니다.',
+     }],
+   };
++  const majority = stoneMajorityWinner(placed.board);
++  if (majority === null) return placed;
++  return resolveBattleOutcome({
++    ...placed,
++    log: [...placed.log, {
++      type: 'result',
++      actor: majority,
++      message: `${majority === 'B' ? '흑' : '백'}이 돌 점유 과반에 도달했습니다.`,
++    }],
++  }, majority, rng);
+ }
+ 
+ export function battleReducer(state: BattleState, action: BattleAction): BattleState {
+@@ -433,7 +456,12 @@ export function battleReducer(state: BattleState, action: BattleAction): BattleS
+     case 'BEGIN_TURN':
+       if (state.phase !== 'turn-start') return state;
+       if (!hasLegalCardMove(state)) return passBattle(state, true);
+-      return { ...state, phase: 'pre-move' };
++      return {
++        ...state,
++        phase: state.charms[state.turn].length === 0 && state.relics[state.turn].length === 0
++          ? 'choose-card'
++          : 'pre-move',
++      };
+     case 'CONTINUE_TO_MOVE':
+       if (state.phase !== 'pre-move') return state;
+       if (!hasLegalCardMove(state)) return passBattle(state, true);
+@@ -472,7 +500,7 @@ export function battleReducer(state: BattleState, action: BattleAction): BattleS
+         }],
+       };
+     case 'SELECT_CARD':
+-      if (state.phase !== 'choose-card'
++      if ((state.phase !== 'choose-card' && state.phase !== 'pre-move')
+         || !activeDeck(state).hand.some((card) => card.id === action.cardId)) return state;
+       return { ...state, phase: 'choose-point', selectedCardId: action.cardId };
+     case 'PLAY_CARD': {
+@@ -484,7 +512,7 @@ export function battleReducer(state: BattleState, action: BattleAction): BattleS
+       const play = tryPlay(state.board, action.point, stone, state.koForbiddenKey);
+       if (!play.ok) return state;
+       const nextDeck = resolveCardUse(deck, card.id, true, action.rng);
+-      return {
++      const placed: BattleState = {
+         ...state,
+         board: play.board,
+         phase: 'resolving',
+@@ -502,6 +530,16 @@ export function battleReducer(state: BattleState, action: BattleAction): BattleS
+           message: '착수했습니다.',
+         }],
+       };
++      const majority = stoneMajorityWinner(placed.board);
++      if (majority === null) return placed;
++      return resolveBattleOutcome({
++        ...placed,
++        log: [...placed.log, {
++          type: 'result',
++          actor: majority,
++          message: `${majority === 'B' ? '흑' : '백'}이 돌 점유 과반에 도달했습니다.`,
++        }],
++      }, majority, action.rng);
+     }
+     case 'RESOLVE_MOVE':
+       return state.phase === 'resolving' ? { ...state, phase: 'turn-end' } : state;
+diff --git a/src/game/content/stones.ts b/src/game/content/stones.ts
+index ba3cec7..40546c6 100644
+--- a/src/game/content/stones.ts
++++ b/src/game/content/stones.ts
+@@ -20,34 +20,49 @@ export interface StoneDefinition {
+   readonly id: StoneKind;
+   readonly name: string;
+   readonly effect: StoneEffectTemplate | null;
++  readonly ui: {
++    readonly summary: string;
++    readonly condition: string;
++    readonly strategy: string;
++    readonly classKey: string;
++    readonly icon: string;
++  };
+ }
+ 
+ export const STONE_DEFINITIONS: Readonly<Record<StoneKind, StoneDefinition>> = {
+-  'STONE-001': { id: 'STONE-001', name: '일반석', effect: null },
++  'STONE-001': {
++    id: 'STONE-001', name: '일반석', effect: null,
++    ui: { summary: '효과 없는 기본 돌.', condition: '항상 착수 가능.', strategy: '덱을 안정시키고 효과 밀도를 조절한다.', classKey: 'basic', icon: '基' },
++  },
+   'STONE-002': {
+     id: 'STONE-002',
+     name: '척후석',
+     effect: { trigger: 'after-placement', priority: 8, perMoveLimit: 1 },
++    ui: { summary: '착수 후 덱 위 2장을 확인하고 순서를 바꾼다.', condition: '이 카드를 착수했을 때.', strategy: '다음 드로우를 설계해 원하는 병종을 준비한다.', classKey: 'scout', icon: '斥' },
+   },
+   'STONE-003': {
+     id: 'STONE-003',
+     name: '장군석',
+     effect: { trigger: 'capture-success', priority: 7, perMoveLimit: 1 },
++    ui: { summary: '이 카드로 포획하면 5냥을 얻는다.', condition: '이 착수로 상대 돌을 잡았을 때.', strategy: '포획 수를 경제로 바꿔 상점과 도장을 준비한다.', classKey: 'general', icon: '將' },
+   },
+   'STONE-004': {
+     id: 'STONE-004',
+     name: '기병석',
+     effect: { trigger: 'card-entered-hand', priority: 8, perMoveLimit: 1 },
++    ui: { summary: '패에 들어올 때 덱 위 1장을 확인한다.', condition: '직전 내 착수로 상대 돌을 잡았을 때.', strategy: '포획 흐름을 이어 정보 우위를 만든다.', classKey: 'cavalry', icon: '騎' },
+   },
+   'STONE-005': {
+     id: 'STONE-005',
+     name: '수호석',
+     effect: { trigger: 'adjacent-endangered-group', priority: 6, perMoveLimit: 1 },
++    ui: { summary: '착수 후 덱 위 2장을 확인한다.', condition: '활로 2 이하인 아군 그룹 옆에 착수했을 때.', strategy: '위기 그룹을 살리며 다음 수를 내다본다.', classKey: 'guardian', icon: '守' },
+   },
+   'STONE-006': {
+     id: 'STONE-006',
+     name: '희생석',
+     effect: { trigger: 'captured-by-opponent-placement', priority: 4, perMoveLimit: 1 },
++    ui: { summary: '잡히면 다음 내 턴 패 한도가 1 늘어난다.', condition: '상대의 착수로 포획됐을 때.', strategy: '버림돌로 유인하고 손패 이득을 챙긴다.', classKey: 'sacrifice', icon: '犧' },
+   },
+ };
+ 
+@@ -180,21 +195,42 @@ export function resolveGuardianEffect(
+   color: StoneColor,
+   deck: DeckState,
+ ): DeckInspectionEffectResult {
++  const endangered = hasAdjacentEndangeredGroup(boardBeforePlacement, point, color);
++  return {
++    deck,
++    inspected: endangered ? inspectTop(deck, 2) : [],
++    triggered: endangered,
++    extraMoves: 0,
++  };
++}
++
++function hasAdjacentEndangeredGroup(
++  boardBeforePlacement: BoardState,
++  point: number,
++  color: StoneColor,
++): boolean {
+   const checked = new Set<number>();
+-  let endangered = false;
+   for (const adjacent of neighbors(boardBeforePlacement.size, point)) {
+     const adjacentStone = boardBeforePlacement.points[adjacent];
+     if (adjacentStone === null || adjacentStone.color !== color || checked.has(adjacent)) continue;
+     const group = groupAt(boardBeforePlacement, adjacent);
+     group.forEach((member) => checked.add(member));
+-    if (libertiesOf(boardBeforePlacement, group).length <= 2) endangered = true;
++    if (libertiesOf(boardBeforePlacement, group).length <= 2) return true;
+   }
+-  return {
+-    deck,
+-    inspected: endangered ? inspectTop(deck, 2) : [],
+-    triggered: endangered,
+-    extraMoves: 0,
+-  };
++  return false;
++}
++
++export function candidatePlacementTriggersEffect(
++  board: BoardState,
++  point: number,
++  color: StoneColor,
++  kind: StoneKind,
++  capturedCount: number,
++): boolean {
++  if (kind === 'STONE-002') return true;
++  if (kind === 'STONE-003') return capturedCount > 0;
++  if (kind === 'STONE-005') return hasAdjacentEndangeredGroup(board, point, color);
++  return false;
+ }
+ 
+ export type StoneRemovalCause = 'opponent-placement' | 'suicide' | 'voluntary-effect';
+diff --git a/src/game/map.ts b/src/game/map.ts
+index 6e2417f..6746e88 100644
+--- a/src/game/map.ts
++++ b/src/game/map.ts
+@@ -145,3 +145,18 @@ export function enumerateMapPaths(map: ActMap): readonly (readonly MapNode[])[]
+   map.starts.forEach((start) => visit(start, []));
+   return paths;
+ }
++
++export function selectableNodeIds(
++  map: ActMap,
++  completedNodeIds: readonly string[],
++): readonly string[] {
++  if (completedNodeIds.length === 0) return [...map.starts];
++  const byId = new Map<string, MapNode>([
++    ...map.columns.flat().map((candidate) => [candidate.id, candidate] as const),
++    [map.boss.id, map.boss] as const,
++  ]);
++  const lastCompletedId = completedNodeIds.at(-1)!;
++  const lastCompleted = byId.get(lastCompletedId);
++  if (lastCompleted === undefined) throw new Error(`map references missing node: ${lastCompletedId}`);
++  return [...lastCompleted.next];
++}
+diff --git a/src/styles.css b/src/styles.css
+index 31644d4..af6b33e 100644
+--- a/src/styles.css
++++ b/src/styles.css
+@@ -65,8 +65,12 @@ button:disabled { cursor: not-allowed; opacity: .45; }
+ .currency { padding: 7px 10px; border: 1px solid #6d603b; border-radius: 999px; color: var(--gold); background: #231f16; font-weight: 800; }
+ .map-path { display: flex; flex-direction: column; gap: 12px; align-items: stretch; }
+ .path-branch { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
++.map-column { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
++.map-column.boss-column { grid-template-columns: 1fr; }
+ .map-node { min-height: 68px; padding: 10px; display: flex; flex-direction: column; justify-content: center; gap: 5px; }
+ .map-node span { color: var(--muted); font-size: .75rem; }
++.map-node[data-state="done"] { opacity: .58; }
++.map-node[data-state="locked"] { opacity: .38; filter: grayscale(.7); }
+ .battle-node { border-color: #6c9b86; }
+ .elite-node { border-color: #916866; }
+ .boss-node { border-color: var(--gold); background: #2d271a; }
+@@ -93,7 +97,6 @@ button:disabled { cursor: not-allowed; opacity: .45; }
+ .stone-kind { text-anchor: middle; pointer-events: none; font-size: 12px; font-weight: 900; }
+ .stone-kind-b { fill: #d9e1dc; }
+ .stone-kind-w { fill: #343a38; }
+-.preview-stone { fill: rgba(17, 25, 23, .46); stroke: var(--jade); stroke-width: 3; stroke-dasharray: 5 4; pointer-events: none; }
+ .invalid-ring { fill: none; stroke: var(--red); stroke-width: 4; pointer-events: none; }
+ .stone-pop { animation: stone-pop .18s ease-out; }
+ @keyframes stone-pop { from { opacity: .2; transform: scale(.68); transform-origin: center; } to { opacity: 1; transform: scale(1); } }
+@@ -103,9 +106,19 @@ button:disabled { cursor: not-allowed; opacity: .45; }
+ .hand { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+ .card { min-height: 118px; padding: 8px 5px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 5px; text-align: center; }
+ .card.selected { border-color: var(--gold); background: #39301d; transform: translateY(-3px); }
+-.card-kind { width: 25px; height: 25px; display: grid; place-items: center; border-radius: 50%; color: #15201d; background: var(--jade); font-weight: 900; }
++.card[data-stone-class="basic"] { --stone-accent: #d2c7ad; }
++.card[data-stone-class="scout"] { --stone-accent: #63c7d4; }
++.card[data-stone-class="general"] { --stone-accent: #e3a24b; }
++.card[data-stone-class="cavalry"] { --stone-accent: #c083ea; }
++.card[data-stone-class="guardian"] { --stone-accent: #64b87b; }
++.card[data-stone-class="sacrifice"] { --stone-accent: #d46c6c; }
++.card[data-stone-class] { border-top-color: var(--stone-accent); }
++.card-icon { width: 25px; height: 25px; display: grid; place-items: center; border-radius: 50%; color: #15201d; background: var(--stone-accent); font-weight: 900; }
+ .card strong { font-size: .78rem; }
+ .card small { color: var(--muted); font-size: .62rem; line-height: 1.35; }
++.card-detail, .effect-status { border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; background: rgba(255, 255, 255, .035); }
++.card-detail h2, .card-detail p { margin: 0 0 6px; }
++.effect-status { color: var(--jade); font-weight: 700; }
+ .effect-panel, .score-card { padding: 14px; border: 1px solid var(--line); border-radius: 14px; background: rgba(24, 32, 32, .86); }
+ .effect-panel ol { margin: 9px 0 0; padding-left: 1.25rem; color: #cbd2cd; font-size: .78rem; line-height: 1.55; }
+ .controls { display: flex; flex-wrap: wrap; gap: 8px; }
+diff --git a/tests/ai.effects.test.ts b/tests/ai.effects.test.ts
+new file mode 100644
+index 0000000..8a04c44
+--- /dev/null
++++ b/tests/ai.effects.test.ts
+@@ -0,0 +1,68 @@
++import { describe, expect, it } from 'vitest';
++
++import { chooseBattleAiMove } from '../src/game/ai';
++import type { StoneCard } from '../src/game/deck';
++import { candidatePlacementTriggersEffect } from '../src/game/content/stones';
++import { createBoard } from '../src/game/go';
++import { createSeededRng } from '../src/game/rng';
++
++const normal: StoneCard = { id: 'normal', kind: 'STONE-001', temporary: false };
++const scout: StoneCard = { id: 'scout', kind: 'STONE-002', temporary: false };
++
++describe('AI 병종 효과 가중치', () => {
++  it('포획 수가 같으면 양수 효과 가중치로 척후석을 선택한다', () => {
++    const board = createBoard(7);
++    const search = { board, color: 'W' as const, hand: [normal, scout], koForbiddenKey: null };
++    const choice = chooseBattleAiMove(search, (candidate) => (
++      candidate.captured.length * 10
++      + (candidatePlacementTriggersEffect(
++        board,
++        candidate.point,
++        'W',
++        candidate.card.kind,
++        candidate.captured.length,
++      ) ? 2 : 0)
++    ), createSeededRng('effect-positive'));
++
++    expect(choice.move?.card.kind).toBe('STONE-002');
++  });
++
++  it('효과 가중치 0이면 기존 포획 평가와 같은 첫 동률 후보를 유지한다', () => {
++    const board = createBoard(7);
++    const search = { board, color: 'W' as const, hand: [normal, scout], koForbiddenKey: null };
++    const noEffect = chooseBattleAiMove(search, (candidate) => candidate.captured.length * 10,
++      () => 0);
++    const injectedZero = chooseBattleAiMove(search, (candidate) => (
++      candidate.captured.length * 10
++      + (candidatePlacementTriggersEffect(
++        board,
++        candidate.point,
++        'W',
++        candidate.card.kind,
++        candidate.captured.length,
++      ) ? 0 : 0)
++    ), () => 0);
++
++    expect(injectedZero.move).toMatchObject({
++      card: noEffect.move?.card,
++      point: noEffect.move?.point,
++      score: noEffect.move?.score,
++    });
++  });
++
++  it('장군·수호 발동 조건과 비배치 효과 병종을 정확히 예측한다', () => {
++    const board = createBoard(7);
++    expect(candidatePlacementTriggersEffect(board, 0, 'B', 'STONE-003', 0)).toBe(false);
++    expect(candidatePlacementTriggersEffect(board, 0, 'B', 'STONE-003', 1)).toBe(true);
++    expect(candidatePlacementTriggersEffect(board, 0, 'B', 'STONE-002', 0)).toBe(true);
++
++    const points = [...board.points];
++    points[1] = { color: 'B', kind: 'STONE-001', instanceId: 'friend' };
++    points[2] = { color: 'W', kind: 'STONE-001', instanceId: 'block-right' };
++    points[8] = { color: 'W', kind: 'STONE-001', instanceId: 'block-down' };
++    expect(candidatePlacementTriggersEffect({ size: 7, points }, 0, 'B', 'STONE-005', 0)).toBe(true);
++    for (const kind of ['STONE-001', 'STONE-004', 'STONE-006'] as const) {
++      expect(candidatePlacementTriggersEffect(board, 0, 'B', kind, 0)).toBe(false);
++    }
++  });
++});
+diff --git a/tests/audio.manager.test.ts b/tests/audio.manager.test.ts
+index 46206f0..ca7ad3f 100644
+--- a/tests/audio.manager.test.ts
++++ b/tests/audio.manager.test.ts
+@@ -25,9 +25,10 @@ class FakeGain {
+ class FakeSource {
+   buffer: AudioBuffer | null = null;
+   onended: (() => void) | null = null;
++  startCalls = 0;
+   connect() { return this as unknown as AudioNode; }
+   disconnect() { return undefined; }
+-  start() { return undefined; }
++  start() { this.startCalls += 1; return undefined; }
+   stop() { return undefined; }
+ }
+ 
+@@ -36,12 +37,17 @@ class FakeContext {
+   state = 'suspended' as AudioContextState | 'interrupted';
+   destination = {} as AudioDestinationNode;
+   gains: FakeGain[] = [];
++  sources: FakeSource[] = [];
+   decodeCount = 0;
+   resume = vi.fn(async () => { this.state = 'running'; });
+   suspend = vi.fn(async () => { this.state = 'suspended'; });
+   close = vi.fn(async () => undefined);
+   createGain = () => { const gain = new FakeGain(); this.gains.push(gain); return gain as unknown as GainNode; };
+-  createBufferSource = () => new FakeSource() as unknown as AudioBufferSourceNode;
++  createBufferSource = () => {
++    const source = new FakeSource();
++    this.sources.push(source);
++    return source as unknown as AudioBufferSourceNode;
++  };
+   decodeAudioData = vi.fn(async () => { this.decodeCount += 1; return { duration: 12 } as AudioBuffer; });
+ }
+ 
+@@ -55,6 +61,82 @@ afterEach(() => {
+ });
+ 
+ describe('AudioManager', () => {
++  it('resume promise가 미해결이어도 fetch와 BufferSource.start를 진행한다', async () => {
++    const context = new FakeContext();
++    context.resume = vi.fn(() => new Promise<void>(() => undefined));
++    const fetcher = vi.fn(async () => response());
++    const manager = new AudioManager({
++      tuning: DRAFT_AUDIO_TUNING,
++      createContext: () => context as unknown as AudioContext,
++      fetcher,
++    });
++    managers.push(manager);
++
++    void manager.unlock();
++    await tick();
++
++    expect(fetcher).toHaveBeenCalledTimes(1);
++    expect(context.sources.reduce((sum, source) => sum + source.startCalls, 0)).toBeGreaterThanOrEqual(1);
++  });
++
++  it('WebAudio fetch 실패 시 fallback 재생과 상태를 노출한다', async () => {
++    const context = new FakeContext();
++    const audio = { src: '', loop: false, muted: false, volume: 1, paused: true, play: vi.fn(async () => undefined), pause: vi.fn() } as unknown as HTMLAudioElement;
++    const errors: unknown[] = [];
++    const manager = new AudioManager({
++      tuning: DRAFT_AUDIO_TUNING,
++      createContext: () => context as unknown as AudioContext,
++      createAudio: () => audio,
++      fetcher: vi.fn(async () => { throw new Error('network'); }),
++      onError: (error) => errors.push(error),
++    });
++    managers.push(manager);
++
++    await manager.unlock();
++
++    expect(audio.play).toHaveBeenCalledTimes(1);
++    expect(manager.snapshot().playback).toBe('fallback');
++    expect(errors.length).toBeGreaterThanOrEqual(1);
++  });
++
++  it('정상 WebAudio 시작을 상태로 노출한다', async () => {
++    const manager = new AudioManager({
++      tuning: DRAFT_AUDIO_TUNING,
++      createContext: () => new FakeContext() as unknown as AudioContext,
++      fetcher: vi.fn(async () => response()),
++    });
++    managers.push(manager);
++    await manager.unlock();
++    expect(manager.snapshot().playback).toBe('web-audio');
++  });
++
++  it('WebAudio와 fallback이 모두 실패하면 오류와 원인을 노출한다', async () => {
++    const manager = new AudioManager({
++      tuning: DRAFT_AUDIO_TUNING,
++      createContext: () => new FakeContext() as unknown as AudioContext,
++      createAudio: null,
++      fetcher: vi.fn(async () => { throw new Error('offline'); }),
++    });
++    managers.push(manager);
++    await manager.unlock();
++    expect(manager.snapshot().playback).toBe('error');
++    expect(manager.snapshot().lastError).toContain('offline');
++  });
++
++  it('오류 상태에서 unlock 재시도는 현재 트랙을 다시 로드한다', async () => {
++    const fetcher = vi.fn(async () => { throw new Error('offline'); });
++    const manager = new AudioManager({
++      tuning: DRAFT_AUDIO_TUNING,
++      createContext: () => new FakeContext() as unknown as AudioContext,
++      createAudio: null,
++      fetcher,
++    });
++    managers.push(manager);
++    await manager.unlock();
++    await manager.unlock();
++    expect(fetcher).toHaveBeenCalledTimes(2);
++  });
++
+   it('첫 gesture 전 context를 만들지 않는다', async () => {
+     const createContext = vi.fn(() => new FakeContext() as unknown as AudioContext);
+     const manager = new AudioManager({ tuning: DRAFT_AUDIO_TUNING, createContext, fetcher: vi.fn(async () => response()), baseUrl: '/portal/' });
+diff --git a/tests/battle.majority.test.ts b/tests/battle.majority.test.ts
+new file mode 100644
+index 0000000..6059caf
+--- /dev/null
++++ b/tests/battle.majority.test.ts
+@@ -0,0 +1,140 @@
++import { describe, expect, it } from 'vitest';
++
++import {
++  battleReducer,
++  createBattleState,
++  performRevivalSpecialMove,
++  stoneMajorityWinner,
++  type BattleState,
++} from '../src/game/battle';
++import { createBoard } from '../src/game/go';
++import { createSeededRng } from '../src/game/rng';
++import type { BoardState, StoneColor } from '../src/game/types';
++import { DRAFT_BATTLE_DEFINITION, DRAFT_KOMI } from './fixtures/draft-battle-config';
++
++function boardWith(size: 7 | 9, black: number, white: number): BoardState {
++  const points = [...createBoard(size).points];
++  for (let point = 0; point < black; point += 1) {
++    points[point] = { color: 'B', kind: 'STONE-001', instanceId: `black-${point}` };
++  }
++  for (let point = black; point < black + white; point += 1) {
++    points[point] = { color: 'W', kind: 'STONE-001', instanceId: `white-${point}` };
++  }
++  return { size, points };
++}
++
++function readyToPlay(board: BoardState, turn: StoneColor, revival = false): BattleState {
++  const state = createBattleState({
++    act: 1,
++    board,
++    playerDeck: ['STONE-001', 'STONE-002', 'STONE-003', 'STONE-004'],
++    enemyDeck: ['STONE-001', 'STONE-002', 'STONE-003', 'STONE-004'],
++    enemy: revival ? DRAFT_BATTLE_DEFINITION : { id: 'NO-REVIVAL' },
++    komi: DRAFT_KOMI,
++    rng: createSeededRng('majority-create'),
++    turn,
++  });
++  return {
++    ...state,
++    phase: 'choose-point',
++    selectedCardId: state.decks[turn].hand[0].id,
++  };
++}
++
++function play(state: BattleState, point: number): BattleState {
++  return battleReducer(state, {
++    type: 'PLAY_CARD',
++    point,
++    rng: createSeededRng(`majority-play-${point}`),
++  });
++}
++
++describe('돌 점유 과반 즉시 종료', () => {
++  it('7x7과 9x9에서 영역이 아닌 돌 개수만으로 과반을 판정한다', () => {
++    expect(stoneMajorityWinner(boardWith(7, 24, 0))).toBeNull();
++    expect(stoneMajorityWinner(boardWith(7, 25, 0))).toBe('B');
++    expect(stoneMajorityWinner(boardWith(7, 0, 25))).toBe('W');
++    expect(stoneMajorityWinner(boardWith(9, 40, 0))).toBeNull();
++    expect(stoneMajorityWinner(boardWith(9, 41, 0))).toBe('B');
++  });
++
++  it('빈 판 첫 착수는 영역 점수와 무관하게 대국을 끝내지 않는다', () => {
++    const next = play(readyToPlay(createBoard(7), 'B'), 0);
++
++    expect(next.phase).not.toBe('result');
++    expect(next.outcome).toBeNull();
++  });
++
++  it('흑의 25번째 착수는 즉시 승리하고 종료 사유를 기록한다', () => {
++    const next = play(readyToPlay(boardWith(7, 24, 0), 'B'), 24);
++
++    expect(next).toMatchObject({
++      phase: 'result',
++      outcome: 'stage-win',
++      rewardStatus: 'available',
++    });
++    expect(next.log.some(({ message }) => message.includes('점유 과반'))).toBe(true);
++  });
++
++  it('백의 25번째 착수는 대칭적으로 즉시 패배를 확정한다', () => {
++    const next = play(readyToPlay(boardWith(7, 0, 24), 'W'), 24);
++
++    expect(next).toMatchObject({ phase: 'result', outcome: 'run-loss' });
++  });
++
++  it('흑 과반 승리는 기존 부활 경로를 그대로 사용한다', () => {
++    const next = play(readyToPlay(boardWith(7, 24, 0), 'B', true), 24);
++
++    expect(next).toMatchObject({
++      phase: 'revival-special-move',
++      revivalStage: 2,
++      rewardStatus: 'withheld',
++    });
++  });
++
++  it('패스는 비정상 주입 판면에서도 점유 판정 계기가 아니다', () => {
++    const state = { ...readyToPlay(boardWith(7, 25, 0), 'B'), phase: 'choose-card' as const };
++    const next = battleReducer(state, { type: 'PASS' });
++
++    expect(next.phase).toBe('turn-start');
++    expect(next.outcome).toBeNull();
++  });
++
++  it('포획 제거가 반영된 완결 판면에서 점유를 판정한다', () => {
++    const points = [...createBoard(7).points];
++    for (let point = 2; point <= 25; point += 1) {
++      points[point] = { color: 'B', kind: 'STONE-001', instanceId: `black-${point}` };
++    }
++    points[1] = { color: 'W', kind: 'STONE-001', instanceId: 'white-target' };
++    points[8] = { color: 'B', kind: 'STONE-001', instanceId: 'black-down' };
++    const next = play(readyToPlay({ size: 7, points }, 'B'), 0);
++
++    expect(next.board.points[1]).toBeNull();
++    expect(next.outcome).toBe('stage-win');
++  });
++
++  it('부활 전용 착수도 완결 직후 백 과반을 판정한다', () => {
++    const points = [...boardWith(7, 0, 24).points];
++    const revived = {
++      ...readyToPlay({ size: 7, points }, 'W', true),
++      phase: 'revival-special-move' as const,
++      revivalStage: 2 as const,
++      enemy: {
++        ...DRAFT_BATTLE_DEFINITION,
++        revival: {
++          ...DRAFT_BATTLE_DEFINITION.revival!,
++          specialMoves: DRAFT_BATTLE_DEFINITION.revival!.specialMoves.map((move) => ({
++            ...move,
++            scoreWeights: {
++              ...move.scoreWeights,
++              pointWeights: move.scoreWeights.pointWeights.map((_, point) => point === 24 ? 1000 : 0),
++            },
++          })),
++        },
++      },
++    };
++    const next = performRevivalSpecialMove(revived, createSeededRng('revival-majority'));
++
++    expect(next).toMatchObject({ phase: 'result', outcome: 'run-loss' });
++  });
++});
+diff --git a/tests/battle.premove.test.ts b/tests/battle.premove.test.ts
+new file mode 100644
+index 0000000..48dcd6b
+--- /dev/null
++++ b/tests/battle.premove.test.ts
+@@ -0,0 +1,60 @@
++import { describe, expect, it } from 'vitest';
++
++import { battleReducer, createBattleState, type BattleState } from '../src/game/battle';
++import { createBoard } from '../src/game/go';
++import { createSeededRng } from '../src/game/rng';
++import { DRAFT_KOMI } from './fixtures/draft-battle-config';
++
++function create(options: { charm?: boolean; relic?: boolean } = {}): BattleState {
++  return createBattleState({
++    act: 1,
++    board: createBoard(7),
++    playerDeck: ['STONE-001', 'STONE-002', 'STONE-003', 'STONE-004'],
++    enemyDeck: ['STONE-001', 'STONE-002', 'STONE-003', 'STONE-004'],
++    enemy: { id: 'PREMOVE-ENEMY' },
++    komi: DRAFT_KOMI,
++    playerCharms: options.charm ? ['ITEM-001'] : [],
++    playerRelics: options.relic ? ['RELIC-001'] : [],
++    rng: createSeededRng('premove-create'),
++  });
++}
++
++describe('선택형 pre-move 흐름', () => {
++  it('부적과 유물이 모두 없으면 BEGIN_TURN 직후 카드 선택으로 간다', () => {
++    expect(battleReducer(create(), { type: 'BEGIN_TURN' }).phase).toBe('choose-card');
++  });
++
++  it('부적 또는 유물을 보유하면 pre-move를 유지한다', () => {
++    expect(battleReducer(create({ charm: true }), { type: 'BEGIN_TURN' }).phase).toBe('pre-move');
++    expect(battleReducer(create({ relic: true }), { type: 'BEGIN_TURN' }).phase).toBe('pre-move');
++  });
++
++  it('pre-move에서 카드를 바로 선택하면 좌표 선택으로 전이한다', () => {
++    const begun = battleReducer(create({ charm: true }), { type: 'BEGIN_TURN' });
++    const selected = battleReducer(begun, { type: 'SELECT_CARD', cardId: begun.decks.B.hand[0].id });
++
++    expect(selected.phase).toBe('choose-point');
++    expect(selected.selectedCardId).toBe(begun.decks.B.hand[0].id);
++  });
++
++  it('부적 사용 뒤에도 별도 확인 없이 카드를 선택할 수 있다', () => {
++    const begun = battleReducer(create({ charm: true }), { type: 'BEGIN_TURN' });
++    const used = battleReducer(begun, { type: 'USE_CHARM', charmId: 'ITEM-001' });
++    const selected = battleReducer(used, { type: 'SELECT_CARD', cardId: used.decks.B.hand[0].id });
++
++    expect(used.phase).toBe('pre-move');
++    expect(selected.phase).toBe('choose-point');
++  });
++
++  it('합법 카드 수가 없으면 기존 자동 패스를 유지한다', () => {
++    const state = create();
++    const emptyHand = {
++      ...state,
++      decks: { ...state.decks, B: { ...state.decks.B, hand: [] } },
++    };
++    const next = battleReducer(emptyHand, { type: 'BEGIN_TURN' });
++
++    expect(next).toMatchObject({ turn: 'W', phase: 'turn-start', consecutivePasses: 1 });
++    expect(next.log.at(-1)).toMatchObject({ type: 'pass', automatic: true });
++  });
++});
+diff --git a/tests/battle.product-effects.test.ts b/tests/battle.product-effects.test.ts
+index 1095d37..834c37a 100644
+--- a/tests/battle.product-effects.test.ts
++++ b/tests/battle.product-effects.test.ts
+@@ -43,9 +43,7 @@ function productBattle(
+ }
+ 
+ function commit(state: GameState, point: number, config = DRAFT_GAME_CONFIG): GameState {
+-  const preview = gameReducer(state, { type: 'CHOOSE_POINT', point }, config);
+-  expect(preview.preview?.point).toBe(point);
+-  return gameReducer(preview, { type: 'CHOOSE_POINT', point }, config);
++  return gameReducer(state, { type: 'CHOOSE_POINT', point }, config);
+ }
+ 
+ function captureBoard(capturedKind: StoneKind = 'STONE-001'): BoardState {
+@@ -152,7 +150,6 @@ describe('제품 전투 특수 돌 배선', () => {
+     const initial = productBattle('STONE-002');
+     const rejected = gameReducer(initial, { type: 'CHOOSE_POINT', point: 0 }, config);
+ 
+-    expect(rejected.preview).toBeNull();
+     expect(rejected.invalidReason).toContain('안전 한도');
+     expect(rejected.battle!.board).toBe(initial.battle!.board);
+     expect(rejected.battle!.decks.B).toBe(initial.battle!.decks.B);
+diff --git a/tests/fixtures/draft-game-config.ts b/tests/fixtures/draft-game-config.ts
+index e48a825..506f2eb 100644
+--- a/tests/fixtures/draft-game-config.ts
++++ b/tests/fixtures/draft-game-config.ts
+@@ -24,6 +24,7 @@ export const DRAFT_GAME_CONFIG: GameConfig = {
+   shop: DRAFT_SHOP_CATALOG,
+   eventCurrencyReward: 20,
+   aiCaptureWeight: 10,
++  aiEffectWeight: 2,
+   aiPassScoreThreshold: -1,
+   analysisCaptureWeight: 10,
+   analysisEffectWeight: 1,
+diff --git a/tests/map.progression.test.ts b/tests/map.progression.test.ts
+new file mode 100644
+index 0000000..1dfc587
+--- /dev/null
++++ b/tests/map.progression.test.ts
+@@ -0,0 +1,97 @@
++import { describe, expect, it } from 'vitest';
++
++import { createInitialGameState, gameReducer, type GameState } from '../src/game/GameProvider';
++import { selectableNodeIds, type MapNode } from '../src/game/map';
++import { DRAFT_GAME_CONFIG } from './fixtures/draft-game-config';
++
++function findNode(state: GameState, id: string): MapNode {
++  const node = [...state.map.columns.flat(), state.map.boss].find((candidate) => candidate.id === id);
++  if (node === undefined) throw new Error(`missing test node: ${id}`);
++  return node;
++}
++
++function finishNode(state: GameState, node: MapNode): GameState {
++  let next = gameReducer(state, { type: 'OPEN_NODE', node }, DRAFT_GAME_CONFIG);
++  if (node.type === 'battle' || node.type === 'elite') {
++    next = gameReducer(next, {
++      type: 'RESOLVE_BATTLE_FOR_ENGINE',
++      battle: node.type === 'elite' ? 'elite' : 'normal',
++      resolution: 'win',
++      capturedStones: 0,
++    }, DRAFT_GAME_CONFIG);
++    return gameReducer(next, { type: 'DECLINE_REWARD' }, DRAFT_GAME_CONFIG);
++  }
++  if (node.type === 'boss') {
++    return gameReducer(next, {
++      type: 'RESOLVE_BATTLE_FOR_ENGINE',
++      battle: 'boss',
++      resolution: 'win',
++      capturedStones: 0,
++    }, DRAFT_GAME_CONFIG);
++  }
++  return next.screen === 'map'
++    ? next
++    : gameReducer(next, { type: 'RETURN_TO_MAP' }, DRAFT_GAME_CONFIG);
++}
++
++describe('지도 경로 진행', () => {
++  it('시작에는 starts만, 완료 뒤에는 마지막 노드 next만 연다', () => {
++    const state = createInitialGameState(DRAFT_GAME_CONFIG);
++    expect(selectableNodeIds(state.map, [])).toEqual(state.map.starts);
++
++    const start = findNode(state, state.map.starts[0]);
++    expect(selectableNodeIds(state.map, [start.id])).toEqual(start.next);
++    expect(selectableNodeIds(state.map, [start.id])).not.toContain(state.map.boss.id);
++
++    const finalColumn = state.map.columns[4][0];
++    expect(selectableNodeIds(state.map, [finalColumn.id])).toEqual([state.map.boss.id]);
++    expect(() => selectableNodeIds(state.map, ['missing-node'])).toThrow(/missing-node/);
++  });
++
++  it('잠긴 OPEN_NODE를 reducer에서 막고 전투 승리·보상 뒤 next를 연다', () => {
++    let state = createInitialGameState(DRAFT_GAME_CONFIG);
++    state = gameReducer(state, { type: 'START_RUN' }, DRAFT_GAME_CONFIG);
++    expect(state.completedNodeIds).toEqual([]);
++
++    const locked = state.map.columns[1][0];
++    const rejected = gameReducer(state, { type: 'OPEN_NODE', node: locked }, DRAFT_GAME_CONFIG);
++    expect(rejected).toMatchObject({ screen: 'map', battle: null, completedNodeIds: [] });
++    expect(rejected.notice).toContain('이어지지 않은');
++
++    const start = findNode(state, state.map.starts[0]);
++    state = gameReducer(state, { type: 'OPEN_NODE', node: start }, DRAFT_GAME_CONFIG);
++    expect(state.completedNodeIds).toEqual([]);
++    state = gameReducer(state, {
++      type: 'RESOLVE_BATTLE_FOR_ENGINE',
++      battle: 'normal',
++      resolution: 'win',
++      capturedStones: 0,
++    }, DRAFT_GAME_CONFIG);
++    expect(state.completedNodeIds).toEqual([start.id]);
++    expect(state.screen).toBe('reward');
++    state = gameReducer(state, { type: 'DECLINE_REWARD' }, DRAFT_GAME_CONFIG);
++    expect(selectableNodeIds(state.map, state.completedNodeIds)).toEqual(start.next);
++  });
++
++  it('비전투 노드는 방문으로 완료되고 막 전환과 RESTART에서 진행을 초기화한다', () => {
++    let state = createInitialGameState(DRAFT_GAME_CONFIG);
++    state = gameReducer(state, { type: 'START_RUN' }, DRAFT_GAME_CONFIG);
++
++    let nextId = state.map.starts[0];
++    while (nextId !== state.map.boss.id) {
++      const node = findNode(state, nextId);
++      state = finishNode(state, node);
++      expect(state.completedNodeIds).toContain(node.id);
++      nextId = node.next[0];
++    }
++
++    const boss = state.map.boss;
++    state = finishNode(state, boss);
++    expect(state.run.act).toBe(2);
++    expect(state.completedNodeIds).toEqual([]);
++    expect(selectableNodeIds(state.map, state.completedNodeIds)).toEqual(state.map.starts);
++
++    state = gameReducer(state, { type: 'RESTART' }, DRAFT_GAME_CONFIG);
++    expect(state.completedNodeIds).toEqual([]);
++  });
++});
+diff --git a/tests/stones.presentation.test.ts b/tests/stones.presentation.test.ts
+new file mode 100644
+index 0000000..bc2fc8f
+--- /dev/null
++++ b/tests/stones.presentation.test.ts
+@@ -0,0 +1,31 @@
++import { describe, expect, it } from 'vitest';
++
++import { STONE_DEFINITIONS } from '../src/game/content/stones';
++
++describe('병종 카드 표시 계약', () => {
++  it('6개 병종 모두 한국어 요약·조건·전략을 제공한다', () => {
++    const definitions = Object.values(STONE_DEFINITIONS);
++    expect(definitions).toHaveLength(6);
++    for (const definition of definitions) {
++      for (const value of [definition.ui.summary, definition.ui.condition, definition.ui.strategy]) {
++        expect(value).toMatch(/[가-힣]/);
++        expect(value).not.toMatch(/STONE-|after-placement|capture-success|card-entered-hand|adjacent-endangered-group|captured-by-opponent-placement/);
++      }
++    }
++  });
++
++  it('병종별 클래스와 문양이 모두 서로 다르다', () => {
++    const ui = Object.values(STONE_DEFINITIONS).map(({ ui: value }) => value);
++    expect(new Set(ui.map(({ classKey }) => classKey)).size).toBe(6);
++    expect(new Set(ui.map(({ icon }) => icon)).size).toBe(6);
++  });
++
++  it('승인된 효과 수치를 요약에 명시한다', () => {
++    expect(STONE_DEFINITIONS['STONE-002'].ui.summary).toContain('2장');
++    expect(STONE_DEFINITIONS['STONE-003'].ui.summary).toContain('5냥');
++    expect(STONE_DEFINITIONS['STONE-004'].ui.summary).toContain('1장');
++    expect(STONE_DEFINITIONS['STONE-005'].ui.condition).toContain('활로 2');
++    expect(STONE_DEFINITIONS['STONE-006'].ui.summary).toContain('패 한도');
++    expect(STONE_DEFINITIONS['STONE-006'].ui.summary).toContain('1');
++  });
++});
+diff --git a/tests/ui.audio-status.test.tsx b/tests/ui.audio-status.test.tsx
+new file mode 100644
+index 0000000..8377d78
+--- /dev/null
++++ b/tests/ui.audio-status.test.tsx
+@@ -0,0 +1,62 @@
++// @vitest-environment jsdom
++import { act } from 'react';
++import { createRoot } from 'react-dom/client';
++import { afterEach, describe, expect, it, vi } from 'vitest';
++
++import { AudioControls } from '../src/components/AudioControls';
++
++let root: ReturnType<typeof createRoot> | null = null;
++let host: HTMLDivElement | null = null;
++
++afterEach(() => {
++  if (root) act(() => root?.unmount());
++  host?.remove();
++  root = null;
++  host = null;
++});
++
++function renderMusic(playback: 'idle' | 'pending' | 'web-audio' | 'fallback' | 'error') {
++  const unlock = vi.fn(async () => undefined);
++  const music = {
++    track: 'overworld',
++    snapshot: {
++      unlocked: playback !== 'idle',
++      route: 'map',
++      track: 'overworld',
++      cache: [],
++      muted: false,
++      volume: 1,
++      generation: 0,
++      playback,
++      lastError: playback === 'error' ? 'offline' : null,
++    },
++    unlock,
++    resume: vi.fn(async () => undefined),
++    setMuted: vi.fn(),
++    setVolume: vi.fn(),
++  };
++  host = document.createElement('div');
++  document.body.append(host);
++  root = createRoot(host);
++  act(() => root?.render(<AudioControls music={music as never} />));
++  return { music, unlock };
++}
++
++describe('음악 재생 상태 UI', () => {
++  it('오류 상태에서 재시도 버튼으로 unlock을 다시 호출한다', () => {
++    const { unlock } = renderMusic('error');
++    const retry = [...host!.querySelectorAll('button')]
++      .find(({ textContent }) => textContent?.includes('음악 다시 시도'));
++    expect(retry).toBeTruthy();
++    act(() => retry?.click());
++    expect(unlock).toHaveBeenCalledTimes(1);
++  });
++
++  it('기존 트랙 라벨과 음소거 토글을 유지한다', () => {
++    const { music } = renderMusic('web-audio');
++    expect(host?.textContent).toContain('여정 음악');
++    const mute = host?.querySelector<HTMLButtonElement>('[aria-label="음악 끄기"]');
++    act(() => mute?.click());
++    expect(music.setMuted).toHaveBeenCalledWith(true);
++  });
++});
+diff --git a/tests/ui.battle.test.tsx b/tests/ui.battle.test.tsx
+index b27ddb2..9641b38 100644
+--- a/tests/ui.battle.test.tsx
++++ b/tests/ui.battle.test.tsx
+@@ -60,9 +60,10 @@ it('실제 10장 덱에서 손패 4장을 보여주고 병종명을 정확히 
+   expect(host.textContent).toContain('내 덱 10');
+   expect(host.textContent).toContain('장군석');
+   expect(host.textContent).not.toContain('STONE-003 수호석');
++  expect(host.textContent).toContain('점유 흑 0 · 백 0 / 25');
+ });
+ 
+-it('tryPlay/resolveMove dry-run 뒤 재확인하면 카드 소비와 AI 선택을 수행한다', () => {
++it('tryPlay/resolveMove 검증 뒤 한 탭으로 카드 소비와 AI 선택을 수행한다', () => {
+   vi.useFakeTimers();
+   host = document.createElement('div');
+   document.body.append(host);
+@@ -70,13 +71,10 @@ it('tryPlay/resolveMove dry-run 뒤 재확인하면 카드 소비와 AI 선택
+   act(() => root?.render(<App config={DRAFT_GAME_CONFIG} />));
+   click('등반 시작');
+   click('일반전');
+-  click('착수로 진행');
++  expect(host.textContent).not.toContain('착수로 진행');
+   click('일반석');
+   const hit = host.querySelector<SVGCircleElement>('[data-hit="0-0"]');
+   act(() => hit?.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+-  expect(host.textContent).toContain('합법 수 미리보기');
+-  expect(host.textContent).toContain('확정');
+-  act(() => hit?.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+   expect(host.querySelectorAll('.stone-b')).toHaveLength(1);
+   expect(host.textContent).toContain('버림 1');
+   act(() => vi.runAllTimers());
+@@ -118,7 +116,6 @@ it('척후석 착수 후 실제 덱 위 카드로 재정렬 패널을 열고 취
+     click('척후석');
+     const hit = host.querySelector<SVGCircleElement>('[data-hit="0-0"]');
+     act(() => hit?.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+-    act(() => hit?.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+   };
+ 
+   mountScout();
+@@ -150,13 +147,13 @@ it('기권은 run 패배 결과 경로로 이어진다', () => {
+   expect(host.textContent).toContain('런 패배');
+ });
+ 
+-it('포획 미리보기와 점유·자충수·단순패 사유를 엔진 판정 그대로 노출한다', () => {
++it('포획 확정과 점유·자충수·단순패 사유를 엔진 판정 그대로 노출한다', () => {
+   let state = createInitialGameState(DRAFT_GAME_CONFIG);
+   state = gameReducer(state, { type: 'START_RUN' }, DRAFT_GAME_CONFIG);
+   state = gameReducer(state, { type: 'OPEN_BATTLE', battle: 'normal' }, DRAFT_GAME_CONFIG);
+-  state = gameReducer(state, { type: 'CONTINUE_TO_MOVE' }, DRAFT_GAME_CONFIG);
+   const selectedCard = state.battle!.decks.B.hand[0];
+   state = gameReducer(state, { type: 'SELECT_CARD', cardId: selectedCard.id }, DRAFT_GAME_CONFIG);
++  const selectedState = state;
+ 
+   const capturePoints = [...state.battle!.board.points];
+   capturePoints[1] = { color: 'W', kind: 'STONE-001', instanceId: 'white-target' };
+@@ -164,25 +161,25 @@ it('포획 미리보기와 점유·자충수·단순패 사유를 엔진 판정
+   capturePoints[8] = { color: 'B', kind: 'STONE-001', instanceId: 'black-down' };
+   state = { ...state, battle: { ...state.battle!, board: { size: 7, points: capturePoints } } };
+   state = gameReducer(state, { type: 'CHOOSE_POINT', point: 0 }, DRAFT_GAME_CONFIG);
+-  expect(state.preview?.capturedCount).toBe(1);
++  expect(state.captures.B).toBe(1);
+ 
+-  const occupied = [...state.battle!.board.points];
++  const occupied = [...selectedState.battle!.board.points];
+   occupied[0] = { color: 'W', kind: 'STONE-001', instanceId: 'occupied' };
+-  state = { ...state, preview: null, battle: { ...state.battle!, board: { size: 7, points: occupied } } };
++  state = { ...selectedState, battle: { ...selectedState.battle!, board: { size: 7, points: occupied } } };
+   state = gameReducer(state, { type: 'CHOOSE_POINT', point: 0 }, DRAFT_GAME_CONFIG);
+   expect(state.invalidReason).toContain('이미 돌');
+ 
+   const suicide = Array(49).fill(null);
+   suicide[1] = { color: 'W', kind: 'STONE-001', instanceId: 'white-right' };
+   suicide[7] = { color: 'W', kind: 'STONE-001', instanceId: 'white-down' };
+-  state = { ...state, preview: null, battle: { ...state.battle!, board: { size: 7, points: suicide }, koForbiddenKey: null } };
++  state = { ...selectedState, battle: { ...selectedState.battle!, board: { size: 7, points: suicide }, koForbiddenKey: null } };
+   state = gameReducer(state, { type: 'CHOOSE_POINT', point: 0 }, DRAFT_GAME_CONFIG);
+   expect(state.invalidReason).toContain('자충수');
+ 
+   const empty = { size: 7 as const, points: Array(49).fill(null) };
+   const koProbe = tryPlay(empty, 0, { color: 'B', kind: selectedCard.kind, instanceId: 'ko-probe' }, null);
+   expect(koProbe.ok).toBe(true);
+-  state = { ...state, preview: null, battle: { ...state.battle!, board: empty, koForbiddenKey: canonicalKoKey(koProbe.board) } };
++  state = { ...selectedState, battle: { ...selectedState.battle!, board: empty, koForbiddenKey: canonicalKoKey(koProbe.board) } };
+   state = gameReducer(state, { type: 'CHOOSE_POINT', point: 0 }, DRAFT_GAME_CONFIG);
+   expect(state.invalidReason).toContain('단순패');
+ });
+diff --git a/tests/ui.board.test.tsx b/tests/ui.board.test.tsx
+index 40b037b..b4b990f 100644
+--- a/tests/ui.board.test.tsx
++++ b/tests/ui.board.test.tsx
+@@ -30,8 +30,8 @@ it('9×9가 81개 좌표를 비중첩 렌더한다', () => {
+   let state = createInitialGameState(DRAFT_GAME_CONFIG);
+   state = gameReducer(state, { type: 'START_RUN' }, DRAFT_GAME_CONFIG);
+   state = gameReducer(state, { type: 'RESOLVE_BATTLE_FOR_ENGINE', battle: 'boss', resolution: 'win', capturedStones: 0 }, DRAFT_GAME_CONFIG);
++  state = gameReducer(state, { type: 'OPEN_BATTLE', battle: 'boss' }, DRAFT_GAME_CONFIG);
+   act(() => root?.render(<App config={DRAFT_GAME_CONFIG} initialState={state} />));
+-  click('보스');
+   expect(host.querySelector('[data-game-engine="integrated"]')).toBeTruthy();
+   const hits = [...host.querySelectorAll<SVGCircleElement>('.hit')];
+   expect(hits).toHaveLength(81);
+@@ -50,12 +50,9 @@ it('좌표는 행·열 이름과 Enter/Space 착수를 제공한다', () => {
+   act(() => root?.render(<App config={DRAFT_GAME_CONFIG} />));
+   click('등반 시작');
+   click('일반전');
+-  click('착수로 진행');
+   click('일반석');
+   const hit = host.querySelector<SVGCircleElement>('[data-hit="0-0"]');
+   expect(hit?.getAttribute('aria-label')).toContain('1행 1열');
+   act(() => hit?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })));
+-  expect(host.querySelector('.preview-stone')).toBeTruthy();
+-  act(() => hit?.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true })));
+   expect(host.querySelectorAll('.stone-b')).toHaveLength(1);
+ });
+diff --git a/tests/ui.card-clarity.test.tsx b/tests/ui.card-clarity.test.tsx
+new file mode 100644
+index 0000000..871447b
+--- /dev/null
++++ b/tests/ui.card-clarity.test.tsx
+@@ -0,0 +1,88 @@
++// @vitest-environment jsdom
++import { act } from 'react';
++import { createRoot } from 'react-dom/client';
++import { afterEach, describe, expect, it } from 'vitest';
++
++import { App } from '../src/App';
++import type { StoneCard } from '../src/game/deck';
++import { createInitialGameState, gameReducer, type GameState } from '../src/game/GameProvider';
++import { DRAFT_GAME_CONFIG } from './fixtures/draft-game-config';
++import { DRAFT_REWARD_CATALOG } from './fixtures/draft-run-config';
++
++let root: ReturnType<typeof createRoot> | null = null;
++let host: HTMLDivElement | null = null;
++
++afterEach(() => {
++  if (root) act(() => root?.unmount());
++  host?.remove();
++  root = null;
++  host = null;
++});
++
++function mount(state: GameState): void {
++  host = document.createElement('div');
++  document.body.append(host);
++  root = createRoot(host);
++  act(() => root?.render(<App config={DRAFT_GAME_CONFIG} initialState={state} />));
++}
++
++function battleWithEveryKind(): GameState {
++  let state = createInitialGameState(DRAFT_GAME_CONFIG);
++  state = gameReducer(state, { type: 'START_RUN' }, DRAFT_GAME_CONFIG);
++  state = gameReducer(state, { type: 'OPEN_BATTLE', battle: 'normal' }, DRAFT_GAME_CONFIG);
++  const hand: readonly StoneCard[] = Object.keys(DRAFT_GAME_CONFIG.enemyDeck.slice(0, 6))
++    .map((_, index) => ({
++      id: `clarity-${index + 1}`,
++      kind: `STONE-00${index + 1}` as StoneCard['kind'],
++      temporary: false,
++    }));
++  return {
++    ...state,
++    battle: {
++      ...state.battle!,
++      phase: 'choose-card',
++      turn: 'B',
++      decks: { ...state.battle!.decks, B: { ...state.battle!.decks.B, hand } },
++    },
++  };
++}
++
++describe('카드 명시성 UI', () => {
++  it('내부 ID/trigger 없이 6종 클래스·문양과 선택 상세를 보여준다', () => {
++    mount(battleWithEveryKind());
++    const cards = [...(host?.querySelectorAll<HTMLButtonElement>('.hand .card') ?? [])];
++    expect(new Set(cards.map(({ dataset }) => dataset.stoneClass)).size).toBe(6);
++    expect(cards.every((card) => card.querySelector('.card-icon') !== null)).toBe(true);
++    expect(host?.textContent).not.toMatch(/STONE-00|after-placement|capture-success|card-entered-hand|adjacent-endangered-group|captured-by-opponent-placement/);
++
++    const scout = cards.find(({ textContent }) => textContent?.includes('척후석'));
++    act(() => scout?.click());
++    expect(host?.querySelector('[aria-label="선택 카드 상세"]')?.textContent).toMatch(/발동 조건.*전략/);
++  });
++
++  it('척후석 착수 뒤 병종명이 포함된 명시적 발동 상태를 표시한다', () => {
++    mount(battleWithEveryKind());
++    const scout = [...(host?.querySelectorAll<HTMLButtonElement>('.hand .card') ?? [])]
++      .find(({ textContent }) => textContent?.includes('척후석'));
++    act(() => scout?.click());
++    const hit = host?.querySelector<SVGCircleElement>('[data-point="0"]');
++    act(() => hit?.dispatchEvent(new MouseEvent('click', { bubbles: true })));
++
++    expect([...host!.querySelectorAll('[role="status"]')].some(({ textContent }) => textContent?.includes('척후석'))).toBe(true);
++  });
++
++  it('보상 부적·유물을 원시 ID 대신 정의 이름으로 표시한다', () => {
++    const base = createInitialGameState(DRAFT_GAME_CONFIG);
++    const charm = DRAFT_REWARD_CATALOG.candidates.find(({ kind }) => kind === 'charm')!;
++    const relic = DRAFT_REWARD_CATALOG.candidates.find(({ kind }) => kind === 'relic')!;
++    mount({
++      ...base,
++      screen: 'reward',
++      run: { ...base.run, pendingRewards: [charm, relic] },
++    });
++
++    expect(host?.textContent).toContain('수읽기 부적');
++    expect(host?.textContent).toContain('장수의 호패');
++    expect(host?.textContent).not.toMatch(/ITEM-|RELIC-/);
++  });
++});
+diff --git a/tests/ui.game.test.tsx b/tests/ui.game.test.tsx
+index 721f8de..5ee4e8f 100644
+--- a/tests/ui.game.test.tsx
++++ b/tests/ui.game.test.tsx
+@@ -33,51 +33,43 @@ function clickButton(name: string): void {
+ }
+ 
+ describe('RoGolike 통합 게임 UI', () => {
+-  it('RoGolike 타이틀과 실제 지도·시설 화면을 표시한다', () => {
++  it('RoGolike 타이틀과 실제 경로 상태를 표시하고 무제한 시설 진입을 숨긴다', () => {
+     const view = renderApp();
+     expect(document.title).toBe('RoGolike');
+     clickButton('등반 시작');
+-    for (const name of ['일반전', '정예전', '보스전', '사건', '상점', '도장']) expect(view.textContent).toContain(name);
+-    clickButton('상점');
+-    expect(view.querySelector('[data-screen="shop"]')).toBeTruthy();
+-    clickButton('지도로 돌아가기');
+-    clickButton('사건');
+-    expect(view.querySelector('[data-screen="event"]')).toBeTruthy();
+-    clickButton('조용히 떠난다');
+-    clickButton('도장');
+-    expect(view.querySelector('[data-screen="dojo"]')).toBeTruthy();
++    for (const name of ['일반전', '정예전', '보스전', '사건', '상점']) expect(view.textContent).toContain(name);
++    expect(view.querySelectorAll('[data-state="open"]')).toHaveLength(2);
++    expect(view.querySelector('[aria-label="여정 시설"]')).toBeNull();
+   });
+ 
+   it('1막은 7×7, 보스 승리 후 2막은 9×9 판을 쓴다', () => {
+     let act2 = createInitialGameState(DRAFT_GAME_CONFIG);
+     act2 = gameReducer(act2, { type: 'START_RUN' }, DRAFT_GAME_CONFIG);
+     act2 = gameReducer(act2, { type: 'RESOLVE_BATTLE_FOR_ENGINE', battle: 'boss', resolution: 'win', capturedStones: 0 }, DRAFT_GAME_CONFIG);
++    act2 = gameReducer(act2, { type: 'OPEN_BATTLE', battle: 'boss' }, DRAFT_GAME_CONFIG);
+     const view = renderApp(DRAFT_GAME_CONFIG, act2);
+-    expect(view.textContent).toContain('제 2막 · 9×9');
+-    clickButton('보스전');
++    expect(view.textContent).toContain('제 2막 문지기');
+     expect(view.querySelectorAll('.hit')).toHaveLength(81);
+   });
+ 
+-  it('카드 선택 전 착수를 막고 dry-run 뒤 같은 좌표에서 확정한다', () => {
++  it('카드 선택 전 착수를 막고 카드 선택 뒤 한 좌표 입력으로 확정한다', () => {
+     const view = renderApp();
+     clickButton('등반 시작');
+     clickButton('일반전');
+-    clickButton('착수로 진행');
+     const first = view.querySelector<SVGCircleElement>('[data-hit="0-0"]')!;
+     act(() => first.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+     expect(view.textContent).toContain('놓을 카드를 먼저 선택하세요.');
+     clickButton('일반석');
+     act(() => first.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+-    expect(view.textContent).toContain('합법 수 미리보기');
+-    act(() => first.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+     expect(view.querySelectorAll('.stone-b')).toHaveLength(1);
+     expect(view.textContent).toContain('착수했습니다.');
+   });
+ 
+   it('실제 덱·버림·부적·패스·포획·효과 기록을 표시한다', () => {
+-    const view = renderApp();
+-    clickButton('등반 시작');
+-    clickButton('정예전');
++    let elite = createInitialGameState(DRAFT_GAME_CONFIG);
++    elite = gameReducer(elite, { type: 'START_RUN' }, DRAFT_GAME_CONFIG);
++    elite = gameReducer(elite, { type: 'OPEN_BATTLE', battle: 'elite' }, DRAFT_GAME_CONFIG);
++    const view = renderApp(DRAFT_GAME_CONFIG, elite);
+     expect(view.querySelector('[aria-label="상대 정보"]')?.textContent).toContain('공격 기풍');
+     expect(view.querySelectorAll('.hand .card')).toHaveLength(4);
+     for (const text of ['내 덱 10', '버림 0', '부적 0', '연속 패스 0', '포획 0', '효과 기록']) expect(view.textContent).toContain(text);
+@@ -90,9 +82,10 @@ describe('RoGolike 통합 게임 UI', () => {
+       komiBySize: { 7: -100, 9: -100 },
+       aiPassScoreThreshold: 1,
+     };
+-    const view = renderApp(passingConfig);
+-    clickButton('등반 시작');
+-    clickButton('보스전');
++    let boss = createInitialGameState(passingConfig);
++    boss = gameReducer(boss, { type: 'START_RUN' }, passingConfig);
++    boss = gameReducer(boss, { type: 'OPEN_BATTLE', battle: 'boss' }, passingConfig);
++    const view = renderApp(passingConfig, boss);
+     clickButton('패스');
+     act(() => vi.runAllTimers());
+     expect(view.textContent).toContain('부활 2단계');
+@@ -107,11 +100,9 @@ describe('RoGolike 통합 게임 UI', () => {
+     const view = renderApp();
+     clickButton('등반 시작');
+     clickButton('일반전');
+-    clickButton('착수로 진행');
+     clickButton('일반석');
+     const first = view.querySelector<SVGCircleElement>('[data-hit="0-0"]')!;
+     act(() => first.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+-    act(() => first.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+     clickButton('지도로 물러나기');
+     const before = view.textContent;
+     act(() => vi.runAllTimers());
+diff --git a/tests/ui.map.progression.test.tsx b/tests/ui.map.progression.test.tsx
+new file mode 100644
+index 0000000..0c4aa59
+--- /dev/null
++++ b/tests/ui.map.progression.test.tsx
+@@ -0,0 +1,60 @@
++// @vitest-environment jsdom
++import { act } from 'react';
++import { createRoot } from 'react-dom/client';
++import { afterEach, describe, expect, it } from 'vitest';
++
++import { App } from '../src/App';
++import { createInitialGameState, gameReducer } from '../src/game/GameProvider';
++import { DRAFT_GAME_CONFIG } from './fixtures/draft-game-config';
++
++let root: ReturnType<typeof createRoot> | null = null;
++let host: HTMLDivElement | null = null;
++
++afterEach(() => {
++  if (root) act(() => root?.unmount());
++  host?.remove();
++  root = null;
++  host = null;
++});
++
++function mount(completedNodeIds: readonly string[] = []): void {
++  let state = createInitialGameState(DRAFT_GAME_CONFIG);
++  state = gameReducer(state, { type: 'START_RUN' }, DRAFT_GAME_CONFIG);
++  state = { ...state, completedNodeIds };
++  host = document.createElement('div');
++  document.body.append(host);
++  root = createRoot(host);
++  act(() => root?.render(<App config={DRAFT_GAME_CONFIG} initialState={state} />));
++}
++
++describe('지도 도달 가능성 UI', () => {
++  it('첫 열 두 노드만 open이고 나머지와 보스는 disabled다', () => {
++    mount();
++    const buttons = [...(host?.querySelectorAll<HTMLButtonElement>('[data-node-id]') ?? [])];
++    expect(buttons.filter(({ dataset }) => dataset.state === 'open')).toHaveLength(2);
++    expect(buttons.filter(({ dataset }) => dataset.state === 'locked').every(({ disabled }) => disabled)).toBe(true);
++    expect(host?.querySelector<HTMLButtonElement>('[data-state="open"]')?.disabled).toBe(false);
++    expect(host?.querySelector<HTMLButtonElement>('[data-node-id$="boss"]')?.disabled).toBe(true);
++    expect(host?.querySelector('[aria-label="여정 시설"]')).toBeNull();
++  });
++
++  it('잠긴 노드는 클릭해도 화면을 바꾸지 않는다', () => {
++    mount();
++    const locked = host?.querySelector<HTMLButtonElement>('[data-state="locked"]');
++    act(() => locked?.click());
++    expect(host?.querySelector('[data-screen="map"]')).toBeTruthy();
++    expect(host?.querySelector('[data-screen="battle"]')).toBeNull();
++  });
++
++  it('완료 노드와 그 next만 done/open 상태로 표시한다', () => {
++    const state = createInitialGameState(DRAFT_GAME_CONFIG);
++    const completed = state.map.starts[0];
++    const completedNode = state.map.columns.flat().find(({ id }) => id === completed)!;
++    mount([completed]);
++
++    expect(host?.querySelector(`[data-node-id="${completed}"]`)?.getAttribute('data-state')).toBe('done');
++    for (const next of completedNode.next) {
++      expect(host?.querySelector(`[data-node-id="${next}"]`)?.getAttribute('data-state')).toBe('open');
++    }
++  });
++});
+diff --git a/tests/ui.onetap.test.tsx b/tests/ui.onetap.test.tsx
+new file mode 100644
+index 0000000..e3951c3
+--- /dev/null
++++ b/tests/ui.onetap.test.tsx
+@@ -0,0 +1,87 @@
++// @vitest-environment jsdom
++import { act } from 'react';
++import { createRoot } from 'react-dom/client';
++import { afterEach, describe, expect, it, vi } from 'vitest';
++
++import { App } from '../src/App';
++import { createInitialGameState, gameReducer, type GameState } from '../src/game/GameProvider';
++import { DRAFT_GAME_CONFIG } from './fixtures/draft-game-config';
++
++let root: ReturnType<typeof createRoot> | null = null;
++let host: HTMLDivElement | null = null;
++
++afterEach(() => {
++  if (root) act(() => root?.unmount());
++  host?.remove();
++  root = null;
++  host = null;
++  vi.useRealTimers();
++});
++
++function clickButton(text: string): void {
++  const button = [...(host?.querySelectorAll('button') ?? [])]
++    .find((candidate) => candidate.textContent?.includes(text) && !candidate.disabled);
++  expect(button, `${text} 버튼`).toBeTruthy();
++  act(() => button?.click());
++}
++
++function hit(point: number): void {
++  const target = host?.querySelector<SVGCircleElement>(`[data-point="${point}"]`);
++  expect(target, `${point} 교차점`).toBeTruthy();
++  act(() => target?.dispatchEvent(new MouseEvent('click', { bubbles: true })));
++}
++
++function openedBattle(): GameState {
++  let state = createInitialGameState(DRAFT_GAME_CONFIG);
++  state = gameReducer(state, { type: 'START_RUN' }, DRAFT_GAME_CONFIG);
++  return gameReducer(state, { type: 'OPEN_BATTLE', battle: 'normal' }, DRAFT_GAME_CONFIG);
++}
++
++describe('교차점 1탭 확정', () => {
++  it('카드 선택 뒤 한 번의 보드 클릭으로 돌과 버림 더미를 확정한다', () => {
++    vi.useFakeTimers();
++    host = document.createElement('div');
++    document.body.append(host);
++    root = createRoot(host);
++    act(() => root?.render(<App config={DRAFT_GAME_CONFIG} initialState={openedBattle()} />));
++
++    clickButton('일반석');
++    hit(0);
++
++    expect(host.querySelectorAll('.stone-b')).toHaveLength(1);
++    expect(host.textContent).toContain('버림 1');
++    expect(host.textContent).not.toContain('합법 수 미리보기');
++  });
++
++  it('점유 좌표 오류 뒤에도 다음 합법 좌표 한 번으로 정상 확정한다', () => {
++    const state = openedBattle();
++    const points = [...state.battle!.board.points];
++    points[0] = { color: 'W', kind: 'STONE-001', instanceId: 'occupied' };
++    const occupied = {
++      ...state,
++      battle: { ...state.battle!, board: { size: 7 as const, points } },
++    };
++    host = document.createElement('div');
++    document.body.append(host);
++    root = createRoot(host);
++    act(() => root?.render(<App config={DRAFT_GAME_CONFIG} initialState={occupied} />));
++
++    clickButton('일반석');
++    hit(0);
++    expect(host.textContent).toContain('이미 돌이 놓인 자리입니다.');
++    expect(host.querySelectorAll('.stone-b')).toHaveLength(0);
++
++    hit(1);
++    expect(host.querySelectorAll('.stone-b')).toHaveLength(1);
++  });
++
++  it('CHOOSE_POINT 한 번으로 moveNumber를 올리고 preview 상태를 남기지 않는다', () => {
++    const state = openedBattle();
++    const cardId = state.battle!.decks.B.hand[0].id;
++    const selected = gameReducer(state, { type: 'SELECT_CARD', cardId }, DRAFT_GAME_CONFIG);
++    const next = gameReducer(selected, { type: 'CHOOSE_POINT', point: 0 }, DRAFT_GAME_CONFIG);
++
++    expect(next.battle?.moveNumber).toBe(1);
++    expect('preview' in next).toBe(false);
++  });
++});

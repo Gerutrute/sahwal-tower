@@ -1,0 +1,141 @@
+$ npm.cmd run balance -- --size 7 --komi 4.5 --seed corrective-7 --pairs 4 --max-moves 98 --target-min 0.4 --target-max 0.6
+
+STDOUT
+
+> sahwal-tower@0.1.0 balance
+> vite-node scripts/balance.ts --size 7 --komi 4.5 --seed corrective-7 --pairs 4 --max-moves 98 --target-min 0.4 --target-max 0.6
+
+{
+  "seed": "corrective-7",
+  "boardSize": 7,
+  "komi": 4.5,
+  "pairCount": 4,
+  "sampleCount": 8,
+  "meanBlackMargin": 8.5,
+  "blackWinRate": 0.625,
+  "whiteWinRate": 0.375,
+  "drawRate": 0,
+  "blackWinWilson95": {
+    "low": 0.30574239460262737,
+    "high": 0.8631557141764026
+  },
+  "target": {
+    "minimumBlackWinRate": 0.4,
+    "maximumBlackWinRate": 0.6
+  },
+  "targetMet": false,
+  "pairs": [
+    {
+      "pairIndex": 0,
+      "games": [
+        {
+          "pairIndex": 0,
+          "swapped": false,
+          "agents": {
+            "B": "agent-a",
+            "W": "agent-b"
+          },
+          "winner": "B",
+          "blackMargin": 31.5,
+          "moves": 98
+        },
+        {
+          "pairIndex": 0,
+          "swapped": true,
+          "agents": {
+            "B": "agent-b",
+            "W": "agent-a"
+          },
+          "winner": "W",
+          "blackMargin": -48.5,
+          "moves": 98
+        }
+      ]
+    },
+    {
+      "pairIndex": 1,
+      "games": [
+        {
+          "pairIndex": 1,
+          "swapped": false,
+          "agents": {
+            "B": "agent-a",
+            "W": "agent-b"
+          },
+          "winner": "W",
+          "blackMargin": -17.5,
+          "moves": 98
+        },
+        {
+          "pairIndex": 1,
+          "swapped": true,
+          "agents": {
+            "B": "agent-b",
+            "W": "agent-a"
+          },
+          "winner": "B",
+          "blackMargin": 37.5,
+          "moves": 98
+        }
+      ]
+    },
+    {
+      "pairIndex": 2,
+      "games": [
+        {
+          "pairIndex": 2,
+          "swapped": false,
+          "agents": {
+            "B": "agent-a",
+            "W": "agent-b"
+          },
+          "winner": "B",
+          "blackMargin": 41.5,
+          "moves": 98
+        },
+        {
+          "pairIndex": 2,
+          "swapped": true,
+          "agents": {
+            "B": "agent-b",
+            "W": "agent-a"
+          },
+          "winner": "W",
+          "blackMargin": -47.5,
+          "moves": 98
+        }
+      ]
+    },
+    {
+      "pairIndex": 3,
+      "games": [
+        {
+          "pairIndex": 3,
+          "swapped": false,
+          "agents": {
+            "B": "agent-a",
+            "W": "agent-b"
+          },
+          "winner": "B",
+          "blackMargin": 35.5,
+          "moves": 98
+        },
+        {
+          "pairIndex": 3,
+          "swapped": true,
+          "agents": {
+            "B": "agent-b",
+            "W": "agent-a"
+          },
+          "winner": "B",
+          "blackMargin": 35.5,
+          "moves": 98
+        }
+      ]
+    }
+  ]
+}
+
+STDERR
+
+EXIT 0

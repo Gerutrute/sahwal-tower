@@ -1,0 +1,17 @@
+$ npx.cmd vitest run tests/ai.effects.test.ts -t 병종별 주입 가중치로 직접 효과를 평가한다
+
+STDOUT
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [32m✓[39m tests/ai.effects.test.ts [2m([22m[2m4 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m[90m 2[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m1 passed[39m[22m[2m | [22m[33m3 skipped[39m[90m (4)[39m
+[2m   Start at [22m 01:01:02
+[2m   Duration [22m 335ms[2m (transform 58ms, setup 11ms, collect 57ms, tests 2ms, environment 0ms, prepare 100ms)[22m
+
+
+STDERR
+
+EXIT 0

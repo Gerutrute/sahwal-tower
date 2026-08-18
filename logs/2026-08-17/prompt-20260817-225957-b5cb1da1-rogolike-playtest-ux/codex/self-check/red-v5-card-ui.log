@@ -1,0 +1,86 @@
+$ npm.cmd test -- --run tests/ui.card-clarity.test.tsx
+
+STDOUT
+
+> sahwal-tower@0.1.0 test
+> vitest run --run tests/ui.card-clarity.test.tsx
+
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [31m❯[39m tests/ui.card-clarity.test.tsx [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[90m 45[2mms[22m[39m
+[31m   [31m×[31m 카드 명시성 UI[2m > [22m내부 ID/trigger 없이 6종 클래스·문양과 선택 상세를 보여준다[90m 26[2mms[22m[31m[39m
+[31m     → expected 1 to be 6 // Object.is equality[39m
+[31m   [31m×[31m 카드 명시성 UI[2m > [22m척후석 착수 뒤 병종명이 포함된 명시적 발동 상태를 표시한다[90m 16[2mms[22m[31m[39m
+[31m     → expected false to be true // Object.is equality[39m
+[31m   [31m×[31m 카드 명시성 UI[2m > [22m보상 부적·유물을 원시 ID 대신 정의 이름으로 표시한다[90m 2[2mms[22m[31m[39m
+[31m     → expected '여정 음악음악 끄기대국 보상전리품을 고르세요수읽기 부적ITEM-00…' not to match /ITEM-|RELIC-/[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[90m (3)[39m
+[2m   Start at [22m 23:34:51
+[2m   Duration [22m 885ms[2m (transform 132ms, setup 9ms, collect 183ms, tests 45ms, environment 295ms, prepare 86ms)[22m
+
+
+STDERR
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 3 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/ui.card-clarity.test.tsx[2m > [22m카드 명시성 UI[2m > [22m내부 ID/trigger 없이 6종 클래스·문양과 선택 상세를 보여준다
+[31m[1mAssertionError[22m: expected 1 to be 6 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 6[39m
+[31m+ 1[39m
+
+[36m [2m❯[22m tests/ui.card-clarity.test.tsx:[2m54:74[22m[39m
+    [90m 52| [39m    [34mmount[39m([34mbattleWithEveryKind[39m())[33m;[39m
+    [90m 53| [39m    [35mconst[39m cards [33m=[39m [[33m...[39m(host[33m?.[39mquerySelectorAll[33m<[39m[33mHTMLButtonElement[39m[33m>[39m([32m'.han[39m…
+    [90m 54| [39m    [34mexpect[39m([35mnew[39m [33mSet[39m(cards[33m.[39m[34mmap[39m(({ dataset }) [33m=>[39m dataset[33m.[39mstoneClass))[33m.[39msiz…
+    [90m   | [39m                                                                         [31m^[39m
+    [90m 55| [39m    [34mexpect[39m(cards[33m.[39m[34mevery[39m((card) [33m=>[39m card[33m.[39m[34mquerySelector[39m([32m'.card-icon'[39m) [33m!==[39m …
+    [90m 56| [39m    [34mexpect[39m(host[33m?.[39mtextContent)[33m.[39mnot[33m.[39m[34mtoMatch[39m([36m/STONE-00|after-placement|ca[39m…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/ui.card-clarity.test.tsx[2m > [22m카드 명시성 UI[2m > [22m척후석 착수 뒤 병종명이 포함된 명시적 발동 상태를 표시한다
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m tests/ui.card-clarity.test.tsx:[2m71:116[22m[39m
+    [90m 69| [39m    [34mact[39m(() [33m=>[39m hit[33m?.[39m[34mdispatchEvent[39m([35mnew[39m [33mMouseEvent[39m([32m'click'[39m[33m,[39m { bubbles[33m:[39m [35mtr[39m…
+    [90m 70| [39m
+    [90m 71| [39m    [34mexpect[39m([[33m...[39mhost[33m![39m[33m.[39m[34mquerySelectorAll[39m([32m'[role="status"]'[39m)][33m.[39m[34msome[39m(({ text…
+    [90m   | [39m                                                                                                                   [31m^[39m
+    [90m 72| [39m  })[33m;[39m
+    [90m 73| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/ui.card-clarity.test.tsx[2m > [22m카드 명시성 UI[2m > [22m보상 부적·유물을 원시 ID 대신 정의 이름으로 표시한다
+[31m[1mAssertionError[22m: expected '여정 음악음악 끄기대국 보상전리품을 고르세요수읽기 부적ITEM-00…' not to match /ITEM-|RELIC-/[39m
+
+[32m- Expected:[39m 
+/ITEM-|RELIC-/
+
+[31m+ Received:[39m 
+"여정 음악음악 끄기대국 보상전리품을 고르세요수읽기 부적ITEM-001장수의 호패RELIC-002보상을 받지 않는다"
+
+[36m [2m❯[22m tests/ui.card-clarity.test.tsx:[2m86:35[22m[39m
+    [90m 84| [39m    [34mexpect[39m(host[33m?.[39mtextContent)[33m.[39m[34mtoContain[39m([32m'수읽기 부적'[39m)[33m;[39m
+    [90m 85| [39m    [34mexpect[39m(host[33m?.[39mtextContent)[33m.[39m[34mtoContain[39m([32m'장수의 호패'[39m)[33m;[39m
+    [90m 86| [39m    [34mexpect[39m(host[33m?.[39mtextContent)[33m.[39mnot[33m.[39m[34mtoMatch[39m([36m/ITEM-|RELIC-/[39m)[33m;[39m
+    [90m   | [39m                                  [31m^[39m
+    [90m 87| [39m  })[33m;[39m
+    [90m 88| [39m})[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+EXIT 1

@@ -1,0 +1,20 @@
+$ npm.cmd run check:mobile
+
+STDOUT
+
+> sahwal-tower@0.1.0 check:mobile
+> node scripts/playwright-mobile-check.mjs
+
+
+STDERR
+file:///D:/%EA%B0%9C%EC%9D%B8%20pjt/codex%20%EA%B2%8C%EC%9E%84%20%ED%95%B4%EC%BB%A4%ED%86%A4/scripts/playwright-mobile-check.mjs:124
+    if (await face.getAttribute('aria-expanded') !== 'true') throw new Error('보상 첫 tap 뒤 상세가 열리지 않음');
+                                                                   ^
+
+Error: 보상 첫 tap 뒤 상세가 열리지 않음
+    at finishOrdinaryBattle (file:///D:/%EA%B0%9C%EC%9D%B8%20pjt/codex%20%EA%B2%8C%EC%9E%84%20%ED%95%B4%EC%BB%A4%ED%86%A4/scripts/playwright-mobile-check.mjs:124:68)
+    at async file:///D:/%EA%B0%9C%EC%9D%B8%20pjt/codex%20%EA%B2%8C%EC%9E%84%20%ED%95%B4%EC%BB%A4%ED%86%A4/scripts/playwright-mobile-check.mjs:265:3
+
+Node.js v24.12.0
+
+EXIT 1

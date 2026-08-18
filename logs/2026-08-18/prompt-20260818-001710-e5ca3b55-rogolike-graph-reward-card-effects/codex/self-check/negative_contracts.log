@@ -1,0 +1,7 @@
+$ git grep -nE aiEffectWeight[^s]|resolveGuardianEffect|DeckInspectionEffectResult|PendingDeckInspection -- src tests scripts
+
+STDOUT
+
+STDERR
+
+EXIT 1

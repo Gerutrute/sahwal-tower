@@ -1,0 +1,17 @@
+$ npx.cmd vitest run tests/deck.test.ts -t 기병석은 사용 후 덱 맨 아래로 돌아간다
+
+STDOUT
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [32m✓[39m tests/deck.test.ts [2m([22m[2m10 tests[22m[2m | [22m[33m9 skipped[39m[2m)[22m[90m 1[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m1 passed[39m[22m[2m | [22m[33m9 skipped[39m[90m (10)[39m
+[2m   Start at [22m 00:53:28
+[2m   Duration [22m 321ms[2m (transform 63ms, setup 16ms, collect 52ms, tests 1ms, environment 0ms, prepare 96ms)[22m
+
+
+STDERR
+
+EXIT 0

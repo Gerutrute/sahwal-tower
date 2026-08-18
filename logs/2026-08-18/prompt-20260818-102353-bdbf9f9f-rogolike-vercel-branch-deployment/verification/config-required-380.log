@@ -1,0 +1,11 @@
+$ node C:\Users\WIN\AppData\Local\Temp\claude\D-----pjt-codex-------\40f74f24-2438-4997-8129-c70e33722845\scratchpad\config-required-check.mjs
+
+STDOUT
+{"alertVisible":true,"alertTextMatched":true,"startButtonCount":0,"scrollWidth":380,"pageErrors":0}
+CONFIG_REQUIRED_CHECK_OK
+
+STDERR
+(node:23676) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+EXIT 0

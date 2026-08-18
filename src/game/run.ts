@@ -31,7 +31,11 @@ export type RunAction =
   | { readonly type: 'OFFER_REWARDS'; readonly candidates: readonly RewardCandidate[] }
   | { readonly type: 'CHOOSE_REWARD'; readonly candidateId: string }
   | { readonly type: 'DECLINE_REWARDS' }
-  | { readonly type: 'REPLACE_CHARM'; readonly index: number };
+  | { readonly type: 'REPLACE_CHARM'; readonly index: number }
+  | { readonly type: 'APPLY_INVENTORY'; readonly inventory: InventoryState }
+  | { readonly type: 'GAIN_CURRENCY'; readonly amount: number }
+  | { readonly type: 'CONSUME_CHARM'; readonly charmId: CharmId }
+  | { readonly type: 'CONSUME_FREE_DOJO_VISIT' };
 
 export function createRunState(input: CreateRunInput): RunState {
   validateEconomyConfig(input.economy);
@@ -125,5 +129,26 @@ export function runReducer(state: RunState, action: RunAction, config: EconomyCo
       charms[action.index] = state.pendingCharm;
       return { ...state, charms, pendingCharm: null };
     }
+    case 'APPLY_INVENTORY':
+      return state.status !== 'active' ? state : {
+        ...state,
+        currency: action.inventory.currency,
+        deck: [...action.inventory.deck],
+        charms: [...action.inventory.charms],
+        relics: [...action.inventory.relics],
+        removalCount: action.inventory.removalCount,
+      };
+    case 'GAIN_CURRENCY':
+      return state.status !== 'active' || !Number.isSafeInteger(action.amount) || action.amount < 0
+        ? state
+        : { ...state, currency: state.currency + action.amount };
+    case 'CONSUME_CHARM': {
+      if (state.status !== 'active' || !state.charms.includes(action.charmId)) return state;
+      const charms = [...state.charms];
+      charms.splice(charms.indexOf(action.charmId), 1);
+      return { ...state, charms };
+    }
+    case 'CONSUME_FREE_DOJO_VISIT':
+      return state.freeDojoVisits > 0 ? { ...state, freeDojoVisits: state.freeDojoVisits - 1 } : state;
   }
 }

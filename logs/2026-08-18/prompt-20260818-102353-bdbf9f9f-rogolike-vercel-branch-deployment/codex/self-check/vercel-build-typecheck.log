@@ -1,0 +1,14 @@
+$ npm.cmd run typecheck
+
+STDOUT
+
+> sahwal-tower@0.1.0 typecheck
+> tsc --noEmit
+
+tests/vercel.runtime-config.test.ts(2,1): error TS2578: Unused '@ts-expect-error' directive.
+tests/vercel.runtime-config.test.ts(7,8): error TS7016: Could not find a declaration file for module '../scripts/vercel-runtime-config.mjs'. 'D:/개인 pjt/codex 게임 해커톤/scripts/vercel-runtime-config.mjs' implicitly has an 'any' type.
+tests/vercel.runtime-config.test.ts(40,23): error TS2540: Cannot assign to '7' because it is a read-only property.
+
+STDERR
+
+EXIT 2

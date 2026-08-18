@@ -1,0 +1,1242 @@
+diff --git a/scripts/playwright-mobile-check.mjs b/scripts/playwright-mobile-check.mjs
+index 9997a72..b5003eb 100644
+--- a/scripts/playwright-mobile-check.mjs
++++ b/scripts/playwright-mobile-check.mjs
+@@ -34,6 +34,7 @@ const draftGameConfig = {
+     maxEffectsPerSource: 4,
+     maxHandSize: 8,
+   },
++  generalCaptureMoneyCap: 15,
+   enemyDeck: ['STONE-001', 'STONE-001', 'STONE-001', 'STONE-001', 'STONE-001', 'STONE-001', 'STONE-002', 'STONE-003', 'STONE-004', 'STONE-005'],
+   bossByAct: {
+     1: {
+@@ -161,6 +162,20 @@ try {
+   await page.getByRole('button', { name: /일반전/ }).first().click();
+   await page.locator('[data-board-size="7"]').waitFor();
+   if (await page.locator('.hit').count() !== 49) throw new Error('7×7 좌표 수 불일치');
++  const board7Widths = {};
++  for (const width of [380, 430]) {
++    await page.setViewportSize({ width, height: 844 });
++    board7Widths[width] = await page.evaluate(() => ({
++      viewport: innerWidth,
++      html: document.documentElement.scrollWidth,
++      body: document.body.scrollWidth,
++    }));
++    if (board7Widths[width].html > width || board7Widths[width].body > width) {
++      throw new Error(`7×7 ${width}px 화면 가로 스크롤 발생`);
++    }
++  }
++  await page.setViewportSize({ width: 380, height: 844 });
++  await page.getByRole('button', { name: '착수로 진행' }).click();
+   await page.locator('.hand .card').first().click();
+   const normalHit = page.locator('[data-hit="0-0"]');
+   await normalHit.click();
+@@ -178,12 +193,22 @@ try {
+   await page.getByRole('button', { name: /보스전/ }).click();
+   await page.locator('[data-board-size="7"]').waitFor();
+   if (!(await page.locator('body').innerText()).includes('보스 음악')) throw new Error('보스 음악 라우팅 실패');
++  await page.getByRole('button', { name: '착수로 진행' }).click();
+   await page.locator('.hand .card').first().click();
+   const act1BossHit = page.locator('[data-hit="0-0"]');
+   await act1BossHit.click();
+   await act1BossHit.click();
+   await page.waitForTimeout(470);
+   await page.getByRole('button', { name: '패스' }).click();
++  await page.getByText('부활 2단계', { exact: false }).waitFor();
++  if (!(await page.locator('body').innerText()).includes('보스 음악')) throw new Error('1막 첫 승리 뒤 bosstheme 유지 실패');
++  await page.getByRole('button', { name: '착수로 진행' }).click();
++  await page.locator('.hand .card').first().click();
++  const act1RevivalHit = page.locator('[data-hit="6-6"]');
++  await act1RevivalHit.click();
++  await act1RevivalHit.click();
++  await page.waitForTimeout(470);
++  await page.getByRole('button', { name: '패스' }).click();
+   await page.getByRole('navigation', { name: '2막 지도' }).waitFor();
+   if (!(await page.locator('body').innerText()).includes('제 2막 · 9×9')) throw new Error('2막 9×9 전환 실패');
+   await page.getByRole('button', { name: /보스전/ }).click();
+@@ -203,6 +228,7 @@ try {
+     }
+   }
+   for (const coordinate of ['0-0', '0-8', '8-0', '8-8']) {
++    await page.getByRole('button', { name: '착수로 진행' }).click();
+     await page.locator('.hand .card').first().click();
+     const hit = page.locator(`[data-hit="${coordinate}"]`);
+     await hit.click();
+@@ -210,8 +236,20 @@ try {
+     await page.waitForTimeout(470);
+   }
+   if (await page.locator('.stone-b').count() !== 4) throw new Error('9×9 네 귀 실제 탭 실패');
+-  const battleMetrics = await page.evaluate(() => ({ width: innerWidth, html: document.documentElement.scrollWidth, body: document.body.scrollWidth }));
+-  if (battleMetrics.html > battleMetrics.width || battleMetrics.body > battleMetrics.width) throw new Error('전투 화면 가로 스크롤 발생');
++  const board9Widths = {};
++  for (const width of [380, 430]) {
++    await page.setViewportSize({ width, height: 844 });
++    board9Widths[width] = await page.evaluate(() => ({
++      viewport: innerWidth,
++      html: document.documentElement.scrollWidth,
++      body: document.body.scrollWidth,
++    }));
++    if (board9Widths[width].html > width || board9Widths[width].body > width) {
++      throw new Error(`9×9 ${width}px 화면 가로 스크롤 발생`);
++    }
++  }
++  await page.setViewportSize({ width: 380, height: 844 });
++  const battleMetrics = board9Widths[380];
+   await page.screenshot({ path: path.join(outputDir, 'mobile-boss.png'), fullPage: true });
+ 
+   await page.getByRole('button', { name: '패스' }).click();
+@@ -225,6 +263,7 @@ try {
+     viewport: { width: 380, height: 844 },
+     initial,
+     battleMetrics,
++    boardWidths: { board7: board7Widths, board9: board9Widths },
+     hitTargetCount: hitRects.length,
+     decisiveMoveCount: candidates,
+     consoleErrors,
+diff --git a/src/App.tsx b/src/App.tsx
+index 5a5408c..ddf7adb 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -11,6 +11,8 @@ import {
+   type GameState,
+ } from './game/GameProvider';
+ import { STONE_DEFINITIONS } from './game/content/stones';
++import { CHARM_DEFINITIONS, type CharmId } from './game/content/charms';
++import { RELIC_DEFINITIONS, type RelicId } from './game/content/relics';
+ import { removalPrice } from './game/economy';
+ import { ENEMY_DEFINITIONS } from './game/content/enemies';
+ import type { MapNode, MapNodeType } from './game/map';
+@@ -80,7 +82,8 @@ function BattleScreen({ thinking }: { readonly thinking: boolean }) {
+   const selected = deck.hand.find(({ id }) => id === battle.selectedCardId);
+   const enemyLabel = state.battleKind === 'boss' ? `제 ${state.run.act}막 문지기` : state.battleKind === 'elite' ? '정예 기객' : '길 위의 기객';
+   const previewEffects = state.preview?.effects.map((entry) => entry.message) ?? [];
+-  const canAct = battle.turn === 'B' && !thinking;
++  const canAct = battle.turn === 'B' && !thinking && state.pendingInspection === null;
++  const inspection = state.pendingInspection;
+   return <main className="screen battle-screen" data-screen="battle">
+     <header className="screen-heading compact">
+       <div>
+@@ -97,7 +100,8 @@ function BattleScreen({ thinking }: { readonly thinking: boolean }) {
+       <span>내 덱 {state.run.deck.length}</span>
+       <span>뽑기 {deck.drawPile.length}</span>
+       <span>버림 {deck.discardPile.length}</span>
+-      <span>부적 {battle.relics.B.length}</span>
++      <span>부적 {battle.charms.B.length}</span>
++      <span>유물 {battle.relics.B.length}</span>
+       <span>연속 패스 {battle.consecutivePasses}</span>
+       <span>포획 {state.captures.B}</span>
+     </div>
+@@ -113,6 +117,7 @@ function BattleScreen({ thinking }: { readonly thinking: boolean }) {
+     <p className={`turn-line ${state.invalidReason ? 'invalid' : ''}`} role="status">
+       {state.invalidReason
+         || (thinking ? '상대가 합법 수를 평가하고 있습니다…'
++          : battle.phase === 'pre-move' ? '부적·유물 사용을 마치거나 착수로 진행하세요.'
+           : state.preview ? `합법 수 미리보기 · ${state.preview.capturedCount}개 포획 · 같은 곳을 다시 눌러 확정`
+             : selected ? `${STONE_DEFINITIONS[selected.kind].name} 좌표를 고르세요.` : '카드를 고르고 교차점을 누르세요.')}
+     </p>
+@@ -132,13 +137,39 @@ function BattleScreen({ thinking }: { readonly thinking: boolean }) {
+         </button>;
+       })}
+     </section>
+-    {battle.relics.B.length > 0 && <section className="relic-actions" aria-label="부적">
+-      {battle.relics.B.map((relicId) => <button key={relicId} onClick={() => dispatch({ type: 'USE_RELIC', relicId })} disabled={battle.phase !== 'pre-move'}>{relicId} 사용</button>)}
++    {inspection && <section className="effect-panel inspection-panel" aria-label="덱 확인 및 재정렬">
++      <h2>덱 확인 및 재정렬</h2>
++      <ol>{inspection.orderedIds.map((id) => {
++        const card = inspection.cards.find((candidate) => candidate.id === id);
++        return <li key={id}>{card ? STONE_DEFINITIONS[card.kind].name : id}</li>;
++      })}</ol>
++      <div className="controls">
++        {inspection.reorderable && inspection.orderedIds.length > 1 && <button onClick={() => dispatch({ type: 'REORDER_INSPECTION', orderedIds: [...inspection.orderedIds].reverse() })}>순서 뒤집기</button>}
++        <button onClick={() => dispatch({ type: 'CANCEL_INSPECTION' })}>취소</button>
++        <button onClick={() => dispatch({ type: 'CONFIRM_INSPECTION' })}>확정</button>
++      </div>
++    </section>}
++    {battle.charms.B.length > 0 && <section className="relic-actions" aria-label="부적">
++      {battle.charms.B.map((charmId) => <button
++        key={charmId}
++        data-charm-id={charmId}
++        onClick={() => dispatch({ type: 'USE_CHARM', charmId: charmId as CharmId })}
++        disabled={battle.phase !== 'pre-move'}
++      >{CHARM_DEFINITIONS[charmId as CharmId].name} 사용</button>)}
++    </section>}
++    {battle.relics.B.length > 0 && <section className="relic-actions" aria-label="유물">
++      {battle.relics.B.map((relicId) => <button
++        key={relicId}
++        data-relic-id={relicId}
++        onClick={() => dispatch({ type: 'USE_RELIC', relicId })}
++        disabled={battle.phase !== 'pre-move' || battle.usedRelicsThisTurn.includes(relicId)}
++      >{RELIC_DEFINITIONS[relicId as RelicId]?.name ?? relicId} 사용</button>)}
+     </section>}
++    {battle.phase === 'pre-move' && <button className="primary" onClick={() => dispatch({ type: 'CONTINUE_TO_MOVE' })}>착수로 진행</button>}
+     <section className="effect-panel">
+       <h2>효과 기록</h2>
+       <ol>
+-        {[...battle.log.slice(-3).map(({ message }) => message), ...previewEffects].map((entry, index) => <li key={`${entry}-${index}`}>{entry}</li>)}
++        {[...battle.log.slice(-3).map(({ message }) => message), ...state.effectLog.slice(-3).map(({ message }) => message), ...previewEffects].map((entry, index) => <li key={`${entry}-${index}`}>{entry}</li>)}
+       </ol>
+     </section>
+     <div className="controls">
+diff --git a/src/game/GameProvider.tsx b/src/game/GameProvider.tsx
+index eab2a70..69f4ce8 100644
+--- a/src/game/GameProvider.tsx
++++ b/src/game/GameProvider.tsx
+@@ -14,7 +14,7 @@ import {
+   type EnemyDefinition,
+ } from './battle';
+ import { chooseBattleAiMove } from './ai';
+-import { createStoneFromCard } from './deck';
++import { addTemporaryHandLimit, createStoneFromCard, type StoneCard } from './deck';
+ import {
+   createDojoVisit,
+   generateShop,
+@@ -28,7 +28,7 @@ import {
+   type ShopCatalog,
+   type ShopState,
+ } from './economy';
+-import { resolveMove, type EffectLimits, type EffectLog } from './effects';
++import { resolveMove, type EffectDefinition, type EffectLimits, type EffectLog } from './effects';
+ import { createBoard, tryPlay, type IllegalMoveCode } from './go';
+ import { generateActMap, type ActMap, type MapNode, type MapWeights } from './map';
+ import {
+@@ -40,7 +40,16 @@ import {
+ import { createSeededRng, type Seed } from './rng';
+ import { createRunState, runReducer, type BattleNodeKind, type BattleResolution, type RunState } from './run';
+ import { scoreArea, type AreaScore } from './scoring';
+-import { createStoneEffectDefinition, STARTING_DECK } from './content/stones';
++import {
++  createStoneEffectDefinition,
++  resolveCavalryEffect,
++  resolveGeneralCaptureEffect,
++  resolveGuardianEffect,
++  resolveSacrificeEffects,
++  resolveScoutEffect,
++  STARTING_DECK,
++} from './content/stones';
++import type { CharmId } from './content/charms';
+ import type { BoardState, StoneColor, StoneKind } from './types';
+ import type { AudioTuning } from '../audio/AudioManager';
+ 
+@@ -52,6 +61,7 @@ export interface GameConfig {
+   readonly economy: EconomyConfig;
+   readonly mapWeights: MapWeights;
+   readonly effectLimits: EffectLimits;
++  readonly generalCaptureMoneyCap: number;
+   readonly enemyDeck: readonly StoneKind[];
+   readonly bossByAct: Readonly<Record<1 | 2, EnemyDefinition>>;
+   readonly rewards: RewardCatalog;
+@@ -78,6 +88,16 @@ export interface MovePreview {
+   readonly effects: readonly EffectLog[];
+ }
+ 
++export type DeckInspectionSource = 'scout' | 'cavalry' | 'guardian';
++
++export interface PendingDeckInspection {
++  readonly sourceKind: DeckInspectionSource;
++  readonly sourceId: string;
++  readonly cards: readonly StoneCard[];
++  readonly orderedIds: readonly string[];
++  readonly reorderable: boolean;
++}
++
+ export interface GameState {
+   readonly screen: GameScreen;
+   readonly run: RunState;
+@@ -86,6 +106,7 @@ export interface GameState {
+   readonly battleKind: BattleNodeKind;
+   readonly selectedNodeId: string | null;
+   readonly preview: MovePreview | null;
++  readonly pendingInspection: PendingDeckInspection | null;
+   readonly invalidPoint: number | null;
+   readonly invalidReason: string;
+   readonly captures: Readonly<Record<StoneColor, number>>;
+@@ -95,6 +116,8 @@ export interface GameState {
+   readonly dojo: DojoVisitState | null;
+   readonly eventResolved: boolean;
+   readonly notice: string;
++  readonly effectLog: readonly EffectLog[];
++  readonly generalMoneyAwarded: number;
+   readonly sequence: number;
+ }
+ 
+@@ -107,7 +130,12 @@ export type GameAction =
+   | { readonly type: 'AI_TURN' }
+   | { readonly type: 'PASS' }
+   | { readonly type: 'RESIGN' }
++  | { readonly type: 'CONTINUE_TO_MOVE' }
++  | { readonly type: 'USE_CHARM'; readonly charmId: CharmId }
+   | { readonly type: 'USE_RELIC'; readonly relicId: string }
++  | { readonly type: 'REORDER_INSPECTION'; readonly orderedIds: readonly string[] }
++  | { readonly type: 'CONFIRM_INSPECTION' }
++  | { readonly type: 'CANCEL_INSPECTION' }
+   | { readonly type: 'CHOOSE_REWARD'; readonly candidateId: string }
+   | { readonly type: 'REPLACE_CHARM'; readonly index: number }
+   | { readonly type: 'DECLINE_REWARD' }
+@@ -131,6 +159,7 @@ function assertConfig(config: GameConfig): void {
+     config.aiPassScoreThreshold,
+     config.analysisCaptureWeight,
+     config.analysisEffectWeight,
++    config.generalCaptureMoneyCap,
+     config.audioTuning.crossfadeSeconds,
+     config.audioTuning.overlapSeconds,
+     config.audioTuning.masterGain,
+@@ -193,6 +222,7 @@ export function createInitialGameState(config: GameConfig): GameState {
+     battleKind: 'normal',
+     selectedNodeId: null,
+     preview: null,
++    pendingInspection: null,
+     invalidPoint: null,
+     invalidReason: '',
+     captures: { B: 0, W: 0 },
+@@ -202,13 +232,15 @@ export function createInitialGameState(config: GameConfig): GameState {
+     dojo: null,
+     eventResolved: false,
+     notice: '',
++    effectLog: [],
++    generalMoneyAwarded: 0,
+     sequence: 1,
+   };
+ }
+ 
+ function readyBattle(battle: BattleState): BattleState {
+   const begun = battleReducer(battle, { type: 'BEGIN_TURN' });
+-  return begun.phase === 'pre-move'
++  return begun.phase === 'pre-move' && begun.turn === 'W'
+     ? battleReducer(begun, { type: 'CONTINUE_TO_MOVE' })
+     : begun;
+ }
+@@ -224,6 +256,7 @@ function openBattle(state: GameState, kind: BattleNodeKind, config: GameConfig,
+     komi: config.komiBySize[state.run.boardSize],
+     rng: rngFor(config, state.sequence, 'battle'),
+     playerRelics: state.run.relics,
++    playerCharms: state.run.charms,
+   }));
+   return {
+     ...state,
+@@ -232,12 +265,15 @@ function openBattle(state: GameState, kind: BattleNodeKind, config: GameConfig,
+     battleKind: kind,
+     selectedNodeId: nodeId ?? null,
+     preview: null,
++    pendingInspection: null,
+     invalidPoint: null,
+     invalidReason: '',
+     captures: { B: 0, W: 0 },
+     moveImpacts: [],
+     result: null,
+     notice: '',
++    effectLog: [],
++    generalMoneyAwarded: 0,
+     sequence: state.sequence + 1,
+   };
+ }
+@@ -256,7 +292,7 @@ function completeRunBattle(
+     capturedStones,
+   }, config.economy);
+   if (run.status !== 'active') {
+-    return { ...state, run, screen: 'result', battle: null, preview: null };
++    return { ...state, run, screen: 'result', battle: null, preview: null, pendingInspection: null };
+   }
+   if (battleKind === 'boss') {
+     const map = generateActMap(run.act, config.mapWeights, rngFor(config, state.sequence, 'next-map'));
+@@ -267,6 +303,7 @@ function completeRunBattle(
+       screen: 'map',
+       battle: null,
+       preview: null,
++      pendingInspection: null,
+       selectedNodeId: null,
+       notice: `${run.act}막 지도가 열렸습니다.`,
+       sequence: state.sequence + 1,
+@@ -280,6 +317,7 @@ function completeRunBattle(
+     screen: 'reward',
+     battle: null,
+     preview: null,
++    pendingInspection: null,
+     sequence: state.sequence + 1,
+   };
+ }
+@@ -313,6 +351,108 @@ function scoreIfReady(state: GameState, battle: BattleState, config: GameConfig)
+   return settleEngineBattle({ ...state, sequence: state.sequence + 1 }, scored, config);
+ }
+ 
++interface ProductEffectState {
++  readonly battle: BattleState;
++  readonly run: RunState;
++  readonly log: readonly EffectLog[];
++}
++
++function moveEffectDefinitions(
++  battle: BattleState,
++  card: StoneCard,
++  point: number,
++  capturedKinds: readonly { readonly instanceId: string; readonly kind: StoneKind }[],
++  projectedDeck: BattleState['decks']['B'],
++): readonly EffectDefinition[] {
++  const definitions: EffectDefinition[] = [];
++  const active = createStoneEffectDefinition(card.kind, {
++    sideRelation: 'active',
++    acquisitionOrder: battle.moveNumber,
++    sourceId: card.id,
++  });
++  const guardianTriggered = card.kind === 'STONE-005'
++    && resolveGuardianEffect(battle.board, point, 'B', projectedDeck).triggered;
++  if (active !== null && (
++    card.kind === 'STONE-002'
++    || (card.kind === 'STONE-003' && capturedKinds.length > 0)
++    || guardianTriggered
++  )) definitions.push(active);
++
++  const handIdsBefore = new Set(battle.decks.B.hand.map(({ id }) => id));
++  const cavalry = projectedDeck.hand.find(({ id, kind }) => !handIdsBefore.has(id) && kind === 'STONE-004');
++  if (cavalry !== undefined && capturedKinds.length > 0) {
++    const cavalryDefinition = createStoneEffectDefinition(cavalry.kind, {
++      sideRelation: 'active',
++      acquisitionOrder: battle.moveNumber,
++      sourceId: cavalry.id,
++    });
++    if (cavalryDefinition !== null) definitions.push(cavalryDefinition);
++  }
++  capturedKinds.filter(({ kind }) => kind === 'STONE-006').forEach((captured) => {
++    const sacrifice = createStoneEffectDefinition(captured.kind, {
++      sideRelation: 'opponent',
++      acquisitionOrder: battle.moveNumber,
++      sourceId: captured.instanceId,
++    });
++    if (sacrifice !== null) definitions.push(sacrifice);
++  });
++  return definitions;
++}
++
++function inspectionAfterMove(
++  battleBefore: BattleState,
++  battleAfter: BattleState,
++  card: StoneCard,
++  point: number,
++  capturedCount: number,
++): PendingDeckInspection | null {
++  const deck = battleAfter.decks.B;
++  if (card.kind === 'STONE-002') {
++    const inspected = resolveScoutEffect(
++      deck,
++      deck.drawPile.slice(0, 2).map(({ id }) => id),
++      [],
++      card.id,
++    ).inspected;
++    return inspected.length === 0 ? null : {
++      sourceKind: 'scout',
++      sourceId: card.id,
++      cards: inspected,
++      orderedIds: inspected.map(({ id }) => id),
++      reorderable: true,
++    };
++  }
++
++  const guardian = card.kind === 'STONE-005'
++    ? resolveGuardianEffect(battleBefore.board, point, 'B', deck)
++    : null;
++  if (guardian?.triggered && guardian.inspected.length > 0) {
++    return {
++      sourceKind: 'guardian',
++      sourceId: card.id,
++      cards: guardian.inspected,
++      orderedIds: guardian.inspected.map(({ id }) => id),
++      reorderable: false,
++    };
++  }
++
++  const handIdsBefore = new Set(battleBefore.decks.B.hand.map(({ id }) => id));
++  const cavalry = deck.hand.find(({ id, kind }) => !handIdsBefore.has(id) && kind === 'STONE-004');
++  if (cavalry !== undefined) {
++    const result = resolveCavalryEffect(deck, capturedCount > 0);
++    if (result.triggered && result.inspected.length > 0) {
++      return {
++        sourceKind: 'cavalry',
++        sourceId: cavalry.id,
++        cards: result.inspected,
++        orderedIds: result.inspected.map(({ id }) => id),
++        reorderable: false,
++      };
++    }
++  }
++  return null;
++}
++
+ function previewOrCommit(state: GameState, point: number, config: GameConfig): GameState {
+   const battle = state.battle;
+   if (battle === null || battle.turn !== 'B' || battle.phase !== 'choose-point' || battle.selectedCardId === null) {
+@@ -323,13 +463,18 @@ function previewOrCommit(state: GameState, point: number, config: GameConfig): G
+   const stone = createStoneFromCard(card, 'B', `ui-preview-${battle.moveNumber + 1}`);
+   const play = tryPlay(battle.board, point, stone, battle.koForbiddenKey);
+   if (!play.ok) return { ...state, preview: null, invalidPoint: point, invalidReason: illegalReason(play.code) };
+-  const definition = createStoneEffectDefinition(card.kind, {
+-    sideRelation: 'active',
+-    acquisitionOrder: battle.moveNumber,
+-    sourceId: card.id,
++  const moveRng = rngFor(config, state.sequence, 'player-move');
++  const projectedDeck = battleReducer(battle, { type: 'PLAY_CARD', point, rng: moveRng }).decks.B;
++  const capturedStones = play.captured.flatMap((capturedPoint) => {
++    const captured = battle.board.points[capturedPoint];
++    return captured === null ? [] : [captured];
+   });
+-  const effects = definition === null ? [] : [definition];
+-  const effectState = { log: [] as readonly EffectLog[] };
++  const sacrificeModifiers = resolveSacrificeEffects(capturedStones, 'opponent-placement');
++  if (battle.decks.W.handLimit + sacrificeModifiers.length > config.effectLimits.maxHandSize) {
++    return { ...state, preview: null, invalidPoint: point, invalidReason: '효과 처리 안전 한도를 초과하여 착수를 취소했습니다.' };
++  }
++  const effects = moveEffectDefinitions(battle, card, point, capturedStones, projectedDeck);
++  const effectState: ProductEffectState = { battle, run: state.run, log: state.effectLog };
+   const dryRun = resolveMove(effectState, effects, config.effectLimits, { dryRun: true });
+   if (!dryRun.ok) {
+     return { ...state, preview: null, invalidPoint: point, invalidReason: dryRun.log[0]?.message ?? '효과를 해결할 수 없습니다.' };
+@@ -344,13 +489,42 @@ function previewOrCommit(state: GameState, point: number, config: GameConfig): G
+   }
+   const committedEffects = resolveMove(effectState, effects, config.effectLimits, { dryRun: false });
+   if (!committedEffects.ok) return state;
+-  let nextBattle = battleReducer(battle, { type: 'PLAY_CARD', point, rng: rngFor(config, state.sequence, 'player-move') });
++  let nextBattle = battleReducer(battle, { type: 'PLAY_CARD', point, rng: moveRng });
++  sacrificeModifiers.forEach((modifier, index) => {
++    nextBattle = {
++      ...nextBattle,
++      decks: {
++        ...nextBattle.decks,
++        W: addTemporaryHandLimit(nextBattle.decks.W, modifier, rngFor(config, state.sequence, `sacrifice-${index}`)),
++      },
++    };
++  });
+   nextBattle = battleReducer(nextBattle, { type: 'RESOLVE_MOVE' });
+-  nextBattle = battleReducer(nextBattle, { type: 'END_TURN' });
++  const pendingInspection = inspectionAfterMove(battle, nextBattle, card, point, play.capturedCount);
++  if (pendingInspection === null) nextBattle = battleReducer(nextBattle, { type: 'END_TURN' });
++
++  let nextRun = state.run;
++  let generalMoneyAwarded = state.generalMoneyAwarded;
++  if (card.kind === 'STONE-003' && play.capturedCount > 0) {
++    const general = resolveGeneralCaptureEffect({
++      money: state.run.currency,
++      generalMoneyAwarded,
++      generalMoneyCap: config.generalCaptureMoneyCap,
++      sourceId: card.id,
++      capturedCount: play.capturedCount,
++      triggeredSources: [],
++    });
++    if (general.awarded > 0) {
++      nextRun = runReducer(nextRun, { type: 'GAIN_CURRENCY', amount: general.awarded }, config.economy);
++      generalMoneyAwarded = general.generalMoneyAwarded;
++    }
++  }
+   return {
+     ...state,
++    run: nextRun,
+     battle: nextBattle,
+     preview: null,
++    pendingInspection,
+     invalidPoint: null,
+     invalidReason: '',
+     captures: { ...state.captures, B: state.captures.B + play.capturedCount },
+@@ -360,6 +534,8 @@ function previewOrCommit(state: GameState, point: number, config: GameConfig): G
+         + committedEffects.log.length * config.analysisEffectWeight,
+       turn: battle.moveNumber + 1,
+     }],
++    effectLog: committedEffects.state.log,
++    generalMoneyAwarded,
+     sequence: state.sequence + 1,
+   };
+ }
+@@ -394,7 +570,52 @@ function performAiTurn(state: GameState, config: GameConfig): GameState {
+       : advanced;
+   }
+   battle = battleReducer(battle, { type: 'SELECT_CARD', cardId: choice.move.card.id });
++  const aiPlay = tryPlay(
++    battle.board,
++    choice.move.point,
++    createStoneFromCard(choice.move.card, 'W', `ai-preview-${battle.moveNumber + 1}`),
++    battle.koForbiddenKey,
++  );
++  if (!aiPlay.ok) return { ...state, battle };
++  const capturedStones = aiPlay.captured.flatMap((capturedPoint) => {
++    const captured = battle.board.points[capturedPoint];
++    return captured === null ? [] : [captured];
++  });
++  const sacrificeModifiers = resolveSacrificeEffects(capturedStones, 'opponent-placement');
++  if (battle.decks.B.handLimit + sacrificeModifiers.length > config.effectLimits.maxHandSize) {
++    battle = battleReducer(battle, { type: 'PASS', automatic: true });
++    return scoreIfReady({ ...state, battle, sequence: state.sequence + 1 }, battle, config);
++  }
++  const sacrificeEffects = capturedStones
++    .filter(({ kind }) => kind === 'STONE-006')
++    .flatMap((captured) => {
++      const definition = createStoneEffectDefinition(captured.kind, {
++        sideRelation: 'opponent',
++        acquisitionOrder: battle.moveNumber,
++        sourceId: captured.instanceId,
++      });
++      return definition === null ? [] : [definition];
++    });
++  const resolvedEffects = resolveMove<ProductEffectState>(
++    { battle, run: state.run, log: state.effectLog },
++    sacrificeEffects,
++    config.effectLimits,
++    { dryRun: false },
++  );
++  if (!resolvedEffects.ok) {
++    battle = battleReducer(battle, { type: 'PASS', automatic: true });
++    return scoreIfReady({ ...state, battle, sequence: state.sequence + 1 }, battle, config);
++  }
+   battle = battleReducer(battle, { type: 'PLAY_CARD', point: choice.move.point, rng: rngFor(config, state.sequence, 'ai-move') });
++  sacrificeModifiers.forEach((modifier, index) => {
++    battle = {
++      ...battle,
++      decks: {
++        ...battle.decks,
++        B: addTemporaryHandLimit(battle.decks.B, modifier, rngFor(config, state.sequence, `ai-sacrifice-${index}`)),
++      },
++    };
++  });
+   const placed = battle.board.points[choice.move.point];
+   battle = battleReducer(battleReducer(battle, { type: 'RESOLVE_MOVE' }), { type: 'END_TURN' });
+   battle = readyBattle(battle);
+@@ -408,6 +629,7 @@ function performAiTurn(state: GameState, config: GameConfig): GameState {
+       turn: current.moveNumber + 1,
+     }],
+     notice: placed === null ? state.notice : '',
++    effectLog: resolvedEffects.state.log,
+     sequence: state.sequence + 1,
+   };
+ }
+@@ -422,6 +644,33 @@ function openNode(state: GameState, node: MapNode, config: GameConfig): GameStat
+   return { ...state, screen: 'map', notice: '사당은 이번 MVP에서 안전한 휴식 노드로 처리됩니다.' };
+ }
+ 
++function finishInspection(state: GameState, confirm: boolean): GameState {
++  const inspection = state.pendingInspection;
++  const battle = state.battle;
++  if (inspection === null || battle === null) return state;
++  let nextBattle = battle;
++  if (confirm && inspection.reorderable) {
++    try {
++      const reordered = resolveScoutEffect(
++        battle.decks.B,
++        inspection.orderedIds,
++        [],
++        inspection.sourceId,
++      );
++      nextBattle = { ...battle, decks: { ...battle.decks, B: reordered.deck } };
++    } catch {
++      return { ...state, invalidReason: '확인한 카드 순서가 현재 덱과 일치하지 않습니다.' };
++    }
++  }
++  nextBattle = battleReducer(nextBattle, { type: 'END_TURN' });
++  return {
++    ...state,
++    battle: nextBattle,
++    pendingInspection: null,
++    invalidReason: '',
++  };
++}
++
+ export function gameReducer(state: GameState, action: GameAction, config: GameConfig): GameState {
+   assertConfig(config);
+   switch (action.type) {
+@@ -440,6 +689,20 @@ export function gameReducer(state: GameState, action: GameAction, config: GameCo
+       return previewOrCommit(state, action.point, config);
+     case 'AI_TURN':
+       return performAiTurn(state, config);
++    case 'CONTINUE_TO_MOVE':
++      return state.battle === null || state.battle.turn !== 'B'
++        ? state
++        : { ...state, battle: battleReducer(state.battle, { type: 'CONTINUE_TO_MOVE' }) };
++    case 'USE_CHARM': {
++      if (state.battle === null || state.battle.turn !== 'B' || state.battle.phase !== 'pre-move') return state;
++      const battle = battleReducer(state.battle, { type: 'USE_CHARM', charmId: action.charmId });
++      if (battle === state.battle) return state;
++      return {
++        ...state,
++        battle,
++        run: runReducer(state.run, { type: 'CONSUME_CHARM', charmId: action.charmId }, config.economy),
++      };
++    }
+     case 'PASS': {
+       if (state.battle === null || state.battle.turn !== 'B') return state;
+       const battle = battleReducer(state.battle, { type: 'PASS' });
+@@ -462,6 +725,18 @@ export function gameReducer(state: GameState, action: GameAction, config: GameCo
+     }
+     case 'USE_RELIC':
+       return state.battle === null ? state : { ...state, battle: battleReducer(state.battle, { type: 'USE_RELIC', relicId: action.relicId }) };
++    case 'REORDER_INSPECTION': {
++      const inspection = state.pendingInspection;
++      if (inspection === null || !inspection.reorderable
++        || action.orderedIds.length !== inspection.cards.length
++        || new Set(action.orderedIds).size !== action.orderedIds.length
++        || action.orderedIds.some((id) => !inspection.cards.some((card) => card.id === id))) return state;
++      return { ...state, pendingInspection: { ...inspection, orderedIds: [...action.orderedIds] } };
++    }
++    case 'CONFIRM_INSPECTION':
++      return finishInspection(state, true);
++    case 'CANCEL_INSPECTION':
++      return finishInspection(state, false);
+     case 'CHOOSE_REWARD': {
+       const run = runReducer(state.run, { type: 'CHOOSE_REWARD', candidateId: action.candidateId }, config.economy);
+       return { ...state, run, screen: run.pendingCharm === null ? 'map' : 'reward', notice: run.pendingCharm === null ? '보상을 덱에 반영했습니다.' : '교체할 부적을 선택하세요.' };
+@@ -522,7 +797,7 @@ export function gameReducer(state: GameState, action: GameAction, config: GameCo
+       return { ...state, run, dojo: result.visit, notice: '수련 결과를 덱에 반영했습니다.' };
+     }
+     case 'RETURN_TO_MAP':
+-      return { ...state, screen: 'map', battle: null, preview: null, invalidPoint: null, invalidReason: '' };
++      return { ...state, screen: 'map', battle: null, preview: null, pendingInspection: null, invalidPoint: null, invalidReason: '' };
+     case 'RESTART':
+       return createInitialGameState(config);
+     case 'RESOLVE_BATTLE_FOR_ENGINE': {
+diff --git a/src/game/battle.ts b/src/game/battle.ts
+index 3497e33..7167e40 100644
+--- a/src/game/battle.ts
++++ b/src/game/battle.ts
+@@ -62,7 +62,7 @@ export type BattleRewardStatus = 'none' | 'withheld' | 'available';
+ export type BattleOutcome = 'run-loss' | 'stage-win';
+ 
+ export interface BattleLogEntry {
+-  readonly type: 'move' | 'pass' | 'relic' | 'revival' | 'result';
++  readonly type: 'move' | 'pass' | 'charm' | 'relic' | 'revival' | 'result';
+   readonly actor: StoneColor;
+   readonly automatic?: boolean;
+   readonly cardId?: string;
+@@ -78,6 +78,7 @@ export interface BattleState {
+   readonly turn: StoneColor;
+   readonly phase: BattlePhase;
+   readonly decks: Readonly<Record<StoneColor, DeckState>>;
++  readonly charms: Readonly<Record<StoneColor, readonly string[]>>;
+   readonly relics: Readonly<Record<StoneColor, readonly string[]>>;
+   readonly enemyTraits: readonly string[];
+   readonly enemy: EnemyDefinition;
+@@ -105,6 +106,8 @@ export interface CreateBattleInput {
+   readonly rng: RandomSource;
+   readonly playerRelics?: readonly string[];
+   readonly enemyRelics?: readonly string[];
++  readonly playerCharms?: readonly string[];
++  readonly enemyCharms?: readonly string[];
+   readonly turn?: StoneColor;
+   readonly koForbiddenKey?: string | null;
+ }
+@@ -112,6 +115,7 @@ export interface CreateBattleInput {
+ export type BattleAction =
+   | { readonly type: 'BEGIN_TURN' }
+   | { readonly type: 'CONTINUE_TO_MOVE' }
++  | { readonly type: 'USE_CHARM'; readonly charmId: string }
+   | { readonly type: 'USE_RELIC'; readonly relicId: string }
+   | { readonly type: 'SELECT_CARD'; readonly cardId: string }
+   | { readonly type: 'PLAY_CARD'; readonly point: number; readonly rng: RandomSource }
+@@ -175,6 +179,10 @@ export function createBattleState(input: CreateBattleInput): BattleState {
+       B: createDeckState(input.playerDeck, input.rng),
+       W: createDeckState(input.enemyDeck, input.rng),
+     },
++    charms: {
++      B: [...(input.playerCharms ?? [])],
++      W: [...(input.enemyCharms ?? [])],
++    },
+     relics: {
+       B: [...(input.playerRelics ?? [])],
+       W: [...(input.enemyRelics ?? [])],
+@@ -290,11 +298,11 @@ export function resolveBattleOutcome(
+   winner: StoneColor,
+   _rng: RandomSource,
+ ): BattleState {
+-  if (winner === 'B') return finishBattle(state, 'stage-win');
++  if (winner === 'W') return finishBattle(state, 'run-loss');
+   if (state.act === 1 && state.revivalStage === 1 && state.enemy.revival !== undefined) {
+     return startRevival(state);
+   }
+-  return finishBattle(state, 'run-loss');
++  return finishBattle(state, 'stage-win');
+ }
+ 
+ function combinedWeights(
+@@ -430,6 +438,25 @@ export function battleReducer(state: BattleState, action: BattleAction): BattleS
+       if (state.phase !== 'pre-move') return state;
+       if (!hasLegalCardMove(state)) return passBattle(state, true);
+       return { ...state, phase: 'choose-card' };
++    case 'USE_CHARM':
++      if (state.phase !== 'pre-move' || !state.charms[state.turn].includes(action.charmId)) return state;
++      {
++        const charms = [...state.charms[state.turn]];
++        charms.splice(charms.indexOf(action.charmId), 1);
++      return {
++        ...state,
++        charms: {
++          ...state.charms,
++          [state.turn]: charms,
++        },
++        log: [...state.log, {
++          type: 'charm',
++          actor: state.turn,
++          sourceId: action.charmId,
++          message: '부적을 사용했습니다.',
++        }],
++      };
++      }
+     case 'USE_RELIC':
+       if (state.phase !== 'pre-move'
+         || !state.relics[state.turn].includes(action.relicId)
+@@ -441,7 +468,7 @@ export function battleReducer(state: BattleState, action: BattleAction): BattleS
+           type: 'relic',
+           actor: state.turn,
+           sourceId: action.relicId,
+-          message: '부적을 사용했습니다.',
++          message: '유물을 사용했습니다.',
+         }],
+       };
+     case 'SELECT_CARD':
+diff --git a/src/game/run.ts b/src/game/run.ts
+index 989826a..893f9b4 100644
+--- a/src/game/run.ts
++++ b/src/game/run.ts
+@@ -34,6 +34,7 @@ export type RunAction =
+   | { readonly type: 'REPLACE_CHARM'; readonly index: number }
+   | { readonly type: 'APPLY_INVENTORY'; readonly inventory: InventoryState }
+   | { readonly type: 'GAIN_CURRENCY'; readonly amount: number }
++  | { readonly type: 'CONSUME_CHARM'; readonly charmId: CharmId }
+   | { readonly type: 'CONSUME_FREE_DOJO_VISIT' };
+ 
+ export function createRunState(input: CreateRunInput): RunState {
+@@ -141,6 +142,12 @@ export function runReducer(state: RunState, action: RunAction, config: EconomyCo
+       return state.status !== 'active' || !Number.isSafeInteger(action.amount) || action.amount < 0
+         ? state
+         : { ...state, currency: state.currency + action.amount };
++    case 'CONSUME_CHARM': {
++      if (state.status !== 'active' || !state.charms.includes(action.charmId)) return state;
++      const charms = [...state.charms];
++      charms.splice(charms.indexOf(action.charmId), 1);
++      return { ...state, charms };
++    }
+     case 'CONSUME_FREE_DOJO_VISIT':
+       return state.freeDojoVisits > 0 ? { ...state, freeDojoVisits: state.freeDojoVisits - 1 } : state;
+   }
+diff --git a/tests/battle.product-effects.test.ts b/tests/battle.product-effects.test.ts
+new file mode 100644
+index 0000000..1095d37
+--- /dev/null
++++ b/tests/battle.product-effects.test.ts
+@@ -0,0 +1,182 @@
++import { describe, expect, it } from 'vitest';
++
++import { createInitialGameState, gameReducer, type GameState } from '../src/game/GameProvider';
++import { createBoard } from '../src/game/go';
++import type { DeckState, StoneCard } from '../src/game/deck';
++import type { BoardState, StoneKind } from '../src/game/types';
++import { DRAFT_GAME_CONFIG } from './fixtures/draft-game-config';
++
++function card(id: string, kind: StoneKind): StoneCard {
++  return { id, kind, temporary: false };
++}
++
++function productBattle(
++  activeKind: StoneKind,
++  board: BoardState = createBoard(7),
++  drawKinds: readonly StoneKind[] = ['STONE-001', 'STONE-003', 'STONE-005', 'STONE-004'],
++): GameState {
++  let state = createInitialGameState(DRAFT_GAME_CONFIG);
++  state = gameReducer(state, { type: 'START_RUN' }, DRAFT_GAME_CONFIG);
++  state = gameReducer(state, { type: 'OPEN_BATTLE', battle: 'normal' }, DRAFT_GAME_CONFIG);
++  const battle = state.battle!;
++  const playerDeck: DeckState = {
++    ...battle.decks.B,
++    hand: [
++      card('active-card', activeKind),
++      card('hand-1', 'STONE-001'),
++      card('hand-2', 'STONE-001'),
++      card('hand-3', 'STONE-001'),
++    ],
++    drawPile: drawKinds.map((kind, index) => card(`draw-${index + 1}`, kind)),
++    discardPile: [],
++  };
++  return gameReducer({
++    ...state,
++    battle: {
++      ...battle,
++      board,
++      turn: 'B',
++      phase: 'choose-card',
++      decks: { ...battle.decks, B: playerDeck },
++    },
++  }, { type: 'SELECT_CARD', cardId: 'active-card' }, DRAFT_GAME_CONFIG);
++}
++
++function commit(state: GameState, point: number, config = DRAFT_GAME_CONFIG): GameState {
++  const preview = gameReducer(state, { type: 'CHOOSE_POINT', point }, config);
++  expect(preview.preview?.point).toBe(point);
++  return gameReducer(preview, { type: 'CHOOSE_POINT', point }, config);
++}
++
++function captureBoard(capturedKind: StoneKind = 'STONE-001'): BoardState {
++  const points = [...createBoard(7).points];
++  points[1] = { color: 'W', kind: capturedKind, instanceId: 'capture-target' };
++  points[2] = { color: 'B', kind: 'STONE-001', instanceId: 'wall-right' };
++  points[8] = { color: 'B', kind: 'STONE-001', instanceId: 'wall-down' };
++  return { size: 7, points };
++}
++
++describe('제품 전투 특수 돌 배선', () => {
++  it('척후석 확인 순서를 확정하면 실제 drawPile 순서가 결정적으로 바뀐다', () => {
++    const placed = commit(productBattle('STONE-002'), 0);
++    const inspection = placed.pendingInspection!;
++
++    expect(inspection.cards.map(({ id }) => id)).toEqual(
++      placed.battle!.decks.B.drawPile.slice(0, 2).map(({ id }) => id),
++    );
++    const reversed = [...inspection.orderedIds].reverse();
++    const reordered = gameReducer(placed, { type: 'REORDER_INSPECTION', orderedIds: reversed }, DRAFT_GAME_CONFIG);
++    const confirmed = gameReducer(reordered, { type: 'CONFIRM_INSPECTION' }, DRAFT_GAME_CONFIG);
++
++    expect(confirmed.pendingInspection).toBeNull();
++    expect(confirmed.battle!.decks.B.drawPile.slice(0, 2).map(({ id }) => id)).toEqual(reversed);
++  });
++
++  it('장군석 포획은 주입된 대국 상한 상태를 갱신하며 실제 런에 5냥을 지급한다', () => {
++    const initial = productBattle('STONE-003', captureBoard());
++    const next = commit(initial, 0);
++
++    expect(next.run.currency).toBe(initial.run.currency + 5);
++    expect(next.generalMoneyAwarded).toBe(5);
++  });
++
++  it('기병석 드로우와 수호석 구조는 실제 덱 위 카드를 확인 대상으로 만든다', () => {
++    const cavalry = commit(productBattle(
++      'STONE-001',
++      captureBoard(),
++      ['STONE-004', 'STONE-003', 'STONE-005'],
++    ), 0);
++    expect(cavalry.pendingInspection).toMatchObject({ sourceKind: 'cavalry', reorderable: false });
++    expect(cavalry.pendingInspection?.cards.map(({ id }) => id)).toEqual(['draw-2']);
++
++    const guardianPoints = [...createBoard(7).points];
++    guardianPoints[1] = { color: 'B', kind: 'STONE-001', instanceId: 'endangered-friend' };
++    guardianPoints[2] = { color: 'W', kind: 'STONE-001', instanceId: 'block-right' };
++    guardianPoints[8] = { color: 'W', kind: 'STONE-001', instanceId: 'block-down' };
++    const guardian = commit(productBattle('STONE-005', { size: 7, points: guardianPoints }), 0);
++    expect(guardian.pendingInspection).toMatchObject({ sourceKind: 'guardian', reorderable: false });
++    expect(guardian.pendingInspection?.cards).toHaveLength(2);
++  });
++
++  it('상대 희생석 포획은 상대의 실제 다음 턴 패 한도와 손패를 늘린다', () => {
++    const initial = productBattle('STONE-001', captureBoard('STONE-006'));
++    const before = initial.battle!.decks.W;
++    const next = commit(initial, 0);
++
++    expect(next.battle!.decks.W.handLimit).toBe(before.handLimit + 1);
++    expect(next.battle!.decks.W.hand).toHaveLength(before.hand.length + 1);
++    expect(next.battle!.decks.W.handLimitModifiers).toContainEqual({
++      sourceId: 'capture-target',
++      amount: 1,
++      remainingTurns: 1,
++    });
++  });
++
++  it('AI가 플레이어 희생석을 포획해도 플레이어의 다음 턴 패 한도가 늘어난다', () => {
++    const points = [...createBoard(7).points];
++    points[1] = { color: 'B', kind: 'STONE-006', instanceId: 'player-sacrifice' };
++    points[2] = { color: 'W', kind: 'STONE-001', instanceId: 'enemy-wall-right' };
++    points[8] = { color: 'W', kind: 'STONE-001', instanceId: 'enemy-wall-down' };
++    const initial = productBattle('STONE-001');
++    const battle = initial.battle!;
++    const before = battle.decks.B;
++    const enemyHand = [0, 1, 2, 3].map((index) => card(`enemy-${index}`, 'STONE-001'));
++    const readyForAi: GameState = {
++      ...initial,
++      battle: {
++        ...battle,
++        board: { size: 7, points },
++        turn: 'W',
++        phase: 'choose-card',
++        selectedCardId: null,
++        decks: { ...battle.decks, W: { ...battle.decks.W, hand: enemyHand } },
++      },
++    };
++
++    const next = gameReducer(readyForAi, { type: 'AI_TURN' }, DRAFT_GAME_CONFIG);
++
++    expect(next.battle!.board.points[1]).toBeNull();
++    expect(next.battle!.decks.B.handLimit).toBe(before.handLimit + 1);
++    expect(next.battle!.decks.B.handLimitModifiers).toContainEqual({
++      sourceId: 'player-sacrifice',
++      amount: 1,
++      remainingTurns: 1,
++    });
++  });
++
++  it('제품 착수도 주입된 효과 큐 한도를 넘으면 판·카드·냥을 원자적으로 보존한다', () => {
++    const config = {
++      ...DRAFT_GAME_CONFIG,
++      effectLimits: { ...DRAFT_GAME_CONFIG.effectLimits, maxResolvedEffects: 0 },
++    };
++    const initial = productBattle('STONE-002');
++    const rejected = gameReducer(initial, { type: 'CHOOSE_POINT', point: 0 }, config);
++
++    expect(rejected.preview).toBeNull();
++    expect(rejected.invalidReason).toContain('안전 한도');
++    expect(rejected.battle!.board).toBe(initial.battle!.board);
++    expect(rejected.battle!.decks.B).toBe(initial.battle!.decks.B);
++    expect(rejected.run.currency).toBe(initial.run.currency);
++  });
++});
++
++describe('제품 pre-move 자원 상태', () => {
++  it('명시적 사용·건너뛰기 전까지 멈추고 부적 소비와 유물 사용 상태를 분리한다', () => {
++    let state = createInitialGameState(DRAFT_GAME_CONFIG);
++    state = {
++      ...state,
++      run: { ...state.run, charms: ['ITEM-001'], relics: ['RELIC-001'] },
++    };
++    state = gameReducer(state, { type: 'OPEN_BATTLE', battle: 'normal' }, DRAFT_GAME_CONFIG);
++
++    expect(state.battle).toMatchObject({ phase: 'pre-move' });
++    expect(state.battle!.charms.B).toEqual(['ITEM-001']);
++    state = gameReducer(state, { type: 'USE_RELIC', relicId: 'RELIC-001' }, DRAFT_GAME_CONFIG);
++    expect(state.battle!.usedRelicsThisTurn).toEqual(['RELIC-001']);
++    state = gameReducer(state, { type: 'USE_CHARM', charmId: 'ITEM-001' }, DRAFT_GAME_CONFIG);
++    expect(state.run.charms).toEqual([]);
++    expect(state.battle!.charms.B).toEqual([]);
++    state = gameReducer(state, { type: 'CONTINUE_TO_MOVE' }, DRAFT_GAME_CONFIG);
++    expect(state.battle!.phase).toBe('choose-card');
++  });
++});
+diff --git a/tests/battle.revival.test.ts b/tests/battle.revival.test.ts
+index 9693679..d793c82 100644
+--- a/tests/battle.revival.test.ts
++++ b/tests/battle.revival.test.ts
+@@ -70,7 +70,7 @@ const revive = (state = create()) => resolveBattleOutcome({
+   phase: 'scoring' as const,
+   consecutivePasses: 2,
+   ending: true,
+-}, 'W', createSeededRng('revive'));
++}, 'B', createSeededRng('revive'));
+ 
+ describe('1막 2단계 부활', () => {
+   it('보상을 보류하고 전투 자산과 판 위 병종을 보존한 채 종료 상태를 초기화한다', () => {
+@@ -99,7 +99,7 @@ describe('1막 2단계 부활', () => {
+       ending: true,
+     };
+ 
+-    const next = resolveBattleOutcome(marked, 'W', createSeededRng('loss'));
++    const next = resolveBattleOutcome(marked, 'B', createSeededRng('first-player-win'));
+ 
+     expect(next.phase).toBe('revival-special-move');
+     expect(next.rewardStatus).toBe('withheld');
+@@ -121,6 +121,17 @@ describe('1막 2단계 부활', () => {
+     expect(next.enemyTraits).toContain('DRAFT-REVIVAL-TRAIT');
+   });
+ 
++  it('1단계 플레이어 패배는 부활을 발동하지 않고 즉시 런을 끝낸다', () => {
++    const next = resolveBattleOutcome(create(), 'W', createSeededRng('first-player-loss'));
++
++    expect(next).toMatchObject({
++      phase: 'result',
++      outcome: 'run-loss',
++      rewardStatus: 'withheld',
++      revivalStage: 1,
++    });
++  });
++
+   it('전용 착수는 손패를 쓰거나 보충 드로우하지 않고 주입된 병종·우선순위·게이지를 쓴다', () => {
+     const state = revive();
+     const beforePlayerDeck = structuredClone(state.decks.B);
+diff --git a/tests/fixtures/draft-game-config.ts b/tests/fixtures/draft-game-config.ts
+index af2b279..e48a825 100644
+--- a/tests/fixtures/draft-game-config.ts
++++ b/tests/fixtures/draft-game-config.ts
+@@ -1,6 +1,6 @@
+ import type { GameConfig } from '../../src/game/GameProvider';
+ import { DRAFT_BATTLE_DEFINITION, DRAFT_KOMI } from './draft-battle-config';
+-import { DRAFT_EFFECT_LIMITS_FIXTURE } from './draft-effect-config';
++import { DRAFT_EFFECT_LIMITS_FIXTURE, DRAFT_GENERAL_CAPTURE_MONEY_CAP_FIXTURE } from './draft-effect-config';
+ import {
+   DRAFT_ECONOMY_CONFIG,
+   DRAFT_MAP_WEIGHTS,
+@@ -14,6 +14,7 @@ export const DRAFT_GAME_CONFIG: GameConfig = {
+   economy: DRAFT_ECONOMY_CONFIG,
+   mapWeights: DRAFT_MAP_WEIGHTS,
+   effectLimits: DRAFT_EFFECT_LIMITS_FIXTURE,
++  generalCaptureMoneyCap: DRAFT_GENERAL_CAPTURE_MONEY_CAP_FIXTURE,
+   enemyDeck: [
+     'STONE-001', 'STONE-001', 'STONE-001', 'STONE-001', 'STONE-001',
+     'STONE-001', 'STONE-002', 'STONE-003', 'STONE-004', 'STONE-005',
+diff --git a/tests/ui.battle.test.tsx b/tests/ui.battle.test.tsx
+index f1ab4c8..b27ddb2 100644
+--- a/tests/ui.battle.test.tsx
++++ b/tests/ui.battle.test.tsx
+@@ -3,8 +3,9 @@ import { act } from 'react';
+ import { createRoot } from 'react-dom/client';
+ import { afterEach, expect, it, vi } from 'vitest';
+ import { App } from '../src/App';
+-import { createInitialGameState, gameReducer } from '../src/game/GameProvider';
++import { createInitialGameState, gameReducer, type GameState } from '../src/game/GameProvider';
+ import { canonicalKoKey, tryPlay } from '../src/game/go';
++import type { StoneCard } from '../src/game/deck';
+ import { DRAFT_GAME_CONFIG } from './fixtures/draft-game-config';
+ 
+ let root: ReturnType<typeof createRoot> | null = null;
+@@ -25,6 +26,29 @@ function click(text: string): void {
+   act(() => button?.click());
+ }
+ 
++function battleStateWithScout(): GameState {
++  let state = createInitialGameState(DRAFT_GAME_CONFIG);
++  state = gameReducer(state, { type: 'START_RUN' }, DRAFT_GAME_CONFIG);
++  state = gameReducer(state, { type: 'OPEN_BATTLE', battle: 'normal' }, DRAFT_GAME_CONFIG);
++  const battle = state.battle!;
++  const scout: StoneCard = { id: 'ui-scout', kind: 'STONE-002', temporary: false };
++  const hand = [scout, ...battle.decks.B.hand.slice(0, 3)];
++  const drawPile: readonly StoneCard[] = [
++    { id: 'ui-draw-normal', kind: 'STONE-001', temporary: false },
++    { id: 'ui-draw-general', kind: 'STONE-003', temporary: false },
++    { id: 'ui-draw-guardian', kind: 'STONE-005', temporary: false },
++  ];
++  return {
++    ...state,
++    battle: {
++      ...battle,
++      phase: 'choose-card',
++      turn: 'B',
++      decks: { ...battle.decks, B: { ...battle.decks.B, hand, drawPile } },
++    },
++  };
++}
++
+ it('실제 10장 덱에서 손패 4장을 보여주고 병종명을 정확히 표시한다', () => {
+   host = document.createElement('div');
+   document.body.append(host);
+@@ -46,6 +70,7 @@ it('tryPlay/resolveMove dry-run 뒤 재확인하면 카드 소비와 AI 선택
+   act(() => root?.render(<App config={DRAFT_GAME_CONFIG} />));
+   click('등반 시작');
+   click('일반전');
++  click('착수로 진행');
+   click('일반석');
+   const hit = host.querySelector<SVGCircleElement>('[data-hit="0-0"]');
+   act(() => hit?.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+@@ -58,6 +83,61 @@ it('tryPlay/resolveMove dry-run 뒤 재확인하면 카드 소비와 AI 선택
+   expect(host.querySelectorAll('.stone-w')).toHaveLength(1);
+ });
+ 
++it('pre-move에서 부적과 유물을 구분해 표시하고 실제 사용·건너뛰기 동작을 제공한다', () => {
++  let initial = createInitialGameState(DRAFT_GAME_CONFIG);
++  initial = {
++    ...initial,
++    run: { ...initial.run, charms: ['ITEM-001'], relics: ['RELIC-001'] },
++  };
++  host = document.createElement('div');
++  document.body.append(host);
++  root = createRoot(host);
++  act(() => root?.render(<App config={DRAFT_GAME_CONFIG} initialState={initial} />));
++
++  click('등반 시작');
++  click('일반전');
++  expect(host.textContent).toContain('부적 1');
++  expect(host.textContent).toContain('유물 1');
++  expect(host.querySelector('[aria-label="부적"]')?.textContent).toContain('수읽기 부적');
++  expect(host.querySelector('[aria-label="유물"]')?.textContent).toContain('낡은 바둑통');
++  click('낡은 바둑통 사용');
++  expect(host.querySelector<HTMLButtonElement>('[data-relic-id="RELIC-001"]')?.disabled).toBe(true);
++  click('수읽기 부적 사용');
++  expect(host.querySelector('[data-charm-id="ITEM-001"]')).toBeNull();
++  click('착수로 진행');
++  expect(host.querySelector<HTMLButtonElement>('.hand .card')?.disabled).toBe(false);
++});
++
++it('척후석 착수 후 실제 덱 위 카드로 재정렬 패널을 열고 취소·확정한다', () => {
++  vi.useFakeTimers();
++  const mountScout = () => {
++    host = document.createElement('div');
++    document.body.append(host);
++    root = createRoot(host);
++    act(() => root?.render(<App config={DRAFT_GAME_CONFIG} initialState={battleStateWithScout()} />));
++    click('척후석');
++    const hit = host.querySelector<SVGCircleElement>('[data-hit="0-0"]');
++    act(() => hit?.dispatchEvent(new MouseEvent('click', { bubbles: true })));
++    act(() => hit?.dispatchEvent(new MouseEvent('click', { bubbles: true })));
++  };
++
++  mountScout();
++  const panel = host?.querySelector('[aria-label="덱 확인 및 재정렬"]');
++  expect(panel?.textContent).toContain('장군석');
++  expect(panel?.textContent).toContain('수호석');
++  click('취소');
++  expect(document.querySelector('[aria-label="덱 확인 및 재정렬"]')).toBeNull();
++
++  act(() => root?.unmount());
++  host?.remove();
++  root = null;
++  host = null;
++  mountScout();
++  click('순서 뒤집기');
++  click('확정');
++  expect(document.querySelector('[aria-label="덱 확인 및 재정렬"]')).toBeNull();
++});
++
+ it('기권은 run 패배 결과 경로로 이어진다', () => {
+   host = document.createElement('div');
+   document.body.append(host);
+@@ -74,6 +154,7 @@ it('포획 미리보기와 점유·자충수·단순패 사유를 엔진 판정
+   let state = createInitialGameState(DRAFT_GAME_CONFIG);
+   state = gameReducer(state, { type: 'START_RUN' }, DRAFT_GAME_CONFIG);
+   state = gameReducer(state, { type: 'OPEN_BATTLE', battle: 'normal' }, DRAFT_GAME_CONFIG);
++  state = gameReducer(state, { type: 'CONTINUE_TO_MOVE' }, DRAFT_GAME_CONFIG);
+   const selectedCard = state.battle!.decks.B.hand[0];
+   state = gameReducer(state, { type: 'SELECT_CARD', cardId: selectedCard.id }, DRAFT_GAME_CONFIG);
+ 
+diff --git a/tests/ui.board.test.tsx b/tests/ui.board.test.tsx
+index 8eee8eb..40b037b 100644
+--- a/tests/ui.board.test.tsx
++++ b/tests/ui.board.test.tsx
+@@ -50,6 +50,7 @@ it('좌표는 행·열 이름과 Enter/Space 착수를 제공한다', () => {
+   act(() => root?.render(<App config={DRAFT_GAME_CONFIG} />));
+   click('등반 시작');
+   click('일반전');
++  click('착수로 진행');
+   click('일반석');
+   const hit = host.querySelector<SVGCircleElement>('[data-hit="0-0"]');
+   expect(hit?.getAttribute('aria-label')).toContain('1행 1열');
+diff --git a/tests/ui.game.test.tsx b/tests/ui.game.test.tsx
+index 15dd679..721f8de 100644
+--- a/tests/ui.game.test.tsx
++++ b/tests/ui.game.test.tsx
+@@ -62,6 +62,7 @@ describe('RoGolike 통합 게임 UI', () => {
+     const view = renderApp();
+     clickButton('등반 시작');
+     clickButton('일반전');
++    clickButton('착수로 진행');
+     const first = view.querySelector<SVGCircleElement>('[data-hit="0-0"]')!;
+     act(() => first.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+     expect(view.textContent).toContain('놓을 카드를 먼저 선택하세요.');
+@@ -82,20 +83,21 @@ describe('RoGolike 통합 게임 UI', () => {
+     for (const text of ['내 덱 10', '버림 0', '부적 0', '연속 패스 0', '포획 0', '효과 기록']) expect(view.textContent).toContain(text);
+   });
+ 
+-  it('AI 연속 패스 계가로 첫 패배 부활 전용 착수와 최종 패배를 처리한다', () => {
++  it('AI 연속 패스 계가의 첫 승리로 부활하고 이후 기권은 최종 패배로 처리한다', () => {
+     vi.useFakeTimers();
+-    const passingConfig = { ...DRAFT_GAME_CONFIG, aiPassScoreThreshold: 1 };
++    const passingConfig = {
++      ...DRAFT_GAME_CONFIG,
++      komiBySize: { 7: -100, 9: -100 },
++      aiPassScoreThreshold: 1,
++    };
+     const view = renderApp(passingConfig);
+     clickButton('등반 시작');
+     clickButton('보스전');
+     clickButton('패스');
+     act(() => vi.runAllTimers());
+     expect(view.textContent).toContain('부활 2단계');
+-    act(() => vi.runAllTimers());
+     expect(view.textContent).toContain('부활 전용 착수를 수행했습니다.');
+-    clickButton('패스');
+-    act(() => vi.runAllTimers());
+-    act(() => vi.runAllTimers());
++    clickButton('기권');
+     expect(view.querySelector('[data-screen="result"]')).toBeTruthy();
+     expect(view.textContent).toContain('런 패배');
+   });
+@@ -105,6 +107,7 @@ describe('RoGolike 통합 게임 UI', () => {
+     const view = renderApp();
+     clickButton('등반 시작');
+     clickButton('일반전');
++    clickButton('착수로 진행');
+     clickButton('일반석');
+     const first = view.querySelector<SVGCircleElement>('[data-hit="0-0"]')!;
+     act(() => first.dispatchEvent(new MouseEvent('click', { bubbles: true })));

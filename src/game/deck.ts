@@ -94,6 +94,15 @@ export function drawToLimit(state: DeckState, rng: RandomSource): DeckState {
   return next;
 }
 
+export function drawExtra(state: DeckState, maxHandSize: number, rng: RandomSource): DeckState {
+  if (!Number.isSafeInteger(maxHandSize) || maxHandSize < 1) throw new RangeError('maxHandSize must be a positive integer');
+  if (state.hand.length >= maxHandSize) return state;
+  let next = state.drawPile.length === 0 ? reshuffle(state, rng) : state;
+  if (next.drawPile.length === 0) return state;
+  const [drawn, ...drawPile] = next.drawPile;
+  return { ...next, drawPile, hand: [...next.hand, drawn] };
+}
+
 export function discardUsed(
   state: DeckState,
   cardId: string,
@@ -105,7 +114,8 @@ export function discardUsed(
   const afterUse: DeckState = {
     ...state,
     hand: state.hand.filter((candidate) => candidate.id !== cardId),
-    discardPile: card.temporary ? state.discardPile : [...state.discardPile, card],
+    drawPile: card.kind === 'STONE-004' && !card.temporary ? [...state.drawPile, card] : state.drawPile,
+    discardPile: card.temporary || card.kind === 'STONE-004' ? state.discardPile : [...state.discardPile, card],
     temporaryCards: card.temporary
       ? state.temporaryCards.filter((temporaryId) => temporaryId !== cardId)
       : state.temporaryCards,

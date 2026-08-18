@@ -1,0 +1,7 @@
+$ python -m py_compile scripts/evidence/__init__.py scripts/evidence/redact.py scripts/evidence/orca_prompt.py scripts/evidence/evidence.py scripts/evidence/design_decision.py scripts/evidence/claude_hook.py tests/evidence/__init__.py tests/evidence/test_redact.py tests/evidence/test_project_rules.py tests/evidence/test_orca_prompt.py tests/evidence/test_evidence_cli.py tests/evidence/test_design_decision.py tests/evidence/test_claude_hook.py
+
+STDOUT
+
+STDERR
+
+EXIT 0

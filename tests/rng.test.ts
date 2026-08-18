@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createSeededRng, shuffle } from '../src/engine';
+import { createSeededRng, shuffle } from '../src/game/rng';
 
 const take = (rng: () => number, count: number): number[] =>
   Array.from({ length: count }, () => rng());

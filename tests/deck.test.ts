@@ -22,6 +22,26 @@ const allCards = (state: DeckState) => [
 ];
 
 describe('순환형 돌 덱', () => {
+  it('시작 덱은 일반석 5장과 특수돌 5종 각 1장이다', () => {
+    expect(STARTING_DECK).toEqual([
+      'STONE-001', 'STONE-001', 'STONE-001', 'STONE-001', 'STONE-001',
+      'STONE-002', 'STONE-003', 'STONE-004', 'STONE-005', 'STONE-006',
+    ]);
+  });
+
+  it('기병석은 사용 후 덱 맨 아래로 돌아간다', () => {
+    const cavalry = { id: 'cavalry', kind: 'STONE-004' as const, temporary: false };
+    const normal = { id: 'normal', kind: 'STONE-001' as const, temporary: false };
+    const state: DeckState = {
+      drawPile: [normal], hand: [cavalry], discardPile: [], temporaryCards: [],
+      baseHandLimit: 1, handLimit: 1, handLimitModifiers: [], nextCardId: 3,
+    };
+    const next = resolveCardUse(state, cavalry.id, true, () => 0);
+    expect(next.hand).toEqual([normal]);
+    expect(next.drawPile).toEqual([cavalry]);
+    expect(next.discardPile).toEqual([]);
+  });
+
   it('10장에서 4장을 뽑는다', () => {
     const deckList = [...STARTING_DECK];
     const state = createDeckState(deckList, () => 0);
@@ -151,18 +171,18 @@ describe('순환형 돌 덱', () => {
     expect(afterTwoTurns.hand).toHaveLength(7);
   });
 
-  it('확정 STARTING_DECK은 일반석 6장과 지정 특수석 4장이다', () => {
+  it('확정 STARTING_DECK은 일반석 5장과 지정 특수석 5장이다', () => {
     expect(STARTING_DECK).toEqual([
       'STONE-001',
       'STONE-001',
       'STONE-001',
       'STONE-001',
       'STONE-001',
-      'STONE-001',
       'STONE-002',
+      'STONE-003',
+      'STONE-004',
       'STONE-005',
       'STONE-006',
-      'STONE-003',
     ]);
   });
 });

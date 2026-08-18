@@ -1,5 +1,6 @@
-import { createDeckState, createStoneFromCard, resolveCardUse } from './deck';
-import { libertiesAt, neighbors, tryPlay } from './go';
+import { createDeckState, createStoneFromCard, drawExtra, expireTemporaryHandLimits, resolveCardUse } from './deck';
+import { groupAt, libertiesAt, neighbors, tryPlay } from './go';
+import { hasAdjacentEndangeredGroup } from './content/stones';
 import { randomInt } from './rng';
 import { scoreArea } from './scoring';
 import type { DeckState } from './deck';
@@ -62,7 +63,7 @@ export type BattleRewardStatus = 'none' | 'withheld' | 'available';
 export type BattleOutcome = 'run-loss' | 'stage-win';
 
 export interface BattleLogEntry {
-  readonly type: 'move' | 'pass' | 'relic' | 'revival' | 'result';
+  readonly type: 'move' | 'pass' | 'charm' | 'relic' | 'revival' | 'result' | 'effect';
   readonly actor: StoneColor;
   readonly automatic?: boolean;
   readonly cardId?: string;
@@ -72,12 +73,20 @@ export interface BattleLogEntry {
   readonly message: string;
 }
 
+export interface GroupProtection {
+  readonly id: string;
+  readonly color: StoneColor;
+  readonly memberInstanceIds: readonly string[];
+  readonly grantedAtMove: number;
+}
+
 export interface BattleState {
   readonly act: number;
   readonly board: BoardState;
   readonly turn: StoneColor;
   readonly phase: BattlePhase;
   readonly decks: Readonly<Record<StoneColor, DeckState>>;
+  readonly charms: Readonly<Record<StoneColor, readonly string[]>>;
   readonly relics: Readonly<Record<StoneColor, readonly string[]>>;
   readonly enemyTraits: readonly string[];
   readonly enemy: EnemyDefinition;
@@ -93,6 +102,9 @@ export interface BattleState {
   readonly moveNumber: number;
   readonly usedRelicsThisTurn: readonly string[];
   readonly log: readonly BattleLogEntry[];
+  readonly maxHandSize: number;
+  readonly previousCaptureBy: Readonly<Record<StoneColor, boolean>>;
+  readonly protections: readonly GroupProtection[];
 }
 
 export interface CreateBattleInput {
@@ -103,8 +115,11 @@ export interface CreateBattleInput {
   readonly enemy: EnemyDefinition;
   readonly komi: number;
   readonly rng: RandomSource;
+  readonly maxHandSize: number;
   readonly playerRelics?: readonly string[];
   readonly enemyRelics?: readonly string[];
+  readonly playerCharms?: readonly string[];
+  readonly enemyCharms?: readonly string[];
   readonly turn?: StoneColor;
   readonly koForbiddenKey?: string | null;
 }
@@ -112,6 +127,7 @@ export interface CreateBattleInput {
 export type BattleAction =
   | { readonly type: 'BEGIN_TURN' }
   | { readonly type: 'CONTINUE_TO_MOVE' }
+  | { readonly type: 'USE_CHARM'; readonly charmId: string }
   | { readonly type: 'USE_RELIC'; readonly relicId: string }
   | { readonly type: 'SELECT_CARD'; readonly cardId: string }
   | { readonly type: 'PLAY_CARD'; readonly point: number; readonly rng: RandomSource }
@@ -165,6 +181,7 @@ export function validateEnemyDefinition(enemy: EnemyDefinition, boardPoints?: nu
 
 export function createBattleState(input: CreateBattleInput): BattleState {
   if (!Number.isFinite(input.komi)) throw new RangeError('komi must be finite');
+  if (!Number.isSafeInteger(input.maxHandSize) || input.maxHandSize < 1) throw new RangeError('maxHandSize must be a positive integer');
   validateEnemyDefinition(input.enemy, input.board.points.length);
   return {
     act: input.act,
@@ -174,6 +191,10 @@ export function createBattleState(input: CreateBattleInput): BattleState {
     decks: {
       B: createDeckState(input.playerDeck, input.rng),
       W: createDeckState(input.enemyDeck, input.rng),
+    },
+    charms: {
+      B: [...(input.playerCharms ?? [])],
+      W: [...(input.enemyCharms ?? [])],
     },
     relics: {
       B: [...(input.playerRelics ?? [])],
@@ -193,7 +214,26 @@ export function createBattleState(input: CreateBattleInput): BattleState {
     moveNumber: 0,
     usedRelicsThisTurn: [],
     log: [],
+    maxHandSize: input.maxHandSize,
+    previousCaptureBy: { B: false, W: false },
+    protections: [],
   };
+}
+
+export function captureNegatedBy(
+  board: BoardState,
+  capturedPoints: readonly number[],
+  protections: readonly GroupProtection[],
+  mover: StoneColor,
+): GroupProtection | null {
+  const capturedIds = new Set(capturedPoints.flatMap((point) => {
+    const stone = board.points[point];
+    return stone === null ? [] : [stone.instanceId];
+  }));
+  return protections
+    .filter((protection) => protection.color !== mover
+      && protection.memberInstanceIds.some((id) => capturedIds.has(id)))
+    .sort((left, right) => left.grantedAtMove - right.grantedAtMove)[0] ?? null;
 }
 
 function activeDeck(state: BattleState): DeckState {
@@ -210,10 +250,25 @@ export function hasLegalCardMove(state: BattleState): boolean {
   });
 }
 
+export function stoneMajorityWinner(board: BoardState): StoneColor | null {
+  const threshold = Math.ceil(board.points.length / 2);
+  let black = 0;
+  let white = 0;
+  board.points.forEach((stone) => {
+    if (stone?.color === 'B') black += 1;
+    if (stone?.color === 'W') white += 1;
+  });
+  if (black >= threshold) return 'B';
+  if (white >= threshold) return 'W';
+  return null;
+}
+
 function passBattle(state: BattleState, automatic: boolean): BattleState {
   const consecutivePasses = state.consecutivePasses + 1;
+  const expiredDeck = expireTemporaryHandLimits(state.decks[state.turn]);
   return {
     ...state,
+    decks: { ...state.decks, [state.turn]: expiredDeck },
     turn: state.turn === 'B' ? 'W' : 'B',
     phase: consecutivePasses >= 2 ? 'scoring' : 'turn-start',
     selectedCardId: null,
@@ -231,8 +286,10 @@ function passBattle(state: BattleState, automatic: boolean): BattleState {
 }
 
 function endTurn(state: BattleState): BattleState {
+  const expiredDeck = expireTemporaryHandLimits(state.decks[state.turn]);
   return {
     ...state,
+    decks: { ...state.decks, [state.turn]: expiredDeck },
     turn: state.turn === 'B' ? 'W' : 'B',
     phase: 'turn-start',
     selectedCardId: null,
@@ -290,11 +347,11 @@ export function resolveBattleOutcome(
   winner: StoneColor,
   _rng: RandomSource,
 ): BattleState {
-  if (winner === 'B') return finishBattle(state, 'stage-win');
+  if (winner === 'W') return finishBattle(state, 'run-loss');
   if (state.act === 1 && state.revivalStage === 1 && state.enemy.revival !== undefined) {
     return startRevival(state);
   }
-  return finishBattle(state, 'run-loss');
+  return finishBattle(state, 'stage-win');
 }
 
 function combinedWeights(
@@ -377,10 +434,15 @@ export function performRevivalSpecialMove(
   rng: RandomSource,
 ): BattleState {
   if (state.phase !== 'revival-special-move') return state;
+  const decksAfterEnemyTurn = {
+    ...state.decks,
+    W: expireTemporaryHandLimits(state.decks.W),
+  };
   const candidate = chooseRevivalCandidate(state, rng);
   if (candidate === null) {
     return {
       ...state,
+      decks: decksAfterEnemyTurn,
       turn: 'B',
       phase: 'turn-start',
       koForbiddenKey: null,
@@ -394,6 +456,27 @@ export function performRevivalSpecialMove(
     };
   }
 
+  const negatedBy = captureNegatedBy(state.board, candidate.play.captured, state.protections, 'W');
+  if (negatedBy !== null) {
+    return {
+      ...state,
+      decks: decksAfterEnemyTurn,
+      turn: 'B',
+      phase: 'turn-start',
+      consecutivePasses: 0,
+      moveNumber: state.moveNumber + 1,
+      previousCaptureBy: { ...state.previousCaptureBy, W: false },
+      protections: state.protections.filter(({ id }) => id !== negatedBy.id),
+      log: [...state.log, {
+        type: 'effect',
+        actor: 'W',
+        point: candidate.point,
+        sourceId: negatedBy.id,
+        message: '수호 효과가 포획을 무효화했습니다.',
+      }],
+    };
+  }
+
   const gauge = state.enemy.revival?.bossGauge;
   const bossGauges = gauge === undefined
     ? state.bossGauges
@@ -401,13 +484,29 @@ export function performRevivalSpecialMove(
         ...state.bossGauges,
         [gauge.id]: (state.bossGauges[gauge.id] ?? gauge.initial) + gauge.specialMoveDelta,
       };
-  return {
+  const baseProtections = state.protections.filter(({ color }) => color === 'W');
+  const grantsProtection = candidate.definition.stoneKind === 'STONE-005'
+    && hasAdjacentEndangeredGroup(state.board, candidate.point, 'W');
+  const group = grantsProtection ? groupAt(candidate.play.board, candidate.point) : [];
+  const revivalProtection: GroupProtection | null = grantsProtection ? {
+    id: `protection-${state.moveNumber + 1}`,
+    color: 'W',
+    memberInstanceIds: group.flatMap((point) => {
+      const member = candidate.play.board.points[point];
+      return member === null ? [] : [member.instanceId];
+    }),
+    grantedAtMove: state.moveNumber + 1,
+  } : null;
+  const placed: BattleState = {
     ...state,
     board: candidate.play.board,
+    decks: decksAfterEnemyTurn,
     turn: 'B',
     phase: 'turn-start',
     koForbiddenKey: candidate.play.koForbiddenKey,
     moveNumber: state.moveNumber + 1,
+    previousCaptureBy: { ...state.previousCaptureBy, W: candidate.play.capturedCount > 0 },
+    protections: revivalProtection === null ? baseProtections : [...baseProtections, revivalProtection],
     bossGauges,
     log: [...state.log, {
       type: 'move',
@@ -418,6 +517,16 @@ export function performRevivalSpecialMove(
       message: '부활 전용 착수를 수행했습니다.',
     }],
   };
+  const majority = stoneMajorityWinner(placed.board);
+  if (majority === null) return placed;
+  return resolveBattleOutcome({
+    ...placed,
+    log: [...placed.log, {
+      type: 'result',
+      actor: majority,
+      message: `${majority === 'B' ? '흑' : '백'}이 돌 점유 과반에 도달했습니다.`,
+    }],
+  }, majority, rng);
 }
 
 export function battleReducer(state: BattleState, action: BattleAction): BattleState {
@@ -425,11 +534,35 @@ export function battleReducer(state: BattleState, action: BattleAction): BattleS
     case 'BEGIN_TURN':
       if (state.phase !== 'turn-start') return state;
       if (!hasLegalCardMove(state)) return passBattle(state, true);
-      return { ...state, phase: 'pre-move' };
+      return {
+        ...state,
+        phase: state.charms[state.turn].length === 0 && state.relics[state.turn].length === 0
+          ? 'choose-card'
+          : 'pre-move',
+      };
     case 'CONTINUE_TO_MOVE':
       if (state.phase !== 'pre-move') return state;
       if (!hasLegalCardMove(state)) return passBattle(state, true);
       return { ...state, phase: 'choose-card' };
+    case 'USE_CHARM':
+      if (state.phase !== 'pre-move' || !state.charms[state.turn].includes(action.charmId)) return state;
+      {
+        const charms = [...state.charms[state.turn]];
+        charms.splice(charms.indexOf(action.charmId), 1);
+      return {
+        ...state,
+        charms: {
+          ...state.charms,
+          [state.turn]: charms,
+        },
+        log: [...state.log, {
+          type: 'charm',
+          actor: state.turn,
+          sourceId: action.charmId,
+          message: '부적을 사용했습니다.',
+        }],
+      };
+      }
     case 'USE_RELIC':
       if (state.phase !== 'pre-move'
         || !state.relics[state.turn].includes(action.relicId)
@@ -441,11 +574,11 @@ export function battleReducer(state: BattleState, action: BattleAction): BattleS
           type: 'relic',
           actor: state.turn,
           sourceId: action.relicId,
-          message: '부적을 사용했습니다.',
+          message: '유물을 사용했습니다.',
         }],
       };
     case 'SELECT_CARD':
-      if (state.phase !== 'choose-card'
+      if ((state.phase !== 'choose-card' && state.phase !== 'pre-move')
         || !activeDeck(state).hand.some((card) => card.id === action.cardId)) return state;
       return { ...state, phase: 'choose-point', selectedCardId: action.cardId };
     case 'PLAY_CARD': {
@@ -456,8 +589,45 @@ export function battleReducer(state: BattleState, action: BattleAction): BattleS
       const stone = createStoneFromCard(card, state.turn, `battle-${state.moveNumber + 1}`);
       const play = tryPlay(state.board, action.point, stone, state.koForbiddenKey);
       if (!play.ok) return state;
-      const nextDeck = resolveCardUse(deck, card.id, true, action.rng);
-      return {
+      const negatedBy = captureNegatedBy(state.board, play.captured, state.protections, state.turn);
+      if (negatedBy !== null) {
+        return {
+          ...state,
+          phase: 'resolving',
+          decks: { ...state.decks, [state.turn]: resolveCardUse(deck, card.id, true, action.rng) },
+          selectedCardId: null,
+          consecutivePasses: 0,
+          ending: false,
+          moveNumber: state.moveNumber + 1,
+          previousCaptureBy: { ...state.previousCaptureBy, [state.turn]: false },
+          protections: state.protections.filter(({ id }) => id !== negatedBy.id),
+          log: [...state.log, {
+            type: 'effect',
+            actor: state.turn,
+            cardId: card.id,
+            point: action.point,
+            sourceId: negatedBy.id,
+            message: '수호 효과가 포획을 무효화했습니다.',
+          }],
+        };
+      }
+      let nextDeck = resolveCardUse(deck, card.id, true, action.rng);
+      const generalDrawn = card.kind === 'STONE-003' && play.capturedCount > 0;
+      if (generalDrawn) nextDeck = drawExtra(nextDeck, state.maxHandSize, action.rng);
+      const protections = state.protections.filter(({ color }) => color === state.turn);
+      const grantsProtection = card.kind === 'STONE-005'
+        && hasAdjacentEndangeredGroup(state.board, action.point, state.turn);
+      const mergedGroup = grantsProtection ? groupAt(play.board, action.point) : [];
+      const grantedProtection: GroupProtection | null = grantsProtection ? {
+        id: `protection-${state.moveNumber + 1}`,
+        color: state.turn,
+        memberInstanceIds: mergedGroup.flatMap((point) => {
+          const member = play.board.points[point];
+          return member === null ? [] : [member.instanceId];
+        }),
+        grantedAtMove: state.moveNumber + 1,
+      } : null;
+      const placed: BattleState = {
         ...state,
         board: play.board,
         phase: 'resolving',
@@ -467,14 +637,38 @@ export function battleReducer(state: BattleState, action: BattleAction): BattleS
         consecutivePasses: 0,
         ending: false,
         moveNumber: state.moveNumber + 1,
+        previousCaptureBy: { ...state.previousCaptureBy, [state.turn]: play.capturedCount > 0 },
+        protections: grantedProtection === null ? protections : [...protections, grantedProtection],
         log: [...state.log, {
           type: 'move',
           actor: state.turn,
           cardId: card.id,
           point: action.point,
           message: '착수했습니다.',
-        }],
+        }, ...(generalDrawn ? [{
+          type: 'effect' as const,
+          actor: state.turn,
+          cardId: card.id,
+          message: '장군석 효과로 카드 1장을 추가로 뽑았습니다.',
+        }] : []), ...(grantedProtection === null ? [] : [{
+          type: 'effect' as const,
+          actor: state.turn,
+          cardId: card.id,
+          point: action.point,
+          sourceId: grantedProtection.id,
+          message: '수호석이 그룹에 수호를 부여했습니다.',
+        }])],
       };
+      const majority = stoneMajorityWinner(placed.board);
+      if (majority === null) return placed;
+      return resolveBattleOutcome({
+        ...placed,
+        log: [...placed.log, {
+          type: 'result',
+          actor: majority,
+          message: `${majority === 'B' ? '흑' : '백'}이 돌 점유 과반에 도달했습니다.`,
+        }],
+      }, majority, action.rng);
     }
     case 'RESOLVE_MOVE':
       return state.phase === 'resolving' ? { ...state, phase: 'turn-end' } : state;

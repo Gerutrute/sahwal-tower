@@ -63,6 +63,7 @@ const create = (
   enemyRelics: ['RELIC-ENEMY'],
   koForbiddenKey,
   rng: createSeededRng('create-revival'),
+  maxHandSize: 8,
 });
 
 const revive = (state = create()) => resolveBattleOutcome({
@@ -70,7 +71,7 @@ const revive = (state = create()) => resolveBattleOutcome({
   phase: 'scoring' as const,
   consecutivePasses: 2,
   ending: true,
-}, 'W', createSeededRng('revive'));
+}, 'B', createSeededRng('revive'));
 
 describe('1막 2단계 부활', () => {
   it('보상을 보류하고 전투 자산과 판 위 병종을 보존한 채 종료 상태를 초기화한다', () => {
@@ -99,7 +100,7 @@ describe('1막 2단계 부활', () => {
       ending: true,
     };
 
-    const next = resolveBattleOutcome(marked, 'W', createSeededRng('loss'));
+    const next = resolveBattleOutcome(marked, 'B', createSeededRng('first-player-win'));
 
     expect(next.phase).toBe('revival-special-move');
     expect(next.rewardStatus).toBe('withheld');
@@ -119,6 +120,17 @@ describe('1막 2단계 부활', () => {
     expect(next.consecutivePasses).toBe(0);
     expect(next.revivalStage).toBe(2);
     expect(next.enemyTraits).toContain('DRAFT-REVIVAL-TRAIT');
+  });
+
+  it('1단계 플레이어 패배는 부활을 발동하지 않고 즉시 런을 끝낸다', () => {
+    const next = resolveBattleOutcome(create(), 'W', createSeededRng('first-player-loss'));
+
+    expect(next).toMatchObject({
+      phase: 'result',
+      outcome: 'run-loss',
+      rewardStatus: 'withheld',
+      revivalStage: 1,
+    });
   });
 
   it('전용 착수는 손패를 쓰거나 보충 드로우하지 않고 주입된 병종·우선순위·게이지를 쓴다', () => {
@@ -210,6 +222,63 @@ describe('1막 2단계 부활', () => {
     expect(next.phase).toBe('turn-start');
     expect(next.consecutivePasses).toBe(1);
     expect(next.log.at(-1)).toMatchObject({ type: 'pass', actor: 'W', automatic: true });
+  });
+
+  it('부활 전용 턴 완료는 정상·보호 무효화·자동 패스 모두 W 임시 패 한도를 만료한다', () => {
+    const withTemporaryEnemyLimit = (state: ReturnType<typeof revive>) => ({
+      ...state,
+      decks: {
+        ...state.decks,
+        W: {
+          ...state.decks.W,
+          handLimit: state.decks.W.baseHandLimit + 1,
+          handLimitModifiers: [{ sourceId: 'revival-limit', amount: 1, remainingTurns: 1 }],
+        },
+      },
+    });
+    const expectExpired = (state: ReturnType<typeof revive>) => {
+      expect(state.decks.W.handLimit).toBe(state.decks.W.baseHandLimit);
+      expect(state.decks.W.handLimitModifiers).toEqual([]);
+    };
+
+    const successful = performRevivalSpecialMove(
+      withTemporaryEnemyLimit(revive()),
+      createSeededRng('temporary-limit-success'),
+    );
+    expectExpired(successful);
+
+    const protectedPoints = [...createBoard(7).points];
+    protectedPoints[1] = { color: 'B', kind: 'STONE-001', instanceId: 'protected-target' };
+    protectedPoints[2] = { color: 'W', kind: 'STONE-001', instanceId: 'capture-right' };
+    protectedPoints[8] = { color: 'W', kind: 'STONE-001', instanceId: 'capture-down' };
+    const captureAtZero = enemyWith(DRAFT_ZERO_REVIVAL_WEIGHTS, weightsAt(0, 10_000));
+    const protectedRevival = withTemporaryEnemyLimit(revive(create(
+      captureAtZero,
+      { size: 7, points: protectedPoints },
+    )));
+    const negated = performRevivalSpecialMove({
+      ...protectedRevival,
+      protections: [{
+        id: 'revival-protection',
+        color: 'B',
+        memberInstanceIds: ['protected-target'],
+        grantedAtMove: 1,
+      }],
+    }, createSeededRng('temporary-limit-negated'));
+    expect(negated.protections).toEqual([]);
+    expectExpired(negated);
+
+    const blockedPoints: Stone[] = Array.from({ length: 49 }, (_, point) => ({
+      color: 'B',
+      kind: 'STONE-001',
+      instanceId: `temporary-limit-blocked-${point}`,
+    }));
+    const automaticPass = performRevivalSpecialMove(withTemporaryEnemyLimit(revive(create(
+      DRAFT_BATTLE_DEFINITION,
+      { size: 7, points: blockedPoints },
+    ))), createSeededRng('temporary-limit-pass'));
+    expect(automaticPass.log.at(-1)).toMatchObject({ type: 'pass', actor: 'W', automatic: true });
+    expectExpired(automaticPass);
   });
 
   it('2단계 패배는 즉시 런 종료, 승리는 스테이지 최종 승리다', () => {

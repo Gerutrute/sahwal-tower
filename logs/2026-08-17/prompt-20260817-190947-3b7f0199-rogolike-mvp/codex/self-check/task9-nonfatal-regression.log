@@ -1,0 +1,18 @@
+$ npx.cmd vitest run tests/audio.manager.test.ts tests/audio.routing.test.tsx
+
+STDOUT
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [32m✓[39m tests/audio.routing.test.tsx [2m([22m[2m1 test[22m[2m)[22m[90m 2[2mms[22m[39m
+ [32m✓[39m tests/audio.manager.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[32m9 passed[39m[22m[90m (9)[39m
+[2m   Start at [22m 21:34:32
+[2m   Duration [22m 300ms[2m (transform 85ms, setup 16ms, collect 97ms, tests 8ms, environment 0ms, prepare 163ms)[22m
+
+
+STDERR
+
+EXIT 0

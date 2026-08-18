@@ -1,16 +1,30 @@
-import { aiTurn, legalMoves, newRun, playerMove, playerPass, startBattle, type FloorId } from '../src/engine';
+import { simulateKomiPairs, type KomiSimulationInput } from '../src/game/telemetry';
+import type { BoardSize } from '../src/game/types';
 
-function seeded(seed: number) { let value = seed >>> 0; return () => { value = (value * 1664525 + 1013904223) >>> 0; return value / 4294967296; }; }
-for (const floor of [1, 2, 3] as FloorId[]) {
-  for (let game = 0; game < 3; game += 1) {
-    const random = seeded(floor * 100 + game); let state = startBattle(newRun(), floor); let moves = 0;
-    while (state.status === 'playing' && moves < 400) {
-      if (state.turn === 'B') { const legal = legalMoves(state.board, 'B', state.history); state = legal.length ? playerMove(state, legal[Math.floor(random() * legal.length)]) : playerPass(state); }
-      else state = aiTurn(state, random);
-      if (state.pouchB < 0 || state.pouchW < 0) throw new Error('주머니 음수 발생');
-      moves += 1;
-    }
-    if (state.status === 'playing') throw new Error(`${floor}층 ${game + 1}회: 400수 초과`);
-    console.log(`${floor}층 ${game + 1}회: ${state.status} · ${moves}턴 · 흑 ${state.pouchB} / 백 ${state.pouchW}`);
-  }
+function read(name: string): string {
+  const index = process.argv.indexOf(`--${name}`);
+  const value = index < 0 ? undefined : process.argv[index + 1];
+  if (value === undefined || value.startsWith('--')) throw new Error(`required option missing: --${name}`);
+  return value;
 }
+
+function number(name: string): number {
+  const value = Number(read(name));
+  if (!Number.isFinite(value)) throw new Error(`--${name} must be finite`);
+  return value;
+}
+
+const boardSize = number('size');
+if (boardSize !== 7 && boardSize !== 9) throw new Error('--size must be 7 or 9');
+const input: KomiSimulationInput = {
+  seed: read('seed'),
+  boardSize: boardSize as BoardSize,
+  komi: number('komi'),
+  pairCount: number('pairs'),
+  maxMoves: number('max-moves'),
+  target: {
+    minimumBlackWinRate: number('target-min'),
+    maximumBlackWinRate: number('target-max'),
+  },
+};
+console.log(JSON.stringify(simulateKomiPairs(input), null, 2));

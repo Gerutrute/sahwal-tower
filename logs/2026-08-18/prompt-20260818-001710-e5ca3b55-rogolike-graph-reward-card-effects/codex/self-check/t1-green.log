@@ -1,0 +1,17 @@
+$ npx.cmd vitest run tests/map.graph.test.ts -t 아래에서 위로 향하는 열 좌표를 만든다
+
+STDOUT
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [32m✓[39m tests/map.graph.test.ts [2m([22m[2m3 tests[22m[2m | [22m[33m2 skipped[39m[2m)[22m[90m 8[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m1 passed[39m[22m[2m | [22m[33m2 skipped[39m[90m (3)[39m
+[2m   Start at [22m 00:41:16
+[2m   Duration [22m 334ms[2m (transform 40ms, setup 8ms, collect 35ms, tests 8ms, environment 0ms, prepare 120ms)[22m
+
+
+STDERR
+
+EXIT 0

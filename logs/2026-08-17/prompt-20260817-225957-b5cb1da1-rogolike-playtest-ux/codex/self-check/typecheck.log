@@ -1,0 +1,11 @@
+$ npm.cmd run typecheck
+
+STDOUT
+
+> sahwal-tower@0.1.0 typecheck
+> tsc --noEmit
+
+
+STDERR
+
+EXIT 0

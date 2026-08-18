@@ -1,0 +1,15 @@
+$ node C:\Users\WIN\AppData\Local\Temp\claude\D-----pjt-codex-------\40f74f24-2438-4997-8129-c70e33722845\scratchpad\ac-env-005.mjs
+
+STDOUT
+
+> sahwal-tower@0.1.0 build:vercel
+> node scripts/vercel-build.mjs
+
+[vercel-build] validate boot
+
+STDERR
+RUNTIME_CONFIG_BOOT_FAILED
+(node:32300) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+EXIT 1

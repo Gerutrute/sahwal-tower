@@ -1,0 +1,40 @@
+$ npx.cmd vitest run tests/ui.deploy-badge.test.tsx -t preview 배포 메타는 플레이테스트 라벨을 표시한다
+
+STDOUT
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [31m❯[39m tests/ui.deploy-badge.test.tsx [2m([22m[2m1 test[22m[2m | [22m[31m1 failed[39m[2m)[22m[90m 3[2mms[22m[39m
+[31m   [31m×[31m preview 배포 메타는 플레이테스트 라벨을 표시한다[90m 2[2mms[22m[31m[39m
+[31m     → expected null to be truthy[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m   Start at [22m 10:54:52
+[2m   Duration [22m 508ms[2m (transform 19ms, setup 8ms, collect 9ms, tests 3ms, environment 280ms, prepare 67ms)[22m
+
+
+STDERR
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 1 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/ui.deploy-badge.test.tsx[2m > [22mpreview 배포 메타는 플레이테스트 라벨을 표시한다
+[31m[1mAssertionError[22m: expected null to be truthy[39m
+
+[32m- Expected:[39m 
+true
+
+[31m+ Received:[39m 
+null
+
+[36m [2m❯[22m tests/ui.deploy-badge.test.tsx:[2m7:17[22m[39m
+    [90m  5| [39m  [35mconst[39m badge [33m=[39m [35mnull[39m[33m;[39m
+    [90m  6| [39m
+    [90m  7| [39m  [34mexpect[39m(badge)[33m.[39m[34mtoBeTruthy[39m()[33m;[39m
+    [90m   | [39m                [31m^[39m
+    [90m  8| [39m})[33m;[39m
+    [90m  9| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+EXIT 1

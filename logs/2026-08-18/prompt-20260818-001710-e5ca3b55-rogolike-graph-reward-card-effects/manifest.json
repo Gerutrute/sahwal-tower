@@ -1,0 +1,1016 @@
+{
+  "schema_version": "2.0",
+  "prompt_id": "prompt-20260818-001710-e5ca3b55-rogolike-graph-reward-card-effects",
+  "created_at": "2026-08-18T00:17:10+09:00",
+  "completed_at": "2026-08-18T02:07:28+09:00",
+  "status": "FINALIZED",
+  "user_request_sha256": "c1513213bd354a56f3540a9b2d1aabf2fae66172394335a04b2c1d5d8f70c95c",
+  "repo_root": "D:\\개인 pjt\\codex 게임 해커톤",
+  "git_branch": "dev",
+  "git_unborn_head": false,
+  "git_head_before": "8df1159983b0642cf5d144761f518188a64bcc15",
+  "baseline_tree": "bc2da5dc9aba316a344740d0f116299846f75646",
+  "snapshots": {
+    "baseline": "bc2da5dc9aba316a344740d0f116299846f75646",
+    "implementation": "d42a4535229f7cc990b9888749556cad4b3c095f",
+    "verify-before": "7f3f17fed42a8a8ff758a11bfaf43629bdcebb62",
+    "after-fix": "7f3f17fed42a8a8ff758a11bfaf43629bdcebb62",
+    "verify-after": "7f3f17fed42a8a8ff758a11bfaf43629bdcebb62"
+  },
+  "human_decision_status": "captured",
+  "plan_hashes": {
+    "02-claude-requirements-analysis.md": "16393796e7e86fb5db360fd5b2d643e36a9f2426a7010e05d1d0cc495442bf02",
+    "03-claude-implementation-plan.md": "1dd889e79fa888c2acf5715fc5c286bc6714d6adcd760f86e6de73c7cb8c2b78",
+    "04-claude-acceptance-criteria.md": "540c49c6ee95b47060fb1e44fab64f7ee568da281fd05ba41db9f6b50a053c35",
+    "05-codex-implementation-brief.md": "b88c082e748dc3531c7e2084c2e12601d5ccdeb90a63a3376cf2c74b02e52555"
+  },
+  "orca_tasks": {
+    "prompt": null,
+    "plan": null,
+    "implement": null,
+    "verify": []
+  },
+  "orca_dispatches": {
+    "plan": null,
+    "verify": []
+  },
+  "verification": {
+    "t1-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/map.graph.test.ts",
+        "-t",
+        "아래에서 위로 향하는 열 좌표를 만든다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\t1-red.log"
+    },
+    "t1-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/map.graph.test.ts",
+        "-t",
+        "아래에서 위로 향하는 열 좌표를 만든다"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t1-green.log"
+    },
+    "t1-file-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/map.graph.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t1-file-green.log"
+    },
+    "t1-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t1-regression.log"
+    },
+    "t2-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/ui.map.graph.test.tsx",
+        "-t",
+        "실제 next 연결선을 세로 그래프로 그린다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\t2-red.log"
+    },
+    "t2-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/ui.map.graph.test.tsx",
+        "-t",
+        "실제 next 연결선을 세로 그래프로 그린다"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t2-green.log"
+    },
+    "t2-files-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/ui.map.graph.test.tsx",
+        "tests/ui.map.progression.test.tsx"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t2-files-green.log"
+    },
+    "t2-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t2-regression.log"
+    },
+    "t3-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/deck.test.ts",
+        "-t",
+        "시작 덱은 일반석 5장과 특수돌 5종 각 1장이다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\t3-red.log"
+    },
+    "t3-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/deck.test.ts",
+        "-t",
+        "시작 덱은 일반석 5장과 특수돌 5종 각 1장이다"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t3-green.log"
+    },
+    "t3-files-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/deck.test.ts",
+        "tests/stones.presentation.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t3-files-green.log"
+    },
+    "t3-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t3-regression.log"
+    },
+    "t4-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/rewards.detail.test.ts",
+        "-t",
+        "보상 후보를 요약·조건·효과·전략·연계·보유량으로 서술한다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\t4-red.log"
+    },
+    "t4-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/rewards.detail.test.ts",
+        "-t",
+        "보상 후보를 요약·조건·효과·전략·연계·보유량으로 서술한다"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t4-green.log"
+    },
+    "t4-ui-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/ui.reward.detail.test.tsx",
+        "-t",
+        "모바일 첫 탭은 상세만 펼친다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\t4-ui-red.log"
+    },
+    "t4-ui-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/ui.reward.detail.test.tsx",
+        "-t",
+        "모바일 첫 탭은 상세만 펼친다"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t4-ui-green.log"
+    },
+    "t4-files-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/rewards.detail.test.ts",
+        "tests/ui.reward.detail.test.tsx",
+        "tests/stones.presentation.test.ts",
+        "tests/ui.card-clarity.test.tsx"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t4-files-green.log"
+    },
+    "t4-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t4-regression.log"
+    },
+    "t5-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/stones.test.ts",
+        "-t",
+        "척후석은 덱 위 3장을 확인해 1장을 가져오고 1장을 되돌린 뒤 순서를 정한다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\t5-red.log"
+    },
+    "t5-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/stones.test.ts",
+        "-t",
+        "척후석은 덱 위 3장을 확인해 1장을 가져오고 1장을 되돌린 뒤 순서를 정한다"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t5-green.log"
+    },
+    "t5-files-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/stones.test.ts",
+        "tests/battle.product-effects.test.ts",
+        "tests/ui.battle.test.tsx"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t5-files-green.log"
+    },
+    "t5-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t5-regression.log"
+    },
+    "t6-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/battle.effects.test.ts",
+        "-t",
+        "장군석 포획은 안전 상한 안에서 즉시 카드 1장을 더 뽑는다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\t6-red.log"
+    },
+    "t6-cavalry-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/deck.test.ts",
+        "-t",
+        "기병석은 사용 후 덱 맨 아래로 돌아간다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\t6-cavalry-red.log"
+    },
+    "t6-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/battle.effects.test.ts",
+        "-t",
+        "장군석 포획은 안전 상한 안에서 즉시 카드 1장을 더 뽑는다"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t6-green.log"
+    },
+    "t6-cavalry-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/deck.test.ts",
+        "-t",
+        "기병석은 사용 후 덱 맨 아래로 돌아간다"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t6-cavalry-green.log"
+    },
+    "t6-cavalry-trigger-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/battle.effects.test.ts",
+        "-t",
+        "기병석은 직전 포획 뒤 손패에 들어오면 교환을 제안한다"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t6-cavalry-trigger-green.log"
+    },
+    "t6-files-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/battle.effects.test.ts",
+        "tests/deck.test.ts",
+        "tests/stones.test.ts",
+        "tests/battle.product-effects.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t6-files-green.log"
+    },
+    "t6-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t6-regression.log"
+    },
+    "t7-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/battle.protection.test.ts",
+        "-t",
+        "수호석은 위기 그룹에 수호 1회를 부여한다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\t7-red.log"
+    },
+    "t7-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/battle.protection.test.ts",
+        "-t",
+        "수호석은 위기 그룹에 수호 1회를 부여한다"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t7-green.log"
+    },
+    "t7-files-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/battle.protection.test.ts",
+        "tests/go.rules.test.ts",
+        "tests/ui.battle.test.tsx"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t7-files-green.log"
+    },
+    "t7-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t7-regression.log"
+    },
+    "t8-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/battle.effects.test.ts",
+        "-t",
+        "희생석 패 한도 증가는 다음 내 턴이 끝나면 만료된다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\t8-red.log"
+    },
+    "t8-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/battle.effects.test.ts",
+        "-t",
+        "희생석 패 한도 증가는 다음 내 턴이 끝나면 만료된다"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t8-green.log"
+    },
+    "t8-files-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/battle.effects.test.ts",
+        "tests/battle.product-effects.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t8-files-green.log"
+    },
+    "t8-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t8-regression.log"
+    },
+    "t9-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/ai.effects.test.ts",
+        "-t",
+        "병종별 주입 가중치로 직접 효과를 평가한다"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\t9-red.log"
+    },
+    "t9-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/ai.effects.test.ts",
+        "-t",
+        "병종별 주입 가중치로 직접 효과를 평가한다"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t9-green.log"
+    },
+    "t9-files-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npx.cmd",
+        "vitest",
+        "run",
+        "tests/ai.effects.test.ts",
+        "tests/sim.random.test.ts",
+        "tests/balance.harness.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t9-files-green.log"
+    },
+    "t9-regression": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t9-regression.log"
+    },
+    "t10-mobile-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "check:mobile"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\t10-mobile-red.log"
+    },
+    "t10-mobile-green": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "check:mobile"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\t10-mobile-green.log"
+    },
+    "t10-mobile-green-r2": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "check:mobile"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\t10-mobile-green-r2.log"
+    },
+    "full_tests": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "verification\\full_tests.log"
+    },
+    "typecheck": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "log": "verification\\typecheck.log"
+    },
+    "build": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "log": "verification\\build.log"
+    },
+    "benchmark_ai": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "benchmark:ai"
+      ],
+      "exit_code": 0,
+      "log": "verification\\benchmark_ai.log"
+    },
+    "runtime_audit": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "audit",
+        "--omit=dev",
+        "--audit-level=high"
+      ],
+      "exit_code": 0,
+      "log": "verification\\runtime_audit.log"
+    },
+    "mobile_check": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "check:mobile"
+      ],
+      "exit_code": 0,
+      "log": "verification\\mobile_check.log"
+    },
+    "python_tests": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "verification\\python_tests.log"
+    },
+    "negative_contracts": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "git",
+        "grep",
+        "-nE",
+        "aiEffectWeight[^s]|resolveGuardianEffect|DeckInspectionEffectResult|PendingDeckInspection",
+        "--",
+        "src",
+        "tests",
+        "scripts"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\negative_contracts.log"
+    },
+    "ac_mapping": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "node",
+        "scripts/check-ac-mapping.mjs",
+        "logs/2026-08-18/prompt-20260818-001710-e5ca3b55-rogolike-graph-reward-card-effects/04-claude-acceptance-criteria.md"
+      ],
+      "exit_code": 0,
+      "log": "verification\\ac_mapping.log"
+    },
+    "correction-def1-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/battle.product-effects.test.ts"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\correction-def1-red.log"
+    },
+    "correction-def1-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/battle.product-effects.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\correction-def1-green.log"
+    },
+    "correction-def3-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/battle.revival.test.ts"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\correction-def3-red.log"
+    },
+    "correction-def3-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/battle.revival.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\correction-def3-green.log"
+    },
+    "correction-def4-red": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/map.graph.test.ts"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\correction-def4-red.log"
+    },
+    "correction-def4-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/map.graph.test.ts",
+        "tests/ui.map.graph.test.tsx"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\correction-def4-green.log"
+    },
+    "correction-def2-focused": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/battle.product-effects.test.ts",
+        "tests/stones.test.ts",
+        "tests/battle.protection.test.ts",
+        "tests/ui.battle.test.tsx",
+        "tests/map.graph.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\correction-def2-focused.log"
+    },
+    "correction-focused-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/battle.product-effects.test.ts",
+        "tests/battle.revival.test.ts",
+        "tests/battle.protection.test.ts",
+        "tests/stones.test.ts",
+        "tests/map.graph.test.ts",
+        "tests/ui.map.graph.test.tsx",
+        "tests/ui.battle.test.tsx"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\correction-focused-green.log"
+    },
+    "correction-typecheck-preflight": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\correction-typecheck-preflight.log"
+    },
+    "correction-full-tests": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\correction-full-tests.log"
+    },
+    "correction-typecheck": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\correction-typecheck.log"
+    },
+    "correction-build": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\correction-build.log"
+    },
+    "correction-mobile": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "check:mobile"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\correction-mobile.log"
+    },
+    "correction-mobile-green": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "check:mobile"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\correction-mobile-green.log"
+    },
+    "correction-def4-browser-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/map.graph.test.ts",
+        "tests/ui.map.graph.test.tsx"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\correction-def4-browser-green.log"
+    },
+    "correction-build-final": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\correction-build-final.log"
+    },
+    "correction-mobile-final": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "check:mobile"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\correction-mobile-final.log"
+    },
+    "correction-full-tests-final": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\correction-full-tests-final.log"
+    },
+    "correction-typecheck-final": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\correction-typecheck-final.log"
+    },
+    "correction-diff-check": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 2,
+      "log": "codex\\self-check\\correction-diff-check.log"
+    },
+    "correction-scoped-diff-check": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "scripts/playwright-mobile-check.mjs",
+        "src/game/battle.ts",
+        "tests/battle.revival.test.ts",
+        "tests/stones.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\correction-scoped-diff-check.log"
+    },
+    "correction-def1-cancel-green": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/battle.product-effects.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\correction-def1-cancel-green.log"
+    },
+    "correction-full-tests-final-r2": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\correction-full-tests-final-r2.log"
+    },
+    "correction-typecheck-final-r2": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\correction-typecheck-final-r2.log"
+    }
+  },
+  "verifier_tree_unchanged": true,
+  "open_defects": [],
+  "final_outcome": "succeeded"
+}

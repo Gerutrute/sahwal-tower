@@ -1,0 +1,44 @@
+$ npm.cmd test -- --run tests/ui.audio-status.test.tsx
+
+STDOUT
+
+> sahwal-tower@0.1.0 test
+> vitest run --run tests/ui.audio-status.test.tsx
+
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [31m❯[39m tests/ui.audio-status.test.tsx [2m([22m[2m2 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[90m 17[2mms[22m[39m
+[31m   [31m×[31m 음악 재생 상태 UI[2m > [22m오류 상태에서 재시도 버튼으로 unlock을 다시 호출한다[90m 12[2mms[22m[31m[39m
+[31m     → expected undefined to be truthy[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m   Start at [22m 23:37:45
+[2m   Duration [22m 675ms[2m (transform 30ms, setup 9ms, collect 37ms, tests 17ms, environment 340ms, prepare 97ms)[22m
+
+
+STDERR
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 1 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/ui.audio-status.test.tsx[2m > [22m음악 재생 상태 UI[2m > [22m오류 상태에서 재시도 버튼으로 unlock을 다시 호출한다
+[31m[1mAssertionError[22m: expected undefined to be truthy[39m
+
+[32m- Expected:[39m 
+true
+
+[31m+ Received:[39m 
+undefined
+
+[36m [2m❯[22m tests/ui.audio-status.test.tsx:[2m50:19[22m[39m
+    [90m 48| [39m    [35mconst[39m retry [33m=[39m [[33m...[39mhost[33m![39m[33m.[39m[34mquerySelectorAll[39m([32m'button'[39m)]
+    [90m 49| [39m      [33m.[39m[34mfind[39m(({ textContent }) [33m=>[39m textContent[33m?.[39m[34mincludes[39m([32m'음악 다시 시도[39m…
+    [90m 50| [39m    [34mexpect[39m(retry)[33m.[39m[34mtoBeTruthy[39m()[33m;[39m
+    [90m   | [39m                  [31m^[39m
+    [90m 51| [39m    [34mact[39m(() [33m=>[39m retry[33m?.[39m[34mclick[39m())[33m;[39m
+    [90m 52| [39m    [34mexpect[39m(unlock)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+EXIT 1

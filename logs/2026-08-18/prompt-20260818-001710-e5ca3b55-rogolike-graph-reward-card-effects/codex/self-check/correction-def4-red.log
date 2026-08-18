@@ -1,0 +1,37 @@
+$ npm.cmd test -- --run tests/map.graph.test.ts
+
+STDOUT
+
+> sahwal-tower@0.1.0 test
+> vitest run --run tests/map.graph.test.ts
+
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [31m❯[39m tests/map.graph.test.ts [2m([22m[2m4 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[90m 10[2mms[22m[39m
+[31m   [31m×[31m 지도 그래프 레이아웃[2m > [22m각 행은 68px 노드 상자·최대 3줄 문구·행간 여백을 위한 최소 96px를 확보한다[90m 2[2mms[22m[31m[39m
+[31m     → expected 83.19999999999999 to be greater than or equal to 96[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (4)[39m
+[2m   Start at [22m 01:38:45
+[2m   Duration [22m 293ms[2m (transform 62ms, setup 16ms, collect 52ms, tests 10ms, environment 0ms, prepare 82ms)[22m
+
+
+STDERR
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 1 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/map.graph.test.ts[2m > [22m지도 그래프 레이아웃[2m > [22m각 행은 68px 노드 상자·최대 3줄 문구·행간 여백을 위한 최소 96px를 확보한다
+[31m[1mAssertionError[22m: expected 83.19999999999999 to be greater than or equal to 96[39m
+[36m [2m❯[22m tests/map.graph.test.ts:[2m31:57[22m[39m
+    [90m 29| [39m
+    [90m 30| [39m    [35mfor[39m ([35mlet[39m index [33m=[39m [34m1[39m[33m;[39m index [33m<[39m rowCenters[33m.[39mlength[33m;[39m index [33m+=[39m [34m1[39m) {
+    [90m 31| [39m      [34mexpect[39m(rowCenters[index] [33m-[39m rowCenters[index [33m-[39m [34m1[39m])[33m.[39m[34mtoBeGreaterTha[39m…
+    [90m   | [39m                                                        [31m^[39m
+    [90m 32| [39m    }
+    [90m 33| [39m    [34mexpect[39m(layout[33m.[39mwidth)[33m.[39m[34mtoBeLessThanOrEqual[39m([34m380[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+EXIT 1

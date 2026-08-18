@@ -1,0 +1,314 @@
+$ npm.cmd test
+
+STDOUT
+
+> sahwal-tower@0.1.0 test
+> vitest run
+
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [32m✓[39m tests/go.rules.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/go.board.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/stones.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/go.scoring.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/deck.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/battle.effects.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/stones.presentation.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 4[2mms[22m[39m
+ [32m✓[39m tests/audio.manager.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/battle.protection.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/battle.premove.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 4[2mms[22m[39m
+ [32m✓[39m tests/battle.majority.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/battle.flow.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/ai.effects.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/effects.queue.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/battle.revival.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/rewards.detail.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 111[2mms[22m[39m
+ [32m✓[39m tests/run.progression.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/economy.test.ts [2m([22m[2m33 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/map.graph.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 83[2mms[22m[39m
+ [32m✓[39m tests/ui.progression.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[90m 4[2mms[22m[39m
+ [32m✓[39m tests/map.progression.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/battle.product-effects.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/map.property.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 170[2mms[22m[39m
+ [32m✓[39m tests/unlocks.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 3[2mms[22m[39m
+ [32m✓[39m tests/meta.deps.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/ui.dojo.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[90m 4[2mms[22m[39m
+ [32m✓[39m tests/telemetry.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 3[2mms[22m[39m
+ [32m✓[39m tests/audio.routing.test.tsx [2m([22m[2m1 test[22m[2m)[22m[90m 2[2mms[22m[39m
+ [32m✓[39m tests/rng.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 3[2mms[22m[39m
+ [32m✓[39m tests/result.analysis.test.ts [2m([22m[2m1 test[22m[2m)[22m[90m 4[2mms[22m[39m
+ [32m✓[39m tests/sim.random.test.ts [2m([22m[2m1 test[22m[2m)[22m[90m 106[2mms[22m[39m
+ [32m✓[39m tests/balance.harness.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 291[2mms[22m[39m
+ [32m✓[39m tests/ui.audio-status.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[90m 20[2mms[22m[39m
+ [32m✓[39m tests/ui.map.graph.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[90m 47[2mms[22m[39m
+ [32m✓[39m tests/ui.shell.test.tsx [2m([22m[2m1 test[22m[2m)[22m[90m 52[2mms[22m[39m
+ [32m✓[39m tests/ui.map.progression.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[90m 55[2mms[22m[39m
+ [32m✓[39m tests/ui.reward.detail.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[90m 66[2mms[22m[39m
+ [32m✓[39m tests/ui.onetap.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[90m 99[2mms[22m[39m
+ [32m✓[39m tests/ui.card-clarity.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[90m 100[2mms[22m[39m
+ [32m✓[39m tests/ui.board.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[90m 114[2mms[22m[39m
+ [32m✓[39m tests/ui.game.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[90m 183[2mms[22m[39m
+ [32m✓[39m tests/ui.battle.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[90m 225[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m42 passed[39m[22m[90m (42)[39m
+[2m      Tests [22m [1m[32m210 passed[39m[22m[90m (210)[39m
+[2m   Start at [22m 01:00:10
+[2m   Duration [22m 1.94s[2m (transform 2.23s, setup 301ms, collect 6.59s, tests 1.89s, environment 5.64s, prepare 4.09s)[22m
+
+
+STDERR
+[90mstderr[2m | tests/ui.shell.test.tsx[2m > [22m[2mRoGolike 셸은 주입 config로 시작해 실제 지도를 표시한다
+[22m[39mWarning: An update to GameShell inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GameShell (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1354:61)
+    at GameProvider (D:\개인 pjt\codex 게임 해커톤\src\game\GameProvider.tsx:687:3)
+    at App (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1463:16)
+Warning: An update to GameShell inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GameShell (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1354:61)
+    at GameProvider (D:\개인 pjt\codex 게임 해커톤\src\game\GameProvider.tsx:687:3)
+    at App (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1463:16)
+
+[90mstderr[2m | tests/ui.board.test.tsx[2m > [22m[2m좌표는 행·열 이름과 Enter/Space 착수를 제공한다
+[22m[39mWarning: An update to GameShell inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GameShell (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1354:61)
+    at GameProvider (D:\개인 pjt\codex 게임 해커톤\src\game\GameProvider.tsx:687:3)
+    at App (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1463:16)
+Warning: An update to GameShell inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GameShell (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1354:61)
+    at GameProvider (D:\개인 pjt\codex 게임 해커톤\src\game\GameProvider.tsx:687:3)
+    at App (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1463:16)
+
+[90mstderr[2m | tests/ui.game.test.tsx[2m > [22m[2mRoGolike 통합 게임 UI[2m > [22m[2mRoGolike 타이틀과 실제 경로 상태를 표시하고 무제한 시설 진입을 숨긴다
+[22m[39mWarning: An update to GameShell inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GameShell (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1354:61)
+    at GameProvider (D:\개인 pjt\codex 게임 해커톤\src\game\GameProvider.tsx:687:3)
+    at App (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1463:16)
+Warning: An update to GameShell inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GameShell (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1354:61)
+    at GameProvider (D:\개인 pjt\codex 게임 해커톤\src\game\GameProvider.tsx:687:3)
+    at App (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1463:16)
+
+[90mstderr[2m | tests/ui.game.test.tsx[2m > [22m[2mRoGolike 통합 게임 UI[2m > [22m[2m카드 선택 전 착수를 막고 카드 선택 뒤 한 좌표 입력으로 확정한다
+[22m[39mWarning: An update to GameShell inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GameShell (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1354:61)
+    at GameProvider (D:\개인 pjt\codex 게임 해커톤\src\game\GameProvider.tsx:687:3)
+    at App (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1463:16)
+Warning: An update to GameShell inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GameShell (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1354:61)
+    at GameProvider (D:\개인 pjt\codex 게임 해커톤\src\game\GameProvider.tsx:687:3)
+    at App (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1463:16)
+
+[90mstderr[2m | tests/ui.game.test.tsx[2m > [22m[2mRoGolike 통합 게임 UI[2m > [22m[2mAI 예약은 화면 이탈 뒤 실행되지 않는다
+[22m[39mWarning: An update to GameShell inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GameShell (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1354:61)
+    at GameProvider (D:\개인 pjt\codex 게임 해커톤\src\game\GameProvider.tsx:687:3)
+    at App (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1463:16)
+Warning: An update to GameShell inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GameShell (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1354:61)
+    at GameProvider (D:\개인 pjt\codex 게임 해커톤\src\game\GameProvider.tsx:687:3)
+    at App (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1463:16)
+
+[90mstderr[2m | tests/ui.battle.test.tsx[2m > [22m[2m실제 10장 덱에서 손패 4장을 보여주고 병종명을 정확히 표시한다
+[22m[39mWarning: An update to GameShell inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GameShell (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1354:61)
+    at GameProvider (D:\개인 pjt\codex 게임 해커톤\src\game\GameProvider.tsx:687:3)
+    at App (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1463:16)
+Warning: An update to GameShell inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GameShell (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1354:61)
+    at GameProvider (D:\개인 pjt\codex 게임 해커톤\src\game\GameProvider.tsx:687:3)
+    at App (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1463:16)
+
+[90mstderr[2m | tests/ui.battle.test.tsx[2m > [22m[2mtryPlay/resolveMove 검증 뒤 한 탭으로 카드 소비와 AI 선택을 수행한다
+[22m[39mWarning: An update to GameShell inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GameShell (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1354:61)
+    at GameProvider (D:\개인 pjt\codex 게임 해커톤\src\game\GameProvider.tsx:687:3)
+    at App (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1463:16)
+Warning: An update to GameShell inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GameShell (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1354:61)
+    at GameProvider (D:\개인 pjt\codex 게임 해커톤\src\game\GameProvider.tsx:687:3)
+    at App (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1463:16)
+
+[90mstderr[2m | tests/ui.battle.test.tsx[2m > [22m[2mpre-move에서 부적과 유물을 구분해 표시하고 실제 사용·건너뛰기 동작을 제공한다
+[22m[39mWarning: An update to GameShell inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GameShell (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1354:61)
+    at GameProvider (D:\개인 pjt\codex 게임 해커톤\src\game\GameProvider.tsx:687:3)
+    at App (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1463:16)
+Warning: An update to GameShell inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GameShell (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1354:61)
+    at GameProvider (D:\개인 pjt\codex 게임 해커톤\src\game\GameProvider.tsx:687:3)
+    at App (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1463:16)
+
+[90mstderr[2m | tests/ui.battle.test.tsx[2m > [22m[2m기권은 run 패배 결과 경로로 이어진다
+[22m[39mWarning: An update to GameShell inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GameShell (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1354:61)
+    at GameProvider (D:\개인 pjt\codex 게임 해커톤\src\game\GameProvider.tsx:687:3)
+    at App (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1463:16)
+Warning: An update to GameShell inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GameShell (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1354:61)
+    at GameProvider (D:\개인 pjt\codex 게임 해커톤\src\game\GameProvider.tsx:687:3)
+    at App (D:\개인 pjt\codex 게임 해커톤\src\App.tsx:1463:16)
+
+
+EXIT 0

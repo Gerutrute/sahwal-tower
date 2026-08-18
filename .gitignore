@@ -7,3 +7,5 @@ dist/
 dist-debug-old/
 .vite/
 playwright-results/
+.vercel/
+runtime-config.js

@@ -1,0 +1,12 @@
+$ powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\Users\WIN\AppData\Local\Temp\claude\D-----pjt-codex-------\40f74f24-2438-4997-8129-c70e33722845\scratchpad\ac-env-004.ps1
+
+STDOUT
+
+> sahwal-tower@0.1.0 build:vercel
+> node scripts/vercel-build.mjs
+
+
+STDERR
+RUNTIME_CONFIG_SCHEMA_INVALID komiBySize,economy,mapWeights,effectLimits,generalCaptureMoneyCap,enemyDeck,bossByAct,rewards,shop,eventCurrencyReward,aiCaptureWeight,aiEffectWeights,aiPassScoreThreshold,analysisCaptureWeight,analysisEffectWeight,audioTuning
+
+EXIT 1

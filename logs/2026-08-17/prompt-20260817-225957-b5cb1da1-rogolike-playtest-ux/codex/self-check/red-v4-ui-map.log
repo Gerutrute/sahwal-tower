@@ -1,0 +1,65 @@
+$ npm.cmd test -- --run tests/ui.map.progression.test.tsx
+
+STDOUT
+
+> sahwal-tower@0.1.0 test
+> vitest run --run tests/ui.map.progression.test.tsx
+
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [31m❯[39m tests/ui.map.progression.test.tsx [2m([22m[2m3 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[90m 25[2mms[22m[39m
+[31m   [31m×[31m 지도 도달 가능성 UI[2m > [22m첫 열 두 노드만 open이고 나머지와 보스는 disabled다[90m 18[2mms[22m[31m[39m
+[31m     → expected [] to have a length of 2 but got +0[39m
+[31m   [31m×[31m 지도 도달 가능성 UI[2m > [22m완료 노드와 그 next만 done/open 상태로 표시한다[90m 3[2mms[22m[31m[39m
+[31m     → expected undefined to be 'done' // Object.is equality[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (3)[39m
+[2m   Start at [22m 23:32:05
+[2m   Duration [22m 817ms[2m (transform 128ms, setup 8ms, collect 176ms, tests 25ms, environment 311ms, prepare 131ms)[22m
+
+
+STDERR
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 2 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/ui.map.progression.test.tsx[2m > [22m지도 도달 가능성 UI[2m > [22m첫 열 두 노드만 open이고 나머지와 보스는 disabled다
+[31m[1mAssertionError[22m: expected [] to have a length of 2 but got +0[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 2[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m tests/ui.map.progression.test.tsx:[2m34:71[22m[39m
+    [90m 32| [39m    [34mmount[39m()[33m;[39m
+    [90m 33| [39m    [35mconst[39m buttons [33m=[39m [[33m...[39m(host[33m?.[39mquerySelectorAll[33m<[39m[33mHTMLButtonElement[39m[33m>[39m([32m'[d[39m…
+    [90m 34| [39m    [34mexpect[39m(buttons[33m.[39m[34mfilter[39m(({ dataset }) [33m=>[39m dataset[33m.[39mstate [33m===[39m [32m'open'[39m))[33m.[39m…
+    [90m   | [39m                                                                      [31m^[39m
+    [90m 35| [39m    [34mexpect[39m(buttons[33m.[39m[34mfilter[39m(({ dataset }) [33m=>[39m dataset[33m.[39mstate [33m===[39m [32m'locked'[39m)…
+    [90m 36| [39m    [34mexpect[39m(host[33m?.[39mquerySelector[33m<[39m[33mHTMLButtonElement[39m[33m>[39m([32m'[data-state="open"][39m…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/ui.map.progression.test.tsx[2m > [22m지도 도달 가능성 UI[2m > [22m완료 노드와 그 next만 done/open 상태로 표시한다
+[31m[1mAssertionError[22m: expected undefined to be 'done' // Object.is equality[39m
+
+[32m- Expected:[39m 
+"done"
+
+[31m+ Received:[39m 
+undefined
+
+[36m [2m❯[22m tests/ui.map.progression.test.tsx:[2m55:94[22m[39m
+    [90m 53| [39m    [34mmount[39m([completed])[33m;[39m
+    [90m 54| [39m
+    [90m 55| [39m    [34mexpect[39m(host[33m?.[39m[34mquerySelector[39m([32m`[data-node-id="[39m[36m${[39mcompleted[36m}[39m[32m"]`[39m)[33m?.[39m[34mgetAt[39m…
+    [90m   | [39m                                                                                             [31m^[39m
+    [90m 56| [39m    [35mfor[39m ([35mconst[39m next [35mof[39m completedNode[33m.[39mnext) {
+    [90m 57| [39m      [34mexpect[39m(host[33m?.[39m[34mquerySelector[39m([32m`[data-node-id="[39m[36m${[39mnext[36m}[39m[32m"]`[39m)[33m?.[39m[34mgetAttri[39m…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+EXIT 1

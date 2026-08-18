@@ -1,0 +1,44 @@
+$ npm.cmd test
+
+STDOUT
+
+> sahwal-tower@0.1.0 test
+> vitest run
+
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [32m✓[39m tests/go.rules.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/meta.deps.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/audio.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/go.scoring.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/battle.flow.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/deck.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/battle.revival.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/run.progression.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/result.analysis.test.ts [2m([22m[2m1 test[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/economy.test.ts [2m([22m[2m33 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/rng.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 3[2mms[22m[39m
+ [32m✓[39m tests/go.board.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/engine.purity.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/engine.ai.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/stones.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/effects.queue.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/ui.dojo.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[90m 4[2mms[22m[39m
+ [32m✓[39m tests/ui.progression.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[90m 4[2mms[22m[39m
+ [32m✓[39m tests/map.property.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 155[2mms[22m[39m
+ [32m✓[39m tests/sim.random.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 262[2mms[22m[39m
+ [32m✓[39m tests/ui.board.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[90m 55[2mms[22m[39m
+ [32m✓[39m tests/ui.battle.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[90m 68[2mms[22m[39m
+ [32m✓[39m tests/ui.shell.test.tsx [2m([22m[2m1 test[22m[2m)[22m[90m 21[2mms[22m[39m
+ [32m✓[39m tests/ui.game.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[90m 119[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m24 passed[39m[22m[90m (24)[39m
+[2m      Tests [22m [1m[32m156 passed[39m[22m[90m (156)[39m
+[2m   Start at [22m 21:13:54
+[2m   Duration [22m 1.06s[2m (transform 1.42s, setup 219ms, collect 3.72s, tests 788ms, environment 1.68s, prepare 2.40s)[22m
+
+
+STDERR
+
+EXIT 0

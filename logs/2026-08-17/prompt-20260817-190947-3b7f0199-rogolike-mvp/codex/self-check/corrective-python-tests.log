@@ -1,0 +1,37 @@
+$ python -m unittest discover -s tests -v
+
+STDOUT
+
+STDERR
+test_corrupt_pointer_fails_closed_when_evidence_is_required (evidence.test_claude_hook.ClaudeHookTests.test_corrupt_pointer_fails_closed_when_evidence_is_required) ... ok
+test_deny_survives_audit_log_failure (evidence.test_claude_hook.ClaudeHookTests.test_deny_survives_audit_log_failure) ... ok
+test_evidence_artifact_write_is_allowed (evidence.test_claude_hook.ClaudeHookTests.test_evidence_artifact_write_is_allowed) ... ok
+test_git_dash_c_commit_is_denied (evidence.test_claude_hook.ClaudeHookTests.test_git_dash_c_commit_is_denied) ... ok
+test_missing_evidence_fails_closed (evidence.test_claude_hook.ClaudeHookTests.test_missing_evidence_fails_closed) ... ok
+test_project_pointer_is_found_from_nested_cwd (evidence.test_claude_hook.ClaudeHookTests.test_project_pointer_is_found_from_nested_cwd) ... ok
+test_self_test (evidence.test_claude_hook.ClaudeHookTests.test_self_test) ... ok
+test_utf8_korean_payload_overrides_cp949_stdio (evidence.test_claude_hook.ClaudeHookTests.test_utf8_korean_payload_overrides_cp949_stdio) ... ok
+test_verifier_source_write_is_denied_and_logged (evidence.test_claude_hook.ClaudeHookTests.test_verifier_source_write_is_denied_and_logged) ... ok
+test_ai_cannot_claim_human_decision (evidence.test_design_decision.DesignDecisionTests.test_ai_cannot_claim_human_decision) ... ok
+test_human_decision_is_appended (evidence.test_design_decision.DesignDecisionTests.test_human_decision_is_appended) ... ok
+test_checksum_round_trip_and_tamper_detection (evidence.test_evidence_cli.EvidenceCliTests.test_checksum_round_trip_and_tamper_detection) ... ok
+test_final_validation_rejects_required_command_alias (evidence.test_evidence_cli.EvidenceCliTests.test_final_validation_rejects_required_command_alias) ... ok
+test_final_validation_requires_independent_verifier_command (evidence.test_evidence_cli.EvidenceCliTests.test_final_validation_requires_independent_verifier_command) ... ok
+test_plan_gate_is_fail_closed_then_freezes_hashes (evidence.test_evidence_cli.EvidenceCliTests.test_plan_gate_is_fail_closed_then_freezes_hashes) ... {"missing": ["02-claude-requirements-analysis.md", "03-claude-implementation-plan.md", "04-claude-acceptance-criteria.md", "05-codex-implementation-brief.md"], "pending_human_decision": true}
+plan hash changed: 02-claude-requirements-analysis.md
+ok
+test_snapshot_does_not_touch_user_index (evidence.test_evidence_cli.EvidenceCliTests.test_snapshot_does_not_touch_user_index) ... ok
+test_start_supports_unborn_head_and_korean_path_content (evidence.test_evidence_cli.EvidenceCliTests.test_start_supports_unborn_head_and_korean_path_content) ... ok
+test_only_json_success_receipt_is_accepted (evidence.test_orca_prompt.OrcaTests.test_only_json_success_receipt_is_accepted) ... ok
+test_orca_error_is_rejected (evidence.test_orca_prompt.OrcaTests.test_orca_error_is_rejected) ... ok
+test_claude_hook_settings_exist (evidence.test_project_rules.ProjectRuleTests.test_claude_hook_settings_exist) ... ok
+test_role_contract_and_lifecycle_are_present (evidence.test_project_rules.ProjectRuleTests.test_role_contract_and_lifecycle_are_present) ... ok
+test_bearer_and_inline_secret_are_redacted (evidence.test_redact.RedactTests.test_bearer_and_inline_secret_are_redacted) ... ok
+test_sensitive_keys_and_values_are_redacted (evidence.test_redact.RedactTests.test_sensitive_keys_and_values_are_redacted) ... ok
+
+----------------------------------------------------------------------
+Ran 23 tests in 1.654s
+
+OK
+
+EXIT 0

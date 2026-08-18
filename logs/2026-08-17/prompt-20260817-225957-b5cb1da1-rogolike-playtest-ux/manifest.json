@@ -1,0 +1,504 @@
+{
+  "schema_version": "2.0",
+  "prompt_id": "prompt-20260817-225957-b5cb1da1-rogolike-playtest-ux",
+  "created_at": "2026-08-17T22:59:57+09:00",
+  "completed_at": "2026-08-18T00:04:33+09:00",
+  "status": "FINALIZED",
+  "user_request_sha256": "391d9beb93ebf30070db9690084dbb963b21b23029c48bf56237f8221b3bf298",
+  "repo_root": "D:\\개인 pjt\\codex 게임 해커톤",
+  "git_branch": "dev",
+  "git_unborn_head": false,
+  "git_head_before": "8df1159983b0642cf5d144761f518188a64bcc15",
+  "baseline_tree": "7835c339f4096a28ac32eb7a8bdfd33cb37c6ceb",
+  "snapshots": {
+    "baseline": "7835c339f4096a28ac32eb7a8bdfd33cb37c6ceb",
+    "before-implement": "7835c339f4096a28ac32eb7a8bdfd33cb37c6ceb",
+    "implementation": "bc2da5dc9aba316a344740d0f116299846f75646",
+    "verify-before": "bc2da5dc9aba316a344740d0f116299846f75646",
+    "verify-after": "bc2da5dc9aba316a344740d0f116299846f75646"
+  },
+  "human_decision_status": "captured",
+  "plan_hashes": {
+    "02-claude-requirements-analysis.md": "b084f5a029a132fb283fbd7d17cfae070fc4c4ab306a0adad373866a0dd57de0",
+    "03-claude-implementation-plan.md": "08b20237a19619a314bba11679104734754e25e00924287cb4b77e241d8cc1b8",
+    "04-claude-acceptance-criteria.md": "ce4c0f4bdf0700c10551093efc2b147a79e357a48c6e4dc02d786366a6b11c8e",
+    "05-codex-implementation-brief.md": "888f197cd20ed1b97b73fae12754e85ca51ca840fec5045a40e49196968cb156"
+  },
+  "orca_tasks": {
+    "prompt": null,
+    "plan": null,
+    "implement": null,
+    "verify": []
+  },
+  "orca_dispatches": {
+    "plan": null,
+    "verify": []
+  },
+  "verification": {
+    "red-v1-majority": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/battle.majority.test.ts"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\red-v1-majority.log"
+    },
+    "green-v1-majority": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/battle.majority.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\green-v1-majority.log"
+    },
+    "red-v2-premove": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/battle.premove.test.ts"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\red-v2-premove.log"
+    },
+    "green-v2-premove": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/battle.premove.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\green-v2-premove.log"
+    },
+    "red-v3-onetap": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/ui.onetap.test.tsx"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\red-v3-onetap.log"
+    },
+    "green-v3-onetap": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/ui.onetap.test.tsx"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\green-v3-onetap.log"
+    },
+    "red-v4-ui-map": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/ui.map.progression.test.tsx"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\red-v4-ui-map.log"
+    },
+    "green-v4-ui-map": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/ui.map.progression.test.tsx"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\green-v4-ui-map.log"
+    },
+    "red-v5-presentation": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/stones.presentation.test.ts"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\red-v5-presentation.log"
+    },
+    "red-v5-card-ui": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/ui.card-clarity.test.tsx"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\red-v5-card-ui.log"
+    },
+    "green-v5-card-ui": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/ui.card-clarity.test.tsx"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\green-v5-card-ui.log"
+    },
+    "red-v6-audio-ui": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/ui.audio-status.test.tsx"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\red-v6-audio-ui.log"
+    },
+    "green-v6-audio-ui": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/ui.audio-status.test.tsx"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\green-v6-audio-ui.log"
+    },
+    "green-v6-audio": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/audio.manager.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\green-v6-audio.log"
+    },
+    "red-v4-map": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/map.progression.test.ts"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\red-v4-map.log"
+    },
+    "green-v4-map": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/map.progression.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\green-v4-map.log"
+    },
+    "green-v5-presentation": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/stones.presentation.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\green-v5-presentation.log"
+    },
+    "red-v5-ai-effects": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/ai.effects.test.ts"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\red-v5-ai-effects.log"
+    },
+    "green-v5-ai-effects": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/ai.effects.test.ts"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\green-v5-ai-effects.log"
+    },
+    "red-v6-audio": {
+      "status": "failed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/audio.manager.test.ts"
+      ],
+      "exit_code": 1,
+      "log": "codex\\self-check\\red-v6-audio.log"
+    },
+    "full-tests": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\full-tests.log"
+    },
+    "typecheck": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "log": "verification\\typecheck.log"
+    },
+    "build": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "log": "verification\\build.log"
+    },
+    "benchmark-ai": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "benchmark:ai"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\benchmark-ai.log"
+    },
+    "runtime-audit": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "audit",
+        "--omit=dev",
+        "--audit-level=high"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\runtime-audit.log"
+    },
+    "mobile-check": {
+      "status": "passed",
+      "executed_by": "implementer",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "check:mobile"
+      ],
+      "exit_code": 0,
+      "log": "codex\\self-check\\mobile-check.log"
+    },
+    "verifier-full-tests": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "verification\\verifier-full-tests.log"
+    },
+    "verifier-typecheck": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "log": "verification\\verifier-typecheck.log"
+    },
+    "verifier-build": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "log": "verification\\verifier-build.log"
+    },
+    "verifier-benchmark-ai": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "benchmark:ai"
+      ],
+      "exit_code": 0,
+      "log": "verification\\verifier-benchmark-ai.log"
+    },
+    "verifier-runtime-audit": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "audit",
+        "--omit=dev",
+        "--audit-level=high"
+      ],
+      "exit_code": 0,
+      "log": "verification\\verifier-runtime-audit.log"
+    },
+    "verifier-mobile-check": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "check:mobile"
+      ],
+      "exit_code": 0,
+      "log": "verification\\verifier-mobile-check.log"
+    },
+    "verifier-focused-ac": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--run",
+        "tests/battle.majority.test.ts",
+        "tests/battle.premove.test.ts",
+        "tests/ui.onetap.test.tsx",
+        "tests/map.progression.test.ts",
+        "tests/ui.map.progression.test.tsx",
+        "tests/stones.presentation.test.ts",
+        "tests/ui.card-clarity.test.tsx",
+        "tests/ai.effects.test.ts",
+        "tests/audio.manager.test.ts",
+        "tests/ui.audio-status.test.tsx",
+        "tests/battle.flow.test.ts",
+        "tests/go.scoring.test.ts",
+        "tests/ui.battle.test.tsx",
+        "tests/audio.routing.test.tsx"
+      ],
+      "exit_code": 0,
+      "log": "verification\\verifier-focused-ac.log"
+    },
+    "full_tests": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "verification\\full_tests.log"
+    },
+    "benchmark_ai": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "benchmark:ai"
+      ],
+      "exit_code": 0,
+      "log": "verification\\benchmark_ai.log"
+    },
+    "runtime_audit": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "audit",
+        "--omit=dev",
+        "--audit-level=high"
+      ],
+      "exit_code": 0,
+      "log": "verification\\runtime_audit.log"
+    },
+    "mobile_check": {
+      "status": "passed",
+      "executed_by": "verifier",
+      "argv": [
+        "npm.cmd",
+        "run",
+        "check:mobile"
+      ],
+      "exit_code": 0,
+      "log": "verification\\mobile_check.log"
+    }
+  },
+  "verifier_tree_unchanged": true,
+  "open_defects": [],
+  "final_outcome": "succeeded"
+}

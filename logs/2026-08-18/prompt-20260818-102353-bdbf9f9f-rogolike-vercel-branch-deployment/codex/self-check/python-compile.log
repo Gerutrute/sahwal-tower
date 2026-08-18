@@ -1,0 +1,7 @@
+$ python -m py_compile scripts/evidence/*.py tests/evidence/*.py
+
+STDOUT
+
+STDERR
+[Errno 22] Invalid argument: 'scripts/evidence/*.py'
+EXIT 1

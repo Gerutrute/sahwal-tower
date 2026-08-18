@@ -1,0 +1,71 @@
+$ npm.cmd test -- --run tests/ai.effects.test.ts
+
+STDOUT
+
+> sahwal-tower@0.1.0 test
+> vitest run --run tests/ai.effects.test.ts
+
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [31m❯[39m tests/ai.effects.test.ts [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[90m 5[2mms[22m[39m
+[31m   [31m×[31m AI 병종 효과 가중치[2m > [22m포획 수가 같으면 양수 효과 가중치로 척후석을 선택한다[90m 3[2mms[22m[31m[39m
+[31m     → candidatePlacementTriggersEffect is not a function[39m
+[31m   [31m×[31m AI 병종 효과 가중치[2m > [22m효과 가중치 0이면 기존 포획 평가와 같은 첫 동률 후보를 유지한다[90m 1[2mms[22m[31m[39m
+[31m     → candidatePlacementTriggersEffect is not a function[39m
+[31m   [31m×[31m AI 병종 효과 가중치[2m > [22m장군·수호 발동 조건과 비배치 효과 병종을 정확히 예측한다[90m 0[2mms[22m[31m[39m
+[31m     → candidatePlacementTriggersEffect is not a function[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[90m (3)[39m
+[2m   Start at [22m 23:34:51
+[2m   Duration [22m 352ms[2m (transform 60ms, setup 17ms, collect 54ms, tests 5ms, environment 0ms, prepare 111ms)[22m
+
+
+STDERR
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 3 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/ai.effects.test.ts[2m > [22mAI 병종 효과 가중치[2m > [22m포획 수가 같으면 양수 효과 가중치로 척후석을 선택한다
+[31m[1mTypeError[22m: candidatePlacementTriggersEffect is not a function[39m
+[36m [2m❯[22m tests/ai.effects.test.ts:[2m18:10[22m[39m
+    [90m 16| [39m    [35mconst[39m choice [33m=[39m [34mchooseBattleAiMove[39m(search[33m,[39m (candidate) [33m=>[39m (
+    [90m 17| [39m      candidate[33m.[39mcaptured[33m.[39mlength [33m*[39m [34m10[39m
+    [90m 18| [39m      [33m+[39m ([34mcandidatePlacementTriggersEffect[39m(
+    [90m   | [39m         [31m^[39m
+    [90m 19| [39m        board[33m,[39m
+    [90m 20| [39m        candidate[33m.[39mpoint[33m,[39m
+[90m [2m❯[22m src/game/ai.ts:[2m64:12[22m[39m
+[90m [2m❯[22m Module.chooseBattleAiMove src/game/ai.ts:[2m62:47[22m[39m
+[90m [2m❯[22m tests/ai.effects.test.ts:[2m16:20[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/ai.effects.test.ts[2m > [22mAI 병종 효과 가중치[2m > [22m효과 가중치 0이면 기존 포획 평가와 같은 첫 동률 후보를 유지한다
+[31m[1mTypeError[22m: candidatePlacementTriggersEffect is not a function[39m
+[36m [2m❯[22m tests/ai.effects.test.ts:[2m37:10[22m[39m
+    [90m 35| [39m    [35mconst[39m injectedZero [33m=[39m [34mchooseBattleAiMove[39m(search[33m,[39m (candidate) [33m=>[39m (
+    [90m 36| [39m      candidate[33m.[39mcaptured[33m.[39mlength [33m*[39m [34m10[39m
+    [90m 37| [39m      [33m+[39m ([34mcandidatePlacementTriggersEffect[39m(
+    [90m   | [39m         [31m^[39m
+    [90m 38| [39m        board[33m,[39m
+    [90m 39| [39m        candidate[33m.[39mpoint[33m,[39m
+[90m [2m❯[22m src/game/ai.ts:[2m64:12[22m[39m
+[90m [2m❯[22m Module.chooseBattleAiMove src/game/ai.ts:[2m62:47[22m[39m
+[90m [2m❯[22m tests/ai.effects.test.ts:[2m35:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/ai.effects.test.ts[2m > [22mAI 병종 효과 가중치[2m > [22m장군·수호 발동 조건과 비배치 효과 병종을 정확히 예측한다
+[31m[1mTypeError[22m: candidatePlacementTriggersEffect is not a function[39m
+[36m [2m❯[22m tests/ai.effects.test.ts:[2m55:12[22m[39m
+    [90m 53| [39m  [34mit[39m([32m'장군·수호 발동 조건과 비배치 효과 병종을 정확히 예측한다'[39m[33m,[39m () [33m=>[39m…
+    [90m 54| [39m    [35mconst[39m board [33m=[39m [34mcreateBoard[39m([34m7[39m)[33m;[39m
+    [90m 55| [39m    [34mexpect[39m([34mcandidatePlacementTriggersEffect[39m(board[33m,[39m [34m0[39m[33m,[39m [32m'B'[39m[33m,[39m [32m'STONE-003'[39m…
+    [90m   | [39m           [31m^[39m
+    [90m 56| [39m    [34mexpect[39m([34mcandidatePlacementTriggersEffect[39m(board[33m,[39m [34m0[39m[33m,[39m [32m'B'[39m[33m,[39m [32m'STONE-003'[39m…
+    [90m 57| [39m    [34mexpect[39m([34mcandidatePlacementTriggersEffect[39m(board[33m,[39m [34m0[39m[33m,[39m [32m'B'[39m[33m,[39m [32m'STONE-002'[39m…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+EXIT 1

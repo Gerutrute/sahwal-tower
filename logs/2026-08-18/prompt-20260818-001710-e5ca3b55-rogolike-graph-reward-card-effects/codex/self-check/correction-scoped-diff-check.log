@@ -1,0 +1,11 @@
+$ git diff --check -- scripts/playwright-mobile-check.mjs src/game/battle.ts tests/battle.revival.test.ts tests/stones.test.ts
+
+STDOUT
+
+STDERR
+warning: in the working copy of 'scripts/playwright-mobile-check.mjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/game/battle.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/battle.revival.test.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/stones.test.ts', LF will be replaced by CRLF the next time Git touches it
+
+EXIT 0

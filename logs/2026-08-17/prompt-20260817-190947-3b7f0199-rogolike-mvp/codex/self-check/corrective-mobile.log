@@ -1,0 +1,27 @@
+$ npm.cmd run check:mobile
+
+STDOUT
+
+> sahwal-tower@0.1.0 check:mobile
+> node scripts/playwright-mobile-check.mjs
+
+
+STDERR
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('navigation', { name: '2막 지도' }) to be visible[22m
+
+    at D:\개인 pjt\codex 게임 해커톤\scripts\playwright-mobile-check.mjs:199:57 {
+  log: [
+    "  - waiting for getByRole('navigation', { name: '2막 지도' }) to be visible"
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v24.12.0
+
+EXIT 1

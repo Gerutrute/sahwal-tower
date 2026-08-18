@@ -1,0 +1,40 @@
+$ npx.cmd vitest run tests/ui.map.graph.test.tsx -t 실제 next 연결선을 세로 그래프로 그린다
+
+STDOUT
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/개인 pjt/codex 게임 해커톤[39m
+
+ [31m❯[39m tests/ui.map.graph.test.tsx [2m([22m[2m2 tests[22m[2m | [22m[31m1 failed[39m[2m | [22m[33m1 skipped[39m[2m)[22m[90m 24[2mms[22m[39m
+[31m   [31m×[31m 지도 그래프 UI[2m > [22m실제 next 연결선을 세로 그래프로 그린다[90m 23[2mms[22m[31m[39m
+[31m     → expected [] to have a length of 18 but got +0[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[33m1 skipped[39m[90m (2)[39m
+[2m   Start at [22m 00:41:51
+[2m   Duration [22m 784ms[2m (transform 147ms, setup 8ms, collect 212ms, tests 24ms, environment 307ms, prepare 88ms)[22m
+
+
+STDERR
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 1 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/ui.map.graph.test.tsx[2m > [22m지도 그래프 UI[2m > [22m실제 next 연결선을 세로 그래프로 그린다
+[31m[1mAssertionError[22m: expected [] to have a length of 18 but got +0[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 18[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m tests/ui.map.graph.test.tsx:[2m36:19[22m[39m
+    [90m 34| [39m    [35mconst[39m expected [33m=[39m state[33m.[39mmap[33m.[39mcolumns[33m.[39m[34mflat[39m()[33m.[39m[34mflatMap[39m((node) [33m=>[39m node[33m.[39mn…
+    [90m 35| [39m    [35mconst[39m edges [33m=[39m [[33m...[39m(host[33m?.[39mquerySelectorAll[33m<[39m[33mSVGLineElement[39m[33m>[39m([32m'.map-ed[39m…
+    [90m 36| [39m    [34mexpect[39m(edges)[33m.[39m[34mtoHaveLength[39m([34m18[39m)[33m;[39m
+    [90m   | [39m                  [31m^[39m
+    [90m 37| [39m    [34mexpect[39m(edges[33m.[39m[34mmap[39m(({ dataset }) [33m=>[39m dataset[33m.[39medge)[33m.[39m[34msort[39m())[33m.[39m[34mtoEqual[39m(ex…
+    [90m 38| [39m    [34mexpect[39m(host[33m?.[39m[34mquerySelector[39m([32m'svg[aria-hidden="true"]'[39m))[33m.[39m[34mtoBeTruthy[39m(…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+EXIT 1
